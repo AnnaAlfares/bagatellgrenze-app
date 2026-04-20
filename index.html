@@ -8,25 +8,26 @@
   //fonts.gstatic.com" crossorigin>
   //fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
   <style>
-    :root, [data-theme="light"] {
-      --color-bg:#f7f6f2; --color-surface:#f9f8f5; --color-surface-2:#fbfbf9; --color-surface-offset:#f3f0ec;
-      --color-border:#d4d1ca; --color-divider:#dcd9d5; --color-text:#28251d; --color-text-muted:#6d6b66;
-      --color-text-faint:#9f9d96; --color-text-inverse:#f9f8f4; --color-primary:#01696f; --color-primary-hover:#0c4e54;
-      --color-primary-highlight:#d7e7e4; --color-error:#a12c7b; --color-warning:#964219; --color-success:#437a22;
-      --radius-sm:.375rem; --radius-md:.5rem; --radius-lg:.9rem; --radius-xl:1.1rem; --radius-full:9999px;
-      --shadow-sm:0 1px 2px rgba(20,18,14,.06); --shadow-md:0 8px 24px rgba(20,18,14,.08);
-      --space-2:.5rem; --space-3:.75rem; --space-4:1rem; --space-5:1.25rem; --space-6:1.5rem; --space-8:2rem; --space-12:3rem;
-      --text-xs:.8rem; --text-sm:.95rem; --text-base:1rem; --text-lg:1.15rem; --text-xl:1.65rem;
-      --font-body:'Instrument Sans', system-ui, sans-serif; --font-display:'Fraunces', Georgia, serif;
+    :root,[data-theme="light"]{
+      --color-bg:#f7f6f2;--color-surface:#f9f8f5;--color-surface-2:#fbfbf9;--color-surface-offset:#f3f0ec;
+      --color-border:#d4d1ca;--color-divider:#dcd9d5;--color-text:#28251d;--color-text-muted:#6d6b66;
+      --color-text-faint:#9f9d96;--color-text-inverse:#f9f8f4;--color-primary:#01696f;--color-primary-hover:#0c4e54;
+      --color-primary-highlight:#d7e7e4;--color-error:#a12c7b;--color-warning:#964219;--color-success:#437a22;
+      --radius-sm:.375rem;--radius-md:.5rem;--radius-lg:.9rem;--radius-xl:1.1rem;--radius-full:9999px;
+      --shadow-sm:0 1px 2px rgba(20,18,14,.06);--shadow-md:0 8px 24px rgba(20,18,14,.08);
+      --space-2:.5rem;--space-3:.75rem;--space-4:1rem;--space-5:1.25rem;--space-6:1.5rem;--space-8:2rem;--space-12:3rem;
+      --text-xs:.8rem;--text-sm:.95rem;--text-base:1rem;--text-lg:1.15rem;--text-xl:1.65rem;
+      --font-body:'Instrument Sans',system-ui,sans-serif;--font-display:'Fraunces',Georgia,serif;
     }
-    [data-theme="dark"] {
-      --color-bg:#171614; --color-surface:#1c1b19; --color-surface-2:#201f1d; --color-surface-offset:#23211f;
-      --color-border:#393836; --color-divider:#262523; --color-text:#e2dfda; --color-text-muted:#afaca6;
-      --color-text-faint:#7c7973; --color-text-inverse:#201e1c; --color-primary:#58a3ac; --color-primary-hover:#6bb8c2;
-      --color-primary-highlight:#263536; --color-error:#d163a7; --color-warning:#d18e62; --color-success:#82bb61;
-      --shadow-sm:0 1px 2px rgba(0,0,0,.18); --shadow-md:0 8px 24px rgba(0,0,0,.28);
+    [data-theme="dark"]{
+      --color-bg:#171614;--color-surface:#1c1b19;--color-surface-2:#201f1d;--color-surface-offset:#23211f;
+      --color-border:#393836;--color-divider:#262523;--color-text:#e2dfda;--color-text-muted:#afaca6;
+      --color-text-faint:#7c7973;--color-text-inverse:#201e1c;--color-primary:#58a3ac;--color-primary-hover:#6bb8c2;
+      --color-primary-highlight:#263536;--color-error:#d163a7;--color-warning:#d18e62;--color-success:#82bb61;
+      --shadow-sm:0 1px 2px rgba(0,0,0,.18);--shadow-md:0 8px 24px rgba(0,0,0,.28);
     }
-    *{box-sizing:border-box} html{-webkit-text-size-adjust:none;text-size-adjust:none}
+    *{box-sizing:border-box}
+    html{-webkit-text-size-adjust:none;text-size-adjust:none}
     body{margin:0;font-family:var(--font-body);font-size:var(--text-base);background:var(--color-bg);color:var(--color-text);line-height:1.5}
     button,input,select,textarea{font:inherit} button{cursor:pointer} a{color:inherit}
     .app{max-width:1400px;margin:0 auto;padding:var(--space-6)}
@@ -76,23 +77,27 @@
     .warn{color:var(--color-warning);font-weight:700} .err{color:var(--color-error);font-weight:700}
     .status-card{border-radius:var(--radius-lg);padding:var(--space-4);border:1px solid var(--color-border);background:var(--color-surface-2)}
     .status-neutral{background:var(--color-surface-2);color:var(--color-text)}
-    .status-go{background:color-mix(in srgb, var(--color-success) 14%, var(--color-surface));color:var(--color-success);border-color:color-mix(in srgb, var(--color-success) 28%, var(--color-border))}
-    .quick-add{display:flex;gap:.5rem;flex-wrap:wrap}
-    .quick-add button{min-height:44px;padding:.5rem .75rem;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface)}
+    .status-go{background:color-mix(in srgb,var(--color-success) 14%,var(--color-surface));color:var(--color-success);border-color:color-mix(in srgb,var(--color-success) 28%,var(--color-border))}
+    .quick-add{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:var(--space-2)}
+    .quick-add button{min-height:44px;padding:.5rem .75rem;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface);font-weight:600}
     .import-report{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-4)}
     .hidden{display:none !important}
-    .banner{padding:var(--space-4);border-radius:var(--radius-lg);background:var(--color-primary-highlight);color:var(--color-primary);border:1px solid color-mix(in srgb, var(--color-primary) 18%, transparent)}
-    .conflict-box{padding:var(--space-4);border:1px dashed var(--color-warning);border-radius:var(--radius-lg);background:color-mix(in srgb, var(--color-warning) 10%, var(--color-surface))}
+    .banner{padding:var(--space-4);border-radius:var(--radius-lg);background:var(--color-primary-highlight);color:var(--color-primary);border:1px solid color-mix(in srgb,var(--color-primary) 18%,transparent)}
+    .conflict-box{padding:var(--space-4);border:1px dashed var(--color-warning);border-radius:var(--radius-lg);background:color-mix(in srgb,var(--color-warning) 10%,var(--color-surface))}
     .footer-note{margin-top:var(--space-4);font-size:var(--text-sm);color:var(--color-text-muted)}
     .filter-bar{display:flex;gap:var(--space-3);flex-wrap:wrap;align-items:center;margin-bottom:var(--space-4)}
-    .filter-bar select{width:auto;min-width:180px}
-    .abrechnung-hinweis{font-size:var(--text-sm);color:var(--color-text-muted);margin-top:var(--space-2)}
-    @media (max-width: 1100px){.shell{grid-template-columns:1fr}.sidebar{position:static}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.two,.grid.three{grid-template-columns:1fr}}
-    @media (max-width: 700px){.app{padding:var(--space-4)}.topbar{flex-direction:column}.stats{grid-template-columns:1fr}.table-wrap::before{content:'Tabelle seitlich wischen';display:block;padding:.75rem .9rem;font-size:var(--text-xs);color:var(--color-text-muted);border-bottom:1px solid var(--color-divider)}}
+    .filter-bar select{width:auto;min-width:180px;padding:.5rem .75rem}
+    .abrechnung-hinweis{font-size:var(--text-sm);color:var(--color-text-muted);margin-top:var(--space-2);font-style:italic}
+    .month-nav{display:flex;align-items:center;gap:var(--space-2)}
+    .month-nav input[type="month"]{width:auto;min-width:150px}
+    .month-nav button{min-height:44px;padding:.5rem .9rem;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface)}
+    @media(max-width:1100px){.shell{grid-template-columns:1fr}.sidebar{position:static}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.two,.grid.three{grid-template-columns:1fr}}
+    @media(max-width:700px){.app{padding:var(--space-4)}.topbar{flex-direction:column}.stats{grid-template-columns:1fr}.table-wrap::before{content:'Tabelle seitlich wischen';display:block;padding:.75rem .9rem;font-size:var(--text-xs);color:var(--color-text-muted);border-bottom:1px solid var(--color-divider)}}
   </style>
 </head>
 <body>
 <div class="app">
+
   <div class="topbar">
     <div class="brand">
       <div class="logo">
@@ -117,18 +122,4 @@
       <div class="pill">Lokale Arbeitsversion</div>
       <nav class="nav-group">
         <button class="nav-btn active" data-role-view="employee">Mitarbeiteransicht</button>
-        <button class="nav-btn" data-role-view="admin">Verantwortlichenansicht</button>
-      </nav>
-      <p class="helper" style="margin-top:var(--space-4)">Mitarbeitende pflegen eigene Daten. Verantwortliche importieren mehrere Backups, prüfen Konflikte und exportieren die Monatsabrechnung.</p>
-    </aside>
-
-    <main class="main">
-      <!-- ═══ MITARBEITERANSICHT ═══ -->
-      <div id="employeeView">
-
-        <!-- Arbeitsmonat -->
-        <div class="panel">
-          <div class="section-head">
-            <div><h2>Arbeitsmonat</h2><p>Monat auswählen, um Summen, Rest bis zur Bagatellgrenze und Einträge zu filtern.</p></div>
-          </div>
-          <div class="grid two
+        <button
