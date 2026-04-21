@@ -112,7 +112,7 @@
           <div class="stats">
             <div class="stat"><div class="k">Stunden im Monat</div><div class="v" id="empMonthHours">0,0</div></div>
             <div class="stat"><div class="k">Bagatellgrenze</div><div class="v" id="empLimit">0,0</div></div>
-            <div class="stat"><div class="k">Noch offen</div><div class="v" id="empRemaining">0,0</div></div>
+            <div class="stat"><div <div class="stat"><div class="k" id="remainingLabel">Noch offen</div><div class="v" id="empRemaining">0,0</div></div>
             <div class="stat"><div class="k">Vergütbar</div><div class="v" id="empPayable">0,0</div></div>
           </div>
 
@@ -291,12 +291,26 @@ function getBagatellgrenze() {
   totalHoursEl.textContent = total.toFixed(2);
 
   // Rest bis zur Bagatellgrenze – aber nicht negativ anzeigen
-  remainingHoursEl.textContent = remaining > 0 ? remaining.toFixed(2) : '0,00';
+ remainingHoursEl.textContent = remaining > 0 ? remaining.toFixed(2) : total.toFixed(2);
 
   if (remaining > 0) {
     // Bagatellgrenze noch nicht erreicht
     statusDiv.className = 'status-neutral';
     statusDiv.textContent = 'Unter Bagatellgrenze';
+    if (remaining > 0) {
+  statusDiv.className = 'status-neutral';
+  statusDiv.textContent = 'Unter Bagatellgrenze';
+  banner.classList.add('hidden');
+  const lbl = document.getElementById('remainingLabel');
+  if (lbl) lbl.textContent = 'Noch offen';
+} else {
+  statusDiv.className = 'status-error';
+  statusDiv.textContent = 'Bagatellgrenze erreicht – Abrechnung möglich';
+  banner.classList.remove('hidden');
+  banner.textContent = '💶 Alle Mehrarbeitsstunden dieses Monats können abgerechnet werden.';
+  const lbl = document.getElementById('remainingLabel');
+  if (lbl) lbl.textContent = 'Vergütbar';
+}
     banner.classList.add('hidden');
     banner.textContent = '⚠️ Bagatellgrenze noch nicht erreicht.';
   } else {
