@@ -117,21 +117,49 @@
 
           <div class="grid two">
             <section class="panel">
-              <div class="section-head"><div><h2>Eigene Stammdaten</h2><p>Eine Person kann hier ihre persönliche Bagatellgrenze im Blick behalten.</p></div></div>
-              <div class="grid two">
-                <label>Name<input id="kollegeName" type="text" placeholder="z. B. Frau Muster" /></label>
-                <label>Vollzeitstunden<input id="vollzeit" type="number" step="0.5" min="0" /></label>
-                <label>Teilzeitstunden<input id="teilzeit" type="number" step="0.5" min="0" /></label>
-                <label>Quote<input id="quote" type="number" step="0.01" min="0" /></label>
-                <label>Bagatellgrenze<input id="grenze" type="number" step="0.5" min="0" /></label>
-              </div>
-              <div class="small-actions" style="margin-top:1rem">
-                <button class="button primary" id="saveKollegeBtn">Speichern</button>
-                <button class="ghost" id="clearKollegeBtn">Leeren</button>
-                <button class="danger" id="deleteKollegeBtn">Löschen</button>
-              </div>
-              <div class="footer-note">Tipp: Die Bagatellgrenze kann direkt eingetragen werden, damit die Reststunden sofort sichtbar sind.</div>
-            </section>
+  <div class="section-head">
+    <div>
+      <h2>Eigene Stammdaten</h2>
+      <p>Hier wird deine individuelle Bagatellgrenze automatisch berechnet.</p>
+    </div>
+  </div>
+  <div class="grid two">
+    <label>
+      Name
+      <input id="kollegeName" type="text" placeholder="z. B. Frau Muster" />
+    </label>
+
+    <label>
+      Vollzeitstunden
+      <input id="vollzeit" type="number" value="28" readonly />
+    </label>
+
+    <label>
+      Teilzeitstunden
+      <input id="teilzeit" type="number" step="0.5" min="0" max="28" onchange="updateStammdaten()" />
+    </label>
+
+    <label>
+      Quote
+      <input id="quote" type="number" step="0.01" min="0" readonly />
+    </label>
+
+    <label>
+      Bagatellgrenze (Monat)
+      <input id="grenze" type="number" step="0.1" min="0" readonly />
+    </label>
+  </div>
+
+  <div class="small-actions" style="margin-top:1rem">
+    <button class="button primary" id="saveKollegeBtn">Speichern</button>
+    <button class="ghost" id="clearKollegeBtn">Leeren</button>
+    <button class="danger" id="deleteKollegeBtn">Löschen</button>
+  </div>
+
+  <div class="footer-note">
+    Tipp: Teilzeitstunden eintragen – Quote und Bagatellgrenze werden automatisch aus 28 Stunden Vollzeit und 3 Stunden Bagatellgrenze berechnet.
+  </div>
+</section>
 
             <section class="panel">
               <div class="section-head"><div><h2>Mehrarbeits-Eintrag</h2><p>Einzelne Einträge mit Datum und Bemerkung sichern die spätere Buchhaltung ab.</p></div></div>
@@ -210,7 +238,74 @@
         state.importReport = data.importReport || { neu: 0, aktualisiert: 0, konflikte: 0 };
       } catch (e) { console.error(e); }
     }
+const VOLLVZEIT_STUNDEN = 28;
+const BAGATELL_VOLLZEIT = 3;
 
+let teilzeitStunden = 28;
+
+function updateStammdaten() {
+  const teilzeitInput = document.getElementById('teilzeit');
+  const vollzeitInput = document.getElementById('vollzeit');
+  const quoteInput = document.getElementById('quote');
+  const grenzeInput = document.getElementById('grenze');
+
+  const teilzeit = Number.parseFloat(teilzeitInput.value);
+
+  if (!Number.isNaN(teilzeit) && teilzeit > 0 && teilzeit <= VOLLVZEIT_STUNDEN) {
+    vollzeitInput.value = VOLLVZEIT_STUNDEN;
+
+    const quote = teilzeit / VOLLVZEIT_STUNDEN;
+    quoteInput.value = quote.toFixed(2);
+
+    const grenze = BAGATELL_VOLLZEIT * quote;
+    grenzeInput.value = grenze.toFixed(2);
+
+    teilzeitStunden = teilzeit;
+    localStorage.setItem('teilzeitStunden', String(teilzeitStunden));
+    updateStats(); // nutzt die neue Grenze in der Monatslogik
+  } else {
+    quoteInput.value = '';
+    grenzeInput.value = '';
+  }
+}
+
+function getBagatellgrenze() {
+  return BAGATELL_VOLLZEIT * (teilzeitStunden / VOLLVZEIT_STUNDEN);
+}
+    function updateStats() {
+  const key = getMonthKey();
+  const monthEntries = entries[key] || [];
+
+  const total = monthEntries.reduce((sum, e) => sum + e.hours, 0);
+  const bagatell = getBagatellgrenze();
+  const remaining = bagatell - total;
+
+  const totalHoursEl = document.getElementById('totalHours');
+  const remainingHoursEl = document.getElementById('remainingHours');
+  const statusDiv = document.getElementById('statusText');
+  const banner = document.getElementById('warningBanner');
+
+  if (!totalHoursEl || !remainingHoursEl || !statusDiv || !banner) return;
+
+  totalHoursEl.textContent = total.toFixed(2);
+
+  // Rest bis zur Bagatellgrenze – aber nicht negativ anzeigen
+  remainingHoursEl.textContent = remaining > 0 ? remaining.toFixed(2) : '0,00';
+
+  if (remaining > 0) {
+    // Bagatellgrenze noch nicht erreicht
+    statusDiv.className = 'status-neutral';
+    statusDiv.textContent = 'Unter Bagatellgrenze';
+    banner.classList.add('hidden');
+    banner.textContent = '⚠️ Bagatellgrenze noch nicht erreicht.';
+  } else {
+    // Bagatellgrenze erreicht oder überschritten → alle Stunden vergütbar
+    statusDiv.className = 'status-error';
+    statusDiv.textContent = 'Bagatellgrenze erreicht – Abrechnung möglich';
+    banner.classList.remove('hidden');
+    banner.textContent = '💶 Alle Mehrarbeitsstunden dieses Monats können abgerechnet werden.';
+  }
+}
     function downloadText(filename, content, type = 'application/json;charset=utf-8') {
       const blob = new Blob([content], { type });
       const url = URL.createObjectURL(blob);
