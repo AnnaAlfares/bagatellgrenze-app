@@ -97,3 +97,175 @@
 </head>
 <body>
 <div class="app">
+    <div class="topbar">
+      <h1>Bagatellgrenze Mehrarbeit</h1>
+      <button onclick="toggleTheme()" class="small-actions">☀️/🌙</button>
+    </div>
+
+    <div class="month-nav">
+      <button onclick="changeMonth(-1)">◀ Voriger Monat</button>
+      <input type="month" id="monthInput" onchange="loadMonth()">
+      <button onclick="changeMonth(1)">Nächster Monat ▶</button>
+    </div>
+
+    <div class="stats">
+      <div class="status-card">
+        <div class="status-neutral">Gesamtstunden</div>
+        <h2 id="totalHours">0,00</h2>
+      </div>
+      <div class="status-card">
+        <div class="status-go" id="statusText">Unter Grenze</div>
+        <h2 id="remainingHours">20,00</h2>
+      </div>
+    </div>
+
+    <div class="banner hidden" id="warningBanner">
+      ⚠️ Achtung: Die Bagatellgrenze von 20 Stunden wird bald erreicht!
+    </div>
+
+    <div class="quick-add">
+      <input type="number" step="0.5" id="quickHours" placeholder="Stunden">
+      <input type="text" id="quickNote" placeholder="Notiz (optional)">
+      <button onclick="quickAdd()">+ Schnell hinzufügen</button>
+    </div>
+
+    <div class="table-wrap">
+      <table id="hoursTable">
+        <thead>
+          <tr>
+            <th>Datum</th>
+            <th>Stunden</th>
+            <th>Notiz</th>
+            <th>Aktion</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+        </tbody>
+      </table>
+    </div>
+
+    <div class="footer-note">
+      💡 Bagatellgrenze: Bis zu 20 Stunden Mehrarbeit pro Monat sind zulässig.
+    </div>
+  </div>
+
+  <script>
+    let currentMonth = new Date();
+    let entries = JSON.parse(localStorage.getItem('entries')) || {};
+
+    function init() {
+      const now = new Date();
+      currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      document.getElementById('monthInput').valueAsDate = currentMonth;
+      loadMonth();
+      
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const newTheme = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    }
+
+    function changeMonth(delta) {
+      currentMonth.setMonth(currentMonth.getMonth() + delta);
+      document.getElementById('monthInput').valueAsDate = new Date(currentMonth);
+      loadMonth();
+    }
+
+    function loadMonth() {
+      const input = document.getElementById('monthInput');
+      if (input.value) {
+        currentMonth = new Date(input.value + '-01');
+      }
+      
+      const key = getMonthKey();
+      const monthEntries = entries[key] || [];
+      
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+      
+      monthEntries.forEach((entry, index) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td>${entry.date}</td>
+          <td>${entry.hours.toFixed(2)}</td>
+          <td>${entry.note || ''}</td>
+          <td><button class="small-actions" onclick="deleteEntry(${index})">❌</button></td>
+        `;
+      });
+      
+      updateStats();
+    }
+
+    function getMonthKey() {
+      return currentMonth.getFullYear() + '-' + String(currentMonth.getMonth() + 1).padStart(2, '0');
+    }
+
+    function quickAdd() {
+      const hours = parseFloat(document.getElementById('quickHours').value);
+      const note = document.getElementById('quickNote').value;
+      
+      if (!hours || hours <= 0) {
+        alert('Bitte geben Sie gültige Stunden ein.');
+        return;
+      }
+      
+      const key = getMonthKey();
+      if (!entries[key]) entries[key] = [];
+      
+      const today = new Date().toISOString().split('T')[0];
+      entries[key].push({ date: today, hours, note });
+      
+      localStorage.setItem('entries', JSON.stringify(entries));
+      
+      document.getElementById('quickHours').value = '';
+      document.getElementById('quickNote').value = '';
+      
+      loadMonth();
+    }
+
+    function deleteEntry(index) {
+      const key = getMonthKey();
+      entries[key].splice(index, 1);
+      localStorage.setItem('entries', JSON.stringify(entries));
+      loadMonth();
+    }
+
+    function updateStats() {
+      const key = getMonthKey();
+      const monthEntries = entries[key] || [];
+      
+      const total = monthEntries.reduce((sum, e) => sum + e.hours, 0);
+      const remaining = 20 - total;
+      
+      document.getElementById('totalHours').textContent = total.toFixed(2);
+      document.getElementById('remainingHours').textContent = Math.abs(remaining).toFixed(2);
+      
+      const statusDiv = document.getElementById('statusText');
+      const banner = document.getElementById('warningBanner');
+      
+      if (remaining > 5) {
+        statusDiv.className = 'status-go';
+        statusDiv.textContent = 'Unter Grenze';
+        banner.classList.add('hidden');
+      } else if (remaining > 0) {
+        statusDiv.className = 'status-neutral';
+        statusDiv.textContent = 'Noch verfügbar';
+        banner.classList.remove('hidden');
+      } else {
+        statusDiv.className = 'status-card';
+        statusDiv.style.background = 'var(--color-error)';
+        statusDiv.textContent = 'Grenze überschritten!';
+        banner.classList.remove('hidden');
+        banner.textContent = '🚨 WARNUNG: Bagatellgrenze von 20 Stunden überschritten!';
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
