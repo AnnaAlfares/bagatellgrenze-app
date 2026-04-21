@@ -3,526 +3,202 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bagatellgrenze Web-App</title>
-  <meta name="theme-color" content="#01696f" />
+  <title>Bagatellgrenze Mehrarbeit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
   <style>
     :root, [data-theme="light"] {
-      --font-body: Inter, system-ui, sans-serif;
-      --font-display: Inter, system-ui, sans-serif;
-      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
-      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
-      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
-      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
-      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2rem);
-      --space-1: 0.25rem;
-      --space-2: 0.5rem;
-      --space-3: 0.75rem;
-      --space-4: 1rem;
-      --space-5: 1.25rem;
-      --space-6: 1.5rem;
-      --space-8: 2rem;
-      --space-10: 2.5rem;
-      --radius-sm: 0.375rem;
-      --radius-md: 0.5rem;
-      --radius-lg: 0.75rem;
-      --radius-xl: 1rem;
-      --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
-      --shadow-md: 0 10px 30px rgba(0,0,0,0.08);
-      --color-bg: #f7f6f2;
-      --color-surface: #f9f8f5;
-      --color-surface-2: #fbfbf9;
-      --color-surface-offset: #edeae5;
-      --color-border: #d4d1ca;
-      --color-divider: #dcd9d5;
-      --color-text: #28251d;
-      --color-text-muted: #6f6d67;
-      --color-text-faint: #9e9b95;
-      --color-text-inverse: #f9f8f4;
-      --color-primary: #01696f;
-      --color-primary-hover: #0c4e54;
-      --color-primary-highlight: #cedcd8;
-      --color-error: #a12c7b;
-      --color-warning: #964219;
-      --color-success: #437a22;
+      --color-bg:#f7f6f2; --color-surface:#f9f8f5; --color-surface-2:#fbfbf9; --color-surface-offset:#f3f0ec;
+      --color-border:#d4d1ca; --color-divider:#dcd9d5; --color-text:#28251d; --color-text-muted:#6d6b66;
+      --color-text-faint:#9f9d96; --color-text-inverse:#f9f8f4; --color-primary:#01696f; --color-primary-hover:#0c4e54;
+      --color-primary-highlight:#d7e7e4; --color-error:#a12c7b; --color-warning:#964219; --color-success:#437a22;
+      --radius-sm:.375rem; --radius-md:.5rem; --radius-lg:.9rem; --radius-xl:1.1rem; --radius-full:9999px;
+      --shadow-sm:0 1px 2px rgba(20,18,14,.06); --shadow-md:0 8px 24px rgba(20,18,14,.08);
+      --space-2:.5rem; --space-3:.75rem; --space-4:1rem; --space-5:1.25rem; --space-6:1.5rem; --space-8:2rem; --space-12:3rem;
+      --text-xs:.8rem; --text-sm:.95rem; --text-base:1rem; --text-lg:1.15rem; --text-xl:1.65rem;
+      --font-body:'Instrument Sans', system-ui, sans-serif; --font-display:'Fraunces', Georgia, serif;
     }
     [data-theme="dark"] {
-      --color-bg: #171614;
-      --color-surface: #1c1b19;
-      --color-surface-2: #201f1d;
-      --color-surface-offset: #2a2826;
-      --color-border: #393836;
-      --color-divider: #262523;
-      --color-text: #cdccca;
-      --color-text-muted: #9a9996;
-      --color-text-faint: #666461;
-      --color-text-inverse: #2b2a28;
-      --color-primary: #4f98a3;
-      --color-primary-hover: #227f8b;
-      --color-primary-highlight: #313b3b;
-      --color-error: #d163a7;
-      --color-warning: #bb653b;
-      --color-success: #6daa45;
-      --shadow-sm: 0 1px 2px rgba(0,0,0,0.25);
-      --shadow-md: 0 10px 30px rgba(0,0,0,0.35);
+      --color-bg:#171614; --color-surface:#1c1b19; --color-surface-2:#201f1d; --color-surface-offset:#23211f;
+      --color-border:#393836; --color-divider:#262523; --color-text:#e2dfda; --color-text-muted:#afaca6;
+      --color-text-faint:#7c7973; --color-text-inverse:#201e1c; --color-primary:#58a3ac; --color-primary-hover:#6bb8c2;
+      --color-primary-highlight:#263536; --color-error:#d163a7; --color-warning:#d18e62; --color-success:#82bb61;
+      --shadow-sm:0 1px 2px rgba(0,0,0,.18); --shadow-md:0 8px 24px rgba(0,0,0,.28);
     }
-    * { box-sizing: border-box; }
-    html { -webkit-text-size-adjust: none; text-size-adjust: none; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: var(--font-body);
-      font-size: var(--text-base);
-      line-height: 1.5;
-      background: var(--color-bg);
-      color: var(--color-text);
-    }
-    button, input, select, textarea { font: inherit; }
-    .app-shell {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: var(--space-4);
-      display: grid;
-      gap: var(--space-4);
-    }
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: var(--space-4);
-      padding: var(--space-4);
-      background: var(--color-surface);
-      border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent);
-      border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-sm);
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-    .brand { display: flex; align-items: center; gap: var(--space-3); }
-    .logo {
-      width: 38px; height: 38px; border-radius: 12px; background: var(--color-primary-highlight);
-      color: var(--color-primary); display: grid; place-items: center; flex: 0 0 auto;
-    }
-    .brand h1 { margin: 0; font-size: var(--text-lg); }
-    .brand p { margin: 0; color: var(--color-text-muted); font-size: var(--text-sm); }
-    .top-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
-    .card {
-      background: var(--color-surface);
-      border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent);
-      border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-sm);
-      padding: var(--space-4);
-    }
-    .grid { display: grid; gap: var(--space-4); }
-    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .section-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); margin-bottom: var(--space-4); }
-    .section-head h2 { margin: 0; font-size: var(--text-lg); }
-    .section-head p { margin: 0; color: var(--color-text-muted); font-size: var(--text-sm); }
-    label { display: block; margin-bottom: 0.35rem; font-size: var(--text-sm); color: var(--color-text-muted); }
-    input, select, textarea {
-      width: 100%;
-      padding: 0.85rem 0.95rem;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--color-border);
-      background: var(--color-surface-2);
-      color: var(--color-text);
-    }
-    textarea { min-height: 98px; resize: vertical; }
-    input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible {
-      outline: 2px solid var(--color-primary);
-      outline-offset: 2px;
-    }
-    .button-row { display: flex; gap: var(--space-2); flex-wrap: wrap; }
-    .btn {
-      min-height: 44px;
-      border: 1px solid transparent;
-      border-radius: var(--radius-md);
-      padding: 0.8rem 1rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      text-align: center;
-    }
-    .btn-primary { background: var(--color-primary); color: var(--color-text-inverse); }
-    .btn-primary:hover { background: var(--color-primary-hover); }
-    .btn-secondary {
-      background: var(--color-surface-2);
-      color: var(--color-text);
-      border-color: color-mix(in srgb, var(--color-text) 14%, transparent);
-    }
-    .btn-danger {
-      background: color-mix(in srgb, var(--color-error) 12%, var(--color-surface));
-      color: var(--color-error);
-      border-color: color-mix(in srgb, var(--color-error) 24%, transparent);
-    }
-    .btn-ghost {
-      background: transparent;
-      color: var(--color-text);
-      border-color: color-mix(in srgb, var(--color-text) 12%, transparent);
-    }
-    .table-wrap {
-      overflow: auto;
-      border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
-      border-radius: var(--radius-lg);
-      background: var(--color-surface-2);
-    }
-    table { width: 100%; border-collapse: collapse; min-width: 760px; }
-    th, td {
-      padding: 0.85rem 0.9rem;
-      text-align: left;
-      border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
-      vertical-align: top;
-      font-size: var(--text-sm);
-    }
-    th {
-      position: sticky; top: 0; background: var(--color-surface-offset); z-index: 1;
-      color: var(--color-text); font-weight: 700;
-    }
-    tr.selected { background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface-2)); }
-    .muted { color: var(--color-text-muted); }
-    .badge {
-      display: inline-flex; align-items: center; min-height: 30px; padding: 0.2rem 0.65rem;
-      border-radius: 999px; font-size: var(--text-xs);
-      background: var(--color-primary-highlight); color: var(--color-primary); font-weight: 700;
-    }
-    .status-warn { color: var(--color-warning); }
-    .status-ok { color: var(--color-success); }
-    .status-error { color: var(--color-error); }
-    .inline-note {
-      margin-top: var(--space-3);
-      padding: var(--space-3);
-      border-radius: var(--radius-md);
-      background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
-      color: var(--color-text-muted);
-      font-size: var(--text-sm);
-    }
-    .toolbar-grid { display: grid; gap: var(--space-3); grid-template-columns: 1.2fr 1fr 1fr auto; align-items: end; }
-    .empty-state {
-      padding: var(--space-6);
-      text-align: center;
-      color: var(--color-text-muted);
-    }
-    .footer-space { height: 3rem; }
-    @media (max-width: 980px) {
-      .grid-2, .grid-3, .toolbar-grid { grid-template-columns: 1fr; }
-      .topbar { align-items: flex-start; flex-direction: column; }
-      .button-row .btn, .top-actions .btn { width: 100%; }
-      table { min-width: 640px; }
-    }
+    *{box-sizing:border-box} html{-webkit-text-size-adjust:none;text-size-adjust:none} body{margin:0;font-family:var(--font-body);font-size:var(--text-base);background:var(--color-bg);color:var(--color-text);line-height:1.5}
+    button,input,select,textarea{font:inherit} button{cursor:pointer} a{color:inherit}
+    .app{max-width:1400px;margin:0 auto;padding:var(--space-6)} .topbar{display:flex;justify-content:space-between;gap:var(--space-4);align-items:flex-start;margin-bottom:var(--space-6)}
+    .brand{display:flex;gap:var(--space-4);align-items:center}.logo{width:44px;height:44px;border-radius:14px;background:var(--color-surface);border:1px solid var(--color-border);display:grid;place-items:center;box-shadow:var(--shadow-sm)}
+    .logo svg{width:26px;height:26px}.title h1{margin:0;font-family:var(--font-display);font-size:clamp(1.8rem,2.6vw,2.5rem)} .title p{margin:.25rem 0 0;color:var(--color-text-muted);max-width:75ch}
+    .toolbar{display:flex;gap:var(--space-3);flex-wrap:wrap;align-items:center}.button,.ghost,.danger{min-height:44px;border-radius:var(--radius-full);padding:.75rem 1rem;border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text)}
+    .button.primary{background:var(--color-primary);color:var(--color-text-inverse);border-color:transparent}.button.primary:hover{background:var(--color-primary-hover)} .danger{color:var(--color-error)}
+    .shell{display:grid;grid-template-columns:280px 1fr;gap:var(--space-6)} .sidebar,.panel,.card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm)}
+    .sidebar{padding:var(--space-4);position:sticky;top:1rem;height:max-content}.main{display:grid;gap:var(--space-6)} .nav-group{display:grid;gap:.5rem;margin-top:var(--space-4)}
+    .nav-btn{width:100%;text-align:left;border:none;background:transparent;padding:.8rem .9rem;border-radius:var(--radius-lg);color:var(--color-text)} .nav-btn.active{background:var(--color-primary-highlight);color:var(--color-primary);font-weight:700}
+    .panel{padding:var(--space-5)} .grid{display:grid;gap:var(--space-5)} .grid.two{grid-template-columns:repeat(2,minmax(0,1fr))} .grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-4)} .stat{padding:var(--space-4);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg)}
+    .stat .k{font-size:var(--text-xs);letter-spacing:.04em;text-transform:uppercase;color:var(--color-text-muted)} .stat .v{font-size:1.6rem;font-weight:700;margin-top:.3rem}
+    .section-head{display:flex;justify-content:space-between;gap:var(--space-4);align-items:flex-start;margin-bottom:var(--space-4)} .section-head h2{margin:0;font-size:var(--text-xl);font-family:var(--font-display)} .section-head p{margin:.35rem 0 0;color:var(--color-text-muted)}
+    label{display:grid;gap:.45rem;font-size:var(--text-sm);font-weight:600} input,select,textarea{width:100%;padding:.8rem .9rem;border-radius:var(--radius-lg);border:1px solid var(--color-border);background:var(--color-surface-2);color:var(--color-text)}
+    textarea{min-height:96px;resize:vertical} .inline-note,.helper{font-size:var(--text-sm);color:var(--color-text-muted)} .pill{display:inline-flex;align-items:center;border-radius:var(--radius-full);padding:.35rem .7rem;background:var(--color-primary-highlight);color:var(--color-primary);font-size:var(--text-xs);font-weight:700}
+    .table-wrap{overflow-x:auto;border:1px solid var(--color-border);border-radius:var(--radius-lg);background:var(--color-surface-2)} table{width:100%;border-collapse:collapse;min-width:900px} th,td{padding:.9rem;border-bottom:1px solid var(--color-divider);text-align:left;vertical-align:top} th{font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-muted)}
+    tr.selected{background:var(--color-primary-highlight)} tr:hover{background:rgba(1,105,111,.05)} .small-actions{display:flex;gap:.5rem;flex-wrap:wrap}.small-actions button{padding:.45rem .7rem;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface)}
+    .row-muted{color:var(--color-text-muted)} .positive{color:var(--color-success);font-weight:700} .warn{color:var(--color-warning);font-weight:700} .err{color:var(--color-error);font-weight:700}.status-card{border-radius:var(--radius-lg);padding:var(--space-4);border:1px solid var(--color-border);background:var(--color-surface-2)}.status-neutral{background:var(--color-surface-2);color:var(--color-text)}.status-go{background:color-mix(in srgb, var(--color-success) 14%, var(--color-surface));color:var(--color-success);border-color:color-mix(in srgb, var(--color-success) 28%, var(--color-border))}.quick-add{display:flex;gap:.5rem;flex-wrap:wrap}.quick-add button{min-height:40px;padding:.5rem .75rem;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface)}.import-report{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-4)}
+    .hidden{display:none !important} .banner{padding:var(--space-4);border-radius:var(--radius-lg);background:var(--color-primary-highlight);color:var(--color-primary);border:1px solid color-mix(in srgb, var(--color-primary) 18%, transparent)}
+    .conflict-box{padding:var(--space-4);border:1px dashed var(--color-warning);border-radius:var(--radius-lg);background:color-mix(in srgb, var(--color-warning) 10%, var(--color-surface))}
+    .footer-note{margin-top:var(--space-4);font-size:var(--text-sm);color:var(--color-text-muted)}
+    @media (max-width: 1100px){.shell{grid-template-columns:1fr}.sidebar{position:static}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.two,.grid.three{grid-template-columns:1fr}}
+    @media (max-width: 700px){.app{padding:var(--space-4)}.topbar{flex-direction:column}.stats{grid-template-columns:1fr}.table-wrap::before{content:'Tabelle seitlich wischen';display:block;padding:.75rem .9rem;font-size:var(--text-xs);color:var(--color-text-muted);border-bottom:1px solid var(--color-divider)}}
   </style>
 </head>
 <body>
-  <div class="app-shell">
-    <header class="topbar">
+  <div class="app">
+    <div class="topbar">
       <div class="brand">
-        <div class="logo" aria-label="Logo">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <rect x="3" y="4" width="18" height="16" rx="4" stroke="currentColor" stroke-width="1.8"></rect>
-            <path d="M8 14.5L11 11.5L13.4 13.9L17 9.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+        <div class="logo" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 33c3-8 8-12 14-12s11 4 14 12" />
+            <path d="M16 17c2-4 5-6 8-6s6 2 8 6" />
+            <circle cx="24" cy="24" r="18" />
           </svg>
         </div>
-        <div>
-          <h1>Bagatellgrenze NRW</h1>
-          <p>Lokale Web-App für Kolleg:innen, Mehrarbeit, Historie und CSV-Export</p>
+        <div class="title">
+          <h1>Mehrarbeit & Bagatellgrenze</h1>
+          <p>Web-App für eigene Erfassung, Sammelimport und Monatsabrechnung. Daten bleiben lokal im Browser und können per Backup-Datei zusammengeführt werden.</p>
         </div>
       </div>
-      <div class="top-actions">
-        <button class="btn btn-secondary" id="themeToggle" type="button">Dark / Light</button>
-        <button class="btn btn-ghost" id="exportBackupBtn" type="button">Datenbackup exportieren</button>
-        <label class="btn btn-ghost" for="importFile" style="cursor:pointer;">
-          Datenbackup importieren
-        </label>
-        <input id="importFile" type="file" accept="application/json" hidden />
+      <div class="toolbar">
+        <button class="ghost" id="themeToggle" aria-label="Farbschema wechseln">🌙</button>
+        <button class="ghost" id="exportBackupBtn">Backup exportieren</button>
+        <label class="button" for="importBackupInput" style="display:inline-flex;align-items:center">Backup importieren</label>
+        <input id="importBackupInput" type="file" accept="application/json" class="hidden" />
       </div>
-    </header>
+    </div>
 
-    <section class="card">
-      <div class="section-head">
-        <div>
-          <h2>Monatsansicht</h2>
-          <p>Filtere Monatsübersicht und Einträge. Die Daten bleiben lokal im Browser gespeichert.</p>
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="pill">Lokale Arbeitsversion</div>
+        <div class="nav-group" id="roleTabs">
+          <button class="nav-btn active" data-role-view="employee">Mitarbeiteransicht</button>
+          <button class="nav-btn" data-role-view="admin">Verantwortlichenansicht</button>
         </div>
-        <span class="badge" id="storageInfo">Lokaler Speicher aktiv</span>
-      </div>
-      <div class="toolbar-grid">
-        <div>
-          <label for="monatFilter">Monat</label>
-          <input id="monatFilter" type="month" />
-        </div>
-        <div>
-          <label for="nameFilter">Name-Filter Einträge</label>
-          <select id="nameFilter"></select>
-        </div>
-        <div>
-          <label for="historieName">Historie für</label>
-          <select id="historieName"></select>
-        </div>
-        <div class="button-row">
-          <button class="btn btn-primary" id="exportMonatBtn" type="button">Monatsübersicht CSV</button>
-        </div>
-      </div>
-      <div class="inline-note">Tipp: Auf Tablets und Handys kannst du die Tabellen horizontal scrollen. Backups werden in dieser Version beim Import standardmäßig zusammengeführt statt einfach ersetzt.</div>
-    </section>
+        <div class="footer-note">Mitarbeitende pflegen eigene Daten. Verantwortliche importieren mehrere Backups, prüfen Konflikte und exportieren die Monatsabrechnung.</div>
+      </aside>
 
-    <section class="grid grid-2">
-      <div class="card">
-        <div class="section-head">
-          <div>
-            <h2>Stammdaten Kolleg:innen</h2>
-            <p>Name, Vollzeit- und Teilzeitstunden pflegen.</p>
-          </div>
-        </div>
-        <div class="grid">
-          <div>
-            <label for="kollegeName">Name</label>
-            <input id="kollegeName" type="text" placeholder="z. B. Anna Müller" />
-          </div>
-          <div class="grid grid-2">
+      <main class="main">
+        <section class="panel" id="sharedPanel">
+          <div class="section-head">
             <div>
-              <label for="vollzeit">Vollzeitstunden</label>
-              <input id="vollzeit" type="text" inputmode="decimal" placeholder="25.5" />
-            </div>
-            <div>
-              <label for="teilzeit">Teilzeitstunden</label>
-              <input id="teilzeit" type="text" inputmode="decimal" placeholder="18" />
+              <h2>Arbeitsmonat</h2>
+              <p>Monat auswählen, um Summen, Rest bis zur Bagatellgrenze und Einträge zu filtern.</p>
             </div>
           </div>
-          <div class="button-row">
-            <button class="btn btn-primary" id="saveKollegeBtn" type="button">Neu hinzufügen</button>
-            <button class="btn btn-secondary" id="updateKollegeBtn" type="button">Stammdaten aktualisieren</button>
-            <button class="btn btn-danger" id="deleteKollegeBtn" type="button">Kolleg:in löschen</button>
-            <button class="btn btn-ghost" id="clearKollegeBtn" type="button">Felder leeren</button>
+          <div class="grid three">
+            <label>Monat
+              <div class="small-actions"><button type="button" id="prevMonthBtn">←</button><input id="monatInput" type="month" /><button type="button" id="nextMonthBtn">→</button></div>
+            </label>
+            <label>Mitarbeitende auswählen
+              <select id="activePersonSelect"></select>
+            </label>
+            <label>Hinweis
+              <input id="statusField" type="text" disabled />
+            </label>
           </div>
-        </div>
-      </div>
+        </section>
 
-      <div class="card">
-        <div class="section-head">
-          <div>
-            <h2>Mehrarbeits-Eintrag</h2>
-            <p>Einzelne Buchungen mit Datum und Bemerkung erfassen.</p>
+        <section id="employeeView" class="grid">
+          <div class="stats">
+            <div class="stat"><div class="k">Stunden im Monat</div><div class="v" id="empMonthHours">0,0</div></div>
+            <div class="stat"><div class="k">Bagatellgrenze</div><div class="v" id="empLimit">0,0</div></div>
+            <div class="stat"><div class="k">Noch offen</div><div class="v" id="empRemaining">0,0</div></div>
+            <div class="stat"><div class="k">Vergütbar</div><div class="v" id="empPayable">0,0</div></div>
           </div>
-        </div>
-        <div class="grid">
-          <div class="grid grid-2">
-            <div>
-              <label for="eintragDatum">Datum</label>
-              <input id="eintragDatum" type="date" />
-            </div>
-            <div>
-              <label for="eintragName">Kolleg:in</label>
-              <select id="eintragName"></select>
-            </div>
-          </div>
-          <div>
-            <label for="eintragStunden">Stunden</label>
-            <input id="eintragStunden" type="text" inputmode="decimal" placeholder="1.5" />
-          </div>
-          <div>
-            <label for="eintragBemerkung">Bemerkung</label>
-            <textarea id="eintragBemerkung" placeholder="z. B. Vertretung 5./6. Stunde"></textarea>
-          </div>
-          <div class="button-row">
-            <button class="btn btn-primary" id="saveEintragBtn" type="button">Eintrag hinzufügen</button>
-            <button class="btn btn-secondary" id="updateEintragBtn" type="button">Eintrag aktualisieren</button>
-            <button class="btn btn-danger" id="deleteEintragBtn" type="button">Eintrag löschen</button>
-            <button class="btn btn-ghost" id="clearEintragBtn" type="button">Felder leeren</button>
-          </div>
-        </div>
-      </div>
-    </section>
 
-    <section class="card">
-      <div class="section-head">
-        <div>
-          <h2>Kolleg:innen / Monatsübersicht</h2>
-          <p>Die Monatssummen werden automatisch aus allen Einträgen berechnet.</p>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table aria-label="Monatsübersicht">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Vollzeit</th>
-              <th>Teilzeit</th>
-              <th>Quote</th>
-              <th>Bagatellgrenze</th>
-              <th>Std. Monat</th>
-              <th>Vergütbar</th>
-              <th>Hinweis</th>
-            </tr>
-          </thead>
-          <tbody id="kollegenTableBody"></tbody>
-        </table>
-      </div>
-    </section>
+          <div class="grid two">
+            <section class="panel">
+              <div class="section-head"><div><h2>Eigene Stammdaten</h2><p>Eine Person kann hier ihre persönliche Bagatellgrenze im Blick behalten.</p></div></div>
+              <div class="grid two">
+                <label>Name<input id="kollegeName" type="text" placeholder="z. B. Frau Muster" /></label>
+                <label>Vollzeitstunden<input id="vollzeit" type="number" step="0.5" min="0" /></label>
+                <label>Teilzeitstunden<input id="teilzeit" type="number" step="0.5" min="0" /></label>
+                <label>Quote<input id="quote" type="number" step="0.01" min="0" /></label>
+                <label>Bagatellgrenze<input id="grenze" type="number" step="0.5" min="0" /></label>
+              </div>
+              <div class="small-actions" style="margin-top:1rem">
+                <button class="button primary" id="saveKollegeBtn">Speichern</button>
+                <button class="ghost" id="clearKollegeBtn">Leeren</button>
+                <button class="danger" id="deleteKollegeBtn">Löschen</button>
+              </div>
+              <div class="footer-note">Tipp: Die Bagatellgrenze kann direkt eingetragen werden, damit die Reststunden sofort sichtbar sind.</div>
+            </section>
 
-    <section class="card">
-      <div class="section-head">
-        <div>
-          <h2>Mehrarbeits-Einträge im gewählten Monat</h2>
-          <p>Tippe auf eine Zeile, um sie zu laden, zu ändern oder zu löschen.</p>
-        </div>
-        <button class="btn btn-secondary" id="exportEintraegeBtn" type="button">Einträge CSV</button>
-      </div>
-      <div class="table-wrap">
-        <table aria-label="Mehrarbeits-Einträge">
-          <thead>
-            <tr>
-              <th>Datum</th>
-              <th>Name</th>
-              <th>Stunden</th>
-              <th>Bemerkung</th>
-            </tr>
-          </thead>
-          <tbody id="eintraegeTableBody"></tbody>
-        </table>
-      </div>
-    </section>
+            <section class="panel">
+              <div class="section-head"><div><h2>Mehrarbeits-Eintrag</h2><p>Einzelne Einträge mit Datum und Bemerkung sichern die spätere Buchhaltung ab.</p></div></div>
+              <div class="grid two">
+                <label>Datum<input id="eintragDatum" type="date" /></label>
+                <label>Stunden<input id="eintragStunden" type="number" step="0.5" min="0" /></label>
+                <div class="quick-add" style="align-self:end"><button type="button" data-add-hours="0.5">+0,5</button><button type="button" data-add-hours="1">+1</button><button type="button" data-add-hours="2">+2</button><button type="button" data-add-hours="-1">-1</button></div>
+                <label style="grid-column:1 / -1">Bemerkung<textarea id="eintragBemerkung" placeholder="z. B. Vertretung in Klasse 7b"></textarea></label>
+              </div>
+              <div class="small-actions" style="margin-top:1rem">
+                <button class="button primary" id="saveEintragBtn">Eintrag speichern</button>
+                <button class="ghost" id="clearEintragBtn">Leeren</button>
+                <button class="danger" id="deleteEintragBtn">Eintrag löschen</button>
+              </div>
+            </section>
+          </div>
 
-    <section class="card">
-      <div class="section-head">
-        <div>
-          <h2>Historie je Kolleg:in</h2>
-          <p>Monatliche Entwicklung für die ausgewählte Person.</p>
-        </div>
-        <button class="btn btn-secondary" id="exportHistorieBtn" type="button">Historie CSV</button>
-      </div>
-      <div class="table-wrap">
-        <table aria-label="Historie">
-          <thead>
-            <tr>
-              <th>Monat</th>
-              <th>Stunden</th>
-              <th>Bagatellgrenze</th>
-              <th>Vergütbar</th>
-              <th>Hinweis</th>
-            </tr>
-          </thead>
-          <tbody id="historieTableBody"></tbody>
-        </table>
-      </div>
-    </section>
+          <section class="panel">
+            <div class="section-head"><div><h2>Eigene Einträge</h2><p>Nur Einträge der ausgewählten Person im gewählten Monat.</p></div></div>
+            <div class="table-wrap"><table><thead><tr><th>Datum</th><th>Monat</th><th>Name</th><th>Stunden</th><th>Bemerkung</th><th>Aktion</th></tr></thead><tbody id="employeeEntriesBody"></tbody></table></div>
+          </section>
+        </section>
 
-    <div class="footer-space"></div>
+        <section id="adminView" class="grid hidden">
+          <div class="banner">Verantwortlichenansicht: Backups aus Kollegien zusammenführen, Konflikte prüfen und Monatsdaten für die Abrechnung exportieren.</div>
+          <div class="import-report panel" id="importReport"><div class="status-card"><div class="k">Neu</div><div class="v" id="reportNew">0</div></div><div class="status-card"><div class="k">Aktualisiert</div><div class="v" id="reportUpdated">0</div></div><div class="status-card"><div class="k">Konflikte</div><div class="v" id="reportConflicts">0</div></div></div>
+
+          <section class="panel">
+            <div class="section-head"><div><h2>Monatsübersicht</h2><p>Automatisch aus allen Einträgen berechnet.</p></div><div class="small-actions"><button class="ghost" id="exportMonthSummaryBtn">Monatsübersicht CSV</button><button class="ghost" id="exportAccountingBtn">Abrechnungsstunden CSV</button></div></div>
+            <div class="table-wrap"><table><thead><tr><th>Name</th><th>Monat</th><th>Stunden</th><th>Bagatellgrenze</th><th>Noch offen</th><th>Vergütbar</th><th>Hinweis</th></tr></thead><tbody id="summaryBody"></tbody></table></div>
+          </section>
+
+          <section class="panel">
+            <div class="section-head"><div><h2>Konflikte beim Import</h2><p>Wenn lokale und importierte Datensätze dieselbe ID, aber unterschiedliche Inhalte haben, wird das hier protokolliert.</p></div></div>
+            <div id="conflictList" class="grid"></div>
+          </section>
+
+          <section class="panel">
+            <div class="section-head"><div><h2>Alle Einträge</h2><p>Gesamtübersicht für Prüfung und Export.</p></div><div class="small-actions"><button class="ghost" id="exportEntriesBtn">Einträge CSV</button></div></div>
+            <div class="table-wrap"><table><thead><tr><th>Datum</th><th>Monat</th><th>Name</th><th>Stunden</th><th>Bemerkung</th><th>Zuletzt geändert</th></tr></thead><tbody id="adminEntriesBody"></tbody></table></div>
+          </section>
+        </section>
+      </main>
+    </div>
   </div>
 
   <script>
-    const state = {
-      kollegen: [],
-      eintraege: [],
-      selectedKollegeId: null,
-      selectedEintragId: null,
-    };
+    const state = { kollegen: [], eintraege: [], roleView: 'employee', selectedKollegeId: null, selectedEintragId: null, conflicts: [], importReport: { neu: 0, aktualisiert: 0, konflikte: 0 } };
 
-    const els = {
-      monatFilter: document.getElementById('monatFilter'),
-      nameFilter: document.getElementById('nameFilter'),
-      historieName: document.getElementById('historieName'),
-      kollegeName: document.getElementById('kollegeName'),
-      vollzeit: document.getElementById('vollzeit'),
-      teilzeit: document.getElementById('teilzeit'),
-      eintragDatum: document.getElementById('eintragDatum'),
-      eintragName: document.getElementById('eintragName'),
-      eintragStunden: document.getElementById('eintragStunden'),
-      eintragBemerkung: document.getElementById('eintragBemerkung'),
-      kollegenTableBody: document.getElementById('kollegenTableBody'),
-      eintraegeTableBody: document.getElementById('eintraegeTableBody'),
-      historieTableBody: document.getElementById('historieTableBody'),
-      themeToggle: document.getElementById('themeToggle'),
-      exportMonatBtn: document.getElementById('exportMonatBtn'),
-      exportHistorieBtn: document.getElementById('exportHistorieBtn'),
-      exportEintraegeBtn: document.getElementById('exportEintraegeBtn'),
-      exportBackupBtn: document.getElementById('exportBackupBtn'),
-      importFile: document.getElementById('importFile'),
-      storageInfo: document.getElementById('storageInfo'),
-    };
-
-    const today = new Date();
-    els.monatFilter.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-    els.eintragDatum.value = today.toISOString().slice(0, 10);
-
-    const themeDefault = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', themeDefault);
-    els.themeToggle.addEventListener('click', () => {
-      const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', current);
-    });
-
-    function uid() {
-      return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-    }
-
-    function parseNum(value) {
-      const n = Number(String(value).replace(',', '.').trim());
-      if (!Number.isFinite(n)) throw new Error('Ungültige Zahl');
-      return n;
-    }
-
-    function formatNum(value, digits = 2) {
-      return Number(value).toFixed(digits).replace('.', ',');
-    }
-
-    function monthFromDate(dateStr) {
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null;
-      return dateStr.slice(0, 7);
-    }
-
-    function bagatellgrenze(teilzeit, vollzeit) {
-      if (vollzeit <= 0) throw new Error('Vollzeitstunden müssen größer als 0 sein');
-      const quote = teilzeit / vollzeit;
-      return { quote, grenze: quote * 3 };
-    }
-
-    function hinweis(summe, grenze) {
-      if (summe > grenze) return `Alle ${formatNum(summe)} Std vergütbar`;
-      return `Noch ${formatNum(grenze - summe)} Std bis Bagatellgrenze`;
-    }
-
-    function normalizeTimestamp(value) {
-      const d = value ? new Date(value) : null;
-      return d && !Number.isNaN(d.getTime()) ? d.toISOString() : new Date().toISOString();
-    }
-
-    function nowIso() {
-      return new Date().toISOString();
-    }
+    const el = id => document.getElementById(id);
+    const fmt = n => Number(n || 0).toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const uid = () => crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const monthFromDate = value => value ? value.slice(0, 7) : '';
+    const nowIso = () => new Date().toISOString();
+    const normTs = v => { const d = v ? new Date(v) : new Date(); return Number.isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString(); };
+    const byDate = (a, b) => (a.datum || '').localeCompare(b.datum || '') || (a.updatedAt || '').localeCompare(b.updatedAt || '');
 
     function enrichKollege(k) {
-      return {
-        id: k.id || uid(),
-        name: k.name || '',
-        vollzeit: Number(k.vollzeit || 0),
-        teilzeit: Number(k.teilzeit || 0),
-        quote: Number(k.quote || 0),
-        grenze: Number(k.grenze || 0),
-        createdAt: normalizeTimestamp(k.createdAt),
-        updatedAt: normalizeTimestamp(k.updatedAt),
-      };
+      return { id: k.id || uid(), name: k.name || '', vollzeit: Number(k.vollzeit || 0), teilzeit: Number(k.teilzeit || 0), quote: Number(k.quote || 0), grenze: Number(k.grenze || 0), createdAt: normTs(k.createdAt), updatedAt: normTs(k.updatedAt) };
     }
-
     function enrichEintrag(e) {
-      return {
-        id: e.id || uid(),
-        datum: e.datum || '',
-        monat: e.monat || monthFromDate(e.datum || '') || '',
-        name: e.name || '',
-        stunden: Number(e.stunden || 0),
-        bemerkung: e.bemerkung || '',
-        createdAt: normalizeTimestamp(e.createdAt),
-        updatedAt: normalizeTimestamp(e.updatedAt),
-      };
+      return { id: e.id || uid(), datum: e.datum || '', monat: e.monat || monthFromDate(e.datum || '') || '', name: e.name || '', stunden: Number(e.stunden || 0), bemerkung: e.bemerkung || '', createdAt: normTs(e.createdAt), updatedAt: normTs(e.updatedAt) };
     }
 
     function saveState() {
-      const payload = JSON.stringify({ kollegen: state.kollegen, eintraege: state.eintraege });
-      localStorage.setItem('bagatellgrenze-webapp', payload);
+      localStorage.setItem('bagatellgrenze-webapp', JSON.stringify({ kollegen: state.kollegen, eintraege: state.eintraege, conflicts: state.conflicts, importReport: state.importReport }));
     }
-
     function loadState() {
       try {
         const raw = localStorage.getItem('bagatellgrenze-webapp');
@@ -530,373 +206,256 @@
         const data = JSON.parse(raw);
         state.kollegen = Array.isArray(data.kollegen) ? data.kollegen.map(enrichKollege) : [];
         state.eintraege = Array.isArray(data.eintraege) ? data.eintraege.map(enrichEintrag) : [];
-      } catch (err) {
-        console.error(err);
-      }
+        state.conflicts = Array.isArray(data.conflicts) ? data.conflicts : [];
+        state.importReport = data.importReport || { neu: 0, aktualisiert: 0, konflikte: 0 };
+      } catch (e) { console.error(e); }
     }
 
-    function monthSum(name, monat) {
-      return state.eintraege.filter(e => e.name === name && e.monat === monat).reduce((sum, e) => sum + Number(e.stunden), 0);
+    function downloadText(filename, content, type = 'application/json;charset=utf-8') {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     }
-
-    function allMonths() {
-      const months = new Set([els.monatFilter.value]);
-      state.eintraege.forEach(e => months.add(e.monat));
-      return [...months].sort();
-    }
-
-    function fillSelect(select, values, includeEmpty = false, preserveValue = true) {
-      const current = preserveValue ? select.value : '';
-      select.innerHTML = '';
-      if (includeEmpty) {
-        const empty = document.createElement('option');
-        empty.value = '';
-        empty.textContent = 'Alle';
-        select.appendChild(empty);
-      }
-      values.forEach(v => {
-        const opt = document.createElement('option');
-        opt.value = v;
-        opt.textContent = v;
-        select.appendChild(opt);
-      });
-      if ([...select.options].some(o => o.value === current)) {
-        select.value = current;
-      } else if (!includeEmpty && values[0]) {
-        select.value = values[0];
-      } else {
-        select.value = includeEmpty ? '' : '';
-      }
-    }
-
-    function renderKollegen() {
-      const monat = els.monatFilter.value;
-      const rows = state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name, 'de'));
-      els.kollegenTableBody.innerHTML = '';
-      if (!rows.length) {
-        els.kollegenTableBody.innerHTML = '<tr><td colspan="8" class="empty-state">Noch keine Kolleg:innen angelegt.</td></tr>';
-        return;
-      }
-      rows.forEach(k => {
-        const summe = monthSum(k.name, monat);
-        const verguetbar = summe > k.grenze ? summe : 0;
-        const tr = document.createElement('tr');
-        if (k.id === state.selectedKollegeId) tr.classList.add('selected');
-        tr.innerHTML = `
-          <td>${k.name}</td>
-          <td>${formatNum(k.vollzeit)}</td>
-          <td>${formatNum(k.teilzeit)}</td>
-          <td>${formatNum(k.quote, 3)}</td>
-          <td>${formatNum(k.grenze)}</td>
-          <td>${formatNum(summe)}</td>
-          <td>${formatNum(verguetbar)}</td>
-          <td>${hinweis(summe, k.grenze)}</td>`;
-        tr.addEventListener('click', () => loadKollegeToForm(k.id));
-        els.kollegenTableBody.appendChild(tr);
-      });
-    }
-
-    function filteredEntries() {
-      const monat = els.monatFilter.value;
-      const nameFilter = els.nameFilter.value;
-      return state.eintraege
-        .filter(e => e.monat === monat)
-        .filter(e => !nameFilter || e.name === nameFilter)
-        .sort((a,b) => `${a.datum}-${a.name}`.localeCompare(`${b.datum}-${b.name}`, 'de'));
-    }
-
-    function renderEintraege() {
-      const rows = filteredEntries();
-      els.eintraegeTableBody.innerHTML = '';
-      if (!rows.length) {
-        els.eintraegeTableBody.innerHTML = '<tr><td colspan="4" class="empty-state">Keine Einträge für diesen Filter.</td></tr>';
-        return;
-      }
-      rows.forEach(e => {
-        const tr = document.createElement('tr');
-        if (e.id === state.selectedEintragId) tr.classList.add('selected');
-        tr.innerHTML = `
-          <td>${e.datum}</td>
-          <td>${e.name}</td>
-          <td>${formatNum(e.stunden)}</td>
-          <td>${e.bemerkung || ''}</td>`;
-        tr.addEventListener('click', () => loadEintragToForm(e.id));
-        els.eintraegeTableBody.appendChild(tr);
-      });
-    }
-
-    function renderHistorie() {
-      const name = els.historieName.value;
-      els.historieTableBody.innerHTML = '';
-      if (!name) {
-        els.historieTableBody.innerHTML = '<tr><td colspan="5" class="empty-state">Bitte eine Person auswählen.</td></tr>';
-        return;
-      }
-      const kollege = state.kollegen.find(k => k.name === name);
-      if (!kollege) return;
-      const monate = [...new Set(state.eintraege.filter(e => e.name === name).map(e => e.monat))].sort();
-      if (!monate.length) {
-        els.historieTableBody.innerHTML = '<tr><td colspan="5" class="empty-state">Für diese Person gibt es noch keine Einträge.</td></tr>';
-        return;
-      }
-      monate.forEach(monat => {
-        const summe = monthSum(name, monat);
-        const verguetbar = summe > kollege.grenze ? summe : 0;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${monat}</td>
-          <td>${formatNum(summe)}</td>
-          <td>${formatNum(kollege.grenze)}</td>
-          <td>${formatNum(verguetbar)}</td>
-          <td>${hinweis(summe, kollege.grenze)}</td>`;
-        els.historieTableBody.appendChild(tr);
-      });
-    }
-
-    function refreshSelects() {
-      const names = state.kollegen.map(k => k.name).sort((a,b) => a.localeCompare(b, 'de'));
-      fillSelect(els.nameFilter, names, true);
-      fillSelect(els.historieName, names, false);
-      fillSelect(els.eintragName, names, false);
-      els.storageInfo.textContent = `Lokal gespeichert: ${state.kollegen.length} Kolleg:innen / ${state.eintraege.length} Einträge`;
-    }
-
-    function refreshAll() {
-      refreshSelects();
-      renderKollegen();
-      renderEintraege();
-      renderHistorie();
-      saveState();
-    }
-
-    function clearKollegeForm() {
-      state.selectedKollegeId = null;
-      els.kollegeName.value = '';
-      els.vollzeit.value = '';
-      els.teilzeit.value = '';
-      renderKollegen();
-    }
-
-    function clearEintragForm() {
-      state.selectedEintragId = null;
-      els.eintragDatum.value = new Date().toISOString().slice(0, 10);
-      els.eintragStunden.value = '';
-      els.eintragBemerkung.value = '';
-      renderEintraege();
-    }
-
-    function loadKollegeToForm(id) {
-      const k = state.kollegen.find(x => x.id === id);
-      if (!k) return;
-      state.selectedKollegeId = id;
-      els.kollegeName.value = k.name;
-      els.vollzeit.value = formatNum(k.vollzeit).replace(',', '.');
-      els.teilzeit.value = formatNum(k.teilzeit).replace(',', '.');
-      els.historieName.value = k.name;
-      renderKollegen();
-      renderHistorie();
-    }
-
-    function loadEintragToForm(id) {
-      const e = state.eintraege.find(x => x.id === id);
-      if (!e) return;
-      state.selectedEintragId = id;
-      els.eintragDatum.value = e.datum;
-      els.eintragName.value = e.name;
-      els.eintragStunden.value = formatNum(e.stunden).replace(',', '.');
-      els.eintragBemerkung.value = e.bemerkung || '';
-      renderEintraege();
-    }
-
-    function saveKollege() {
-      try {
-        const name = els.kollegeName.value.trim();
-        if (!name) throw new Error('Bitte einen Namen eingeben.');
-        if (state.kollegen.some(k => k.name.toLowerCase() === name.toLowerCase())) throw new Error('Dieser Name existiert bereits.');
-        const vollzeit = parseNum(els.vollzeit.value);
-        const teilzeit = parseNum(els.teilzeit.value);
-        const { quote, grenze } = bagatellgrenze(teilzeit, vollzeit);
-        const ts = nowIso();
-        state.kollegen.push({ id: uid(), name, vollzeit, teilzeit, quote, grenze, createdAt: ts, updatedAt: ts });
-        refreshAll();
-        clearKollegeForm();
-      } catch (err) {
-        alert(err.message);
-      }
-    }
-
-    function updateKollege() {
-      try {
-        if (!state.selectedKollegeId) throw new Error('Bitte zuerst eine Person aus der Tabelle wählen.');
-        const k = state.kollegen.find(x => x.id === state.selectedKollegeId);
-        if (!k) throw new Error('Person nicht gefunden.');
-        const name = els.kollegeName.value.trim();
-        if (!name) throw new Error('Bitte einen Namen eingeben.');
-        if (state.kollegen.some(x => x.id !== k.id && x.name.toLowerCase() === name.toLowerCase())) throw new Error('Der neue Name ist bereits vergeben.');
-        const oldName = k.name;
-        const vollzeit = parseNum(els.vollzeit.value);
-        const teilzeit = parseNum(els.teilzeit.value);
-        const { quote, grenze } = bagatellgrenze(teilzeit, vollzeit);
-        Object.assign(k, { name, vollzeit, teilzeit, quote, grenze, updatedAt: nowIso() });
-        state.eintraege.forEach(e => { if (e.name === oldName) e.name = name; });
-        els.historieName.value = name;
-        els.nameFilter.value = state.eintraege.some(e => e.name === name && e.monat === els.monatFilter.value) ? name : '';
-        refreshAll();
-      } catch (err) {
-        alert(err.message);
-      }
-    }
-
-    function deleteKollege() {
-      try {
-        if (!state.selectedKollegeId) throw new Error('Bitte zuerst eine Person auswählen.');
-        const k = state.kollegen.find(x => x.id === state.selectedKollegeId);
-        if (!k) throw new Error('Person nicht gefunden.');
-        if (state.eintraege.some(e => e.name === k.name)) throw new Error('Zu dieser Person gibt es noch Mehrarbeits-Einträge. Bitte diese zuerst löschen oder umbenennen.');
-        if (!confirm(`Soll ${k.name} wirklich gelöscht werden?`)) return;
-        state.kollegen = state.kollegen.filter(x => x.id !== k.id);
-        clearKollegeForm();
-        refreshAll();
-      } catch (err) {
-        alert(err.message);
-      }
-    }
-
-    function saveEintrag() {
-      try {
-        const datum = els.eintragDatum.value;
-        const monat = monthFromDate(datum);
-        if (!monat) throw new Error('Bitte ein gültiges Datum eingeben.');
-        const name = els.eintragName.value;
-        if (!name) throw new Error('Bitte eine Person auswählen.');
-        const stunden = parseNum(els.eintragStunden.value);
-        const bemerkung = els.eintragBemerkung.value.trim();
-        const ts = nowIso();
-        state.eintraege.push({ id: uid(), datum, monat, name, stunden, bemerkung, createdAt: ts, updatedAt: ts });
-        els.monatFilter.value = monat;
-        els.nameFilter.value = name;
-        els.historieName.value = name;
-        refreshAll();
-        clearEintragForm();
-      } catch (err) {
-        alert(err.message);
-      }
-    }
-
-    function updateEintrag() {
-      try {
-        if (!state.selectedEintragId) throw new Error('Bitte zuerst einen Eintrag auswählen.');
-        const e = state.eintraege.find(x => x.id === state.selectedEintragId);
-        if (!e) throw new Error('Eintrag nicht gefunden.');
-        const datum = els.eintragDatum.value;
-        const monat = monthFromDate(datum);
-        if (!monat) throw new Error('Bitte ein gültiges Datum eingeben.');
-        const name = els.eintragName.value;
-        if (!name) throw new Error('Bitte eine Person auswählen.');
-        const stunden = parseNum(els.eintragStunden.value);
-        const bemerkung = els.eintragBemerkung.value.trim();
-        Object.assign(e, { datum, monat, name, stunden, bemerkung, updatedAt: nowIso() });
-        els.monatFilter.value = monat;
-        els.nameFilter.value = name;
-        els.historieName.value = name;
-        refreshAll();
-      } catch (err) {
-        alert(err.message);
-      }
-    }
-
-    function deleteEintrag() {
-      try {
-        if (!state.selectedEintragId) throw new Error('Bitte zuerst einen Eintrag auswählen.');
-        const e = state.eintraege.find(x => x.id === state.selectedEintragId);
-        if (!e) throw new Error('Eintrag nicht gefunden.');
-        if (!confirm(`Eintrag löschen?\n\n${e.datum} | ${e.name} | ${formatNum(e.stunden)} Std`)) return;
-        state.eintraege = state.eintraege.filter(x => x.id !== e.id);
-        clearEintragForm();
-        refreshAll();
-      } catch (err) {
-        alert(err.message);
-      }
-    }
-
     function toCsv(rows) {
-      return rows.map(row => row.map(value => {
-        const text = String(value ?? '');
-        if (/[";\n]/.test(text)) return '"' + text.replaceAll('"', '""') + '"';
-        return text;
+      return '\ufeff' + rows.map(row => row.map(val => {
+        const s = String(val ?? '');
+        return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
       }).join(';')).join('\n');
     }
 
-    function downloadCsv(filename, rows) {
-      const csv = '\uFEFF' + toCsv(rows);
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
+    function getSelectedKollege() {
+      return state.kollegen.find(k => k.id === state.selectedKollegeId) || null;
+    }
+    function getMonth() {
+      return el('monatInput').value || new Date().toISOString().slice(0, 7);
+    }
+    function entriesFor(name, month) {
+      return state.eintraege.filter(e => e.name === name && e.monat === month).sort(byDate);
+    }
+    function monthStats(k, month) {
+      const sum = entriesFor(k.name, month).reduce((a, e) => a + Number(e.stunden || 0), 0);
+      const rest = Math.max(Number(k.grenze || 0) - sum, 0);
+      const payable = Math.max(sum - Number(k.grenze || 0), 0);
+      const hint = payable > 0 ? `Abrechnung möglich: ${fmt(payable)} Std` : `Noch nicht abrechenbar`; 
+      return { sum, rest, payable, hint };
     }
 
-    function exportMonatsuebersicht() {
-      const monat = els.monatFilter.value;
-      const rows = [["Monat", "Name", "Vollzeit", "Teilzeit", "Quote", "Bagatellgrenze", "Stunden_Monat", "Verguetbar", "Hinweis"]];
-      state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name, 'de')).forEach(k => {
-        const summe = monthSum(k.name, monat);
-        const verguetbar = summe > k.grenze ? summe : 0;
-        rows.push([monat, k.name, formatNum(k.vollzeit), formatNum(k.teilzeit), formatNum(k.quote, 3), formatNum(k.grenze), formatNum(summe), formatNum(verguetbar), hinweis(summe, k.grenze)]);
+    function fillKollegeForm(k) {
+      el('kollegeName').value = k?.name || '';
+      el('vollzeit').value = k?.vollzeit ?? '';
+      el('teilzeit').value = k?.teilzeit ?? '';
+      el('quote').value = k?.quote ?? '';
+      el('grenze').value = k?.grenze ?? '';
+    }
+    function fillEintragForm(e) {
+      el('eintragDatum').value = e?.datum || '';
+      el('eintragStunden').value = e?.stunden ?? '';
+      el('eintragBemerkung').value = e?.bemerkung || '';
+    }
+    function clearKollegeForm() { state.selectedKollegeId = null; fillKollegeForm(null); }
+    function clearEintragForm() { state.selectedEintragId = null; fillEintragForm(null); }
+
+    function refreshPersonSelect() {
+      const select = el('activePersonSelect');
+      select.innerHTML = '';
+      const placeholder = document.createElement('option');
+      placeholder.value = ''; placeholder.textContent = state.kollegen.length ? 'Person auswählen' : 'Noch keine Person angelegt';
+      select.appendChild(placeholder);
+      state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
+        const opt = document.createElement('option'); opt.value = k.id; opt.textContent = k.name; if (k.id === state.selectedKollegeId) opt.selected = true; select.appendChild(opt);
       });
-      downloadCsv(`monatsuebersicht_${monat}.csv`, rows);
+      if (!state.selectedKollegeId && state.kollegen[0]) { state.selectedKollegeId = state.kollegen[0].id; }
+      select.value = state.selectedKollegeId || '';
     }
 
-    function exportHistorie() {
-      const name = els.historieName.value;
-      if (!name) return alert('Bitte zuerst eine Person für die Historie auswählen.');
-      const k = state.kollegen.find(x => x.name === name);
-      if (!k) return alert('Person nicht gefunden.');
-      const monate = [...new Set(state.eintraege.filter(e => e.name === name).map(e => e.monat))].sort();
-      const rows = [["Monat", "Name", "Stunden", "Bagatellgrenze", "Verguetbar", "Hinweis"]];
-      monate.forEach(monat => {
-        const summe = monthSum(name, monat);
-        const verguetbar = summe > k.grenze ? summe : 0;
-        rows.push([monat, name, formatNum(summe), formatNum(k.grenze), formatNum(verguetbar), hinweis(summe, k.grenze)]);
+    function renderEmployeeStats() {
+      const k = getSelectedKollege();
+      if (!k) {
+        el('empMonthHours').textContent = el('empLimit').textContent = el('empRemaining').textContent = el('empPayable').textContent = '0,0';
+        el('statusField').value = 'Bitte Person anlegen oder auswählen';
+        return;
+      }
+      const st = monthStats(k, getMonth());
+      el('empMonthHours').textContent = fmt(st.sum);
+      el('empLimit').textContent = fmt(k.grenze);
+      el('empRemaining').textContent = fmt(st.rest);
+      el('empPayable').textContent = fmt(st.payable);
+      el('statusField').value = st.payable > 0 ? `Abrechnung möglich: ${fmt(st.payable)} Std` : 'Noch nicht abrechenbar';
+      el('statusField').className = st.payable > 0 ? 'status-card status-go' : 'status-card status-neutral';
+      fillKollegeForm(k);
+    }
+
+    function renderEmployeeEntries() {
+      const body = el('employeeEntriesBody'); body.innerHTML = '';
+      const k = getSelectedKollege();
+      if (!k) return;
+      const rows = entriesFor(k.name, getMonth());
+      if (!rows.length) {
+        body.innerHTML = '<tr><td colspan="6" class="row-muted">Noch keine Einträge für diese Person in diesem Monat.</td></tr>';
+        return;
+      }
+      rows.forEach(r => {
+        const tr = document.createElement('tr');
+        if (state.selectedEintragId === r.id) tr.classList.add('selected');
+        tr.innerHTML = `<td>${r.datum}</td><td>${r.monat}</td><td>${r.name}</td><td>${fmt(r.stunden)}</td><td>${r.bemerkung || ''}</td><td><div class="small-actions"><button data-edit-entry="${r.id}">Bearbeiten</button></div></td>`;
+        body.appendChild(tr);
       });
-      downloadCsv(`historie_${name.replace(/\s+/g, '_')}.csv`, rows);
     }
 
-    function exportEintraege() {
-      const rows = [["Datum", "Monat", "Name", "Stunden", "Bemerkung"]];
-      filteredEntries().forEach(e => rows.push([e.datum, e.monat, e.name, formatNum(e.stunden), e.bemerkung || '']));
-      downloadCsv(`eintraege_${els.monatFilter.value}.csv`, rows);
+    function renderSummary() {
+      const body = el('summaryBody'); body.innerHTML = '';
+      const month = getMonth();
+      const people = state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de'));
+      if (!people.length) { body.innerHTML = '<tr><td colspan="7" class="row-muted">Noch keine Kolleg:innen angelegt.</td></tr>'; return; }
+      people.forEach(k => {
+        const st = monthStats(k, month);
+        const cls = st.payable > 0 ? 'positive' : ''; 
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${k.name}</td><td>${month}</td><td>${fmt(st.sum)}</td><td>${fmt(k.grenze)}</td><td>${fmt(st.rest)}</td><td>${fmt(st.payable)}</td><td class="${cls}">${st.hint}</td>`;
+        body.appendChild(tr);
+      });
+    }
+
+    function renderAdminEntries() {
+      const body = el('adminEntriesBody'); body.innerHTML = '';
+      const rows = state.eintraege.slice().sort((a,b) => (b.datum||'').localeCompare(a.datum||''));
+      if (!rows.length) { body.innerHTML = '<tr><td colspan="6" class="row-muted">Noch keine Einträge vorhanden.</td></tr>'; return; }
+      rows.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${r.datum}</td><td>${r.monat}</td><td>${r.name}</td><td>${fmt(r.stunden)}</td><td>${r.bemerkung || ''}</td><td>${new Date(r.updatedAt).toLocaleString('de-DE')}</td>`;
+        body.appendChild(tr);
+      });
+    }
+
+    function renderImportReport() {
+      el('reportNew').textContent = String(state.importReport.neu || 0);
+      el('reportUpdated').textContent = String(state.importReport.aktualisiert || 0);
+      el('reportConflicts').textContent = String(state.importReport.konflikte || 0);
+    }
+
+    function renderConflicts() {
+      const wrap = el('conflictList'); wrap.innerHTML = '';
+      if (!state.conflicts.length) {
+        wrap.innerHTML = '<div class="row-muted">Zurzeit keine Konflikte protokolliert.</div>';
+        return;
+      }
+      state.conflicts.slice().reverse().slice(0, 20).forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'conflict-box';
+        div.innerHTML = `<strong>${c.type}</strong><div>ID: ${c.id}</div><div>${c.name || ''}</div><div>Entscheidung: ${c.resolution}</div><div class="row-muted">${new Date(c.loggedAt).toLocaleString('de-DE')}</div>`;
+        wrap.appendChild(div);
+      });
+    }
+
+    function switchRole(view) {
+      state.roleView = view;
+      document.querySelectorAll('[data-role-view]').forEach(btn => btn.classList.toggle('active', btn.dataset.roleView === view));
+      el('employeeView').classList.toggle('hidden', view !== 'employee');
+      el('adminView').classList.toggle('hidden', view !== 'admin');
+    }
+
+    function refreshAll() {
+      refreshPersonSelect();
+      renderEmployeeStats();
+      renderEmployeeEntries();
+      renderSummary();
+      renderAdminEntries();
+      renderConflicts();
+      renderImportReport();
+      saveState();
+    }
+
+    function saveKollege() {
+      const name = el('kollegeName').value.trim();
+      const vollzeit = Number(el('vollzeit').value || 0);
+      const teilzeit = Number(el('teilzeit').value || 0);
+      const quote = Number(el('quote').value || 0);
+      const grenze = Number(el('grenze').value || 0);
+      if (!name) return alert('Bitte Namen eingeben.');
+      if (!state.selectedKollegeId) {
+        const ts = nowIso();
+        const k = { id: uid(), name, vollzeit, teilzeit, quote, grenze, createdAt: ts, updatedAt: ts };
+        state.kollegen.push(k);
+        state.selectedKollegeId = k.id;
+      } else {
+        const k = getSelectedKollege();
+        if (!k) return;
+        const oldName = k.name;
+        Object.assign(k, { name, vollzeit, teilzeit, quote, grenze, updatedAt: nowIso() });
+        if (oldName !== name) state.eintraege.forEach(e => { if (e.name === oldName) { e.name = name; e.updatedAt = nowIso(); } });
+      }
+      refreshAll();
+    }
+
+    function deleteKollege() {
+      const k = getSelectedKollege();
+      if (!k) return;
+      if (!confirm(`Person ${k.name} und zugehörige Einträge löschen?`)) return;
+      state.kollegen = state.kollegen.filter(x => x.id !== k.id);
+      state.eintraege = state.eintraege.filter(e => e.name !== k.name);
+      clearKollegeForm(); clearEintragForm();
+      refreshAll();
+    }
+
+    function saveEintrag() {
+      const k = getSelectedKollege();
+      if (!k) return alert('Bitte zuerst eine Person auswählen.');
+      const datum = el('eintragDatum').value;
+      const stunden = Number(el('eintragStunden').value || 0);
+      const bemerkung = el('eintragBemerkung').value.trim();
+      if (!datum) return alert('Bitte Datum eingeben.');
+      if (stunden <= 0) return alert('Bitte Stunden größer 0 eingeben.');
+      const monat = monthFromDate(datum);
+      if (!state.selectedEintragId) {
+        const ts = nowIso();
+        state.eintraege.push({ id: uid(), datum, monat, name: k.name, stunden, bemerkung, createdAt: ts, updatedAt: ts });
+      } else {
+        const e = state.eintraege.find(x => x.id === state.selectedEintragId);
+        if (!e) return;
+        Object.assign(e, { datum, monat, name: k.name, stunden, bemerkung, updatedAt: nowIso() });
+      }
+      el('monatInput').value = monat;
+      clearEintragForm();
+      refreshAll();
+    }
+
+    function deleteEintrag() {
+      if (!state.selectedEintragId) return alert('Bitte erst einen Eintrag zur Bearbeitung auswählen.');
+      if (!confirm('Diesen Eintrag wirklich löschen?')) return;
+      state.eintraege = state.eintraege.filter(e => e.id !== state.selectedEintragId);
+      clearEintragForm();
+      refreshAll();
     }
 
     function exportBackup() {
-      const blob = new Blob([JSON.stringify({ kollegen: state.kollegen, eintraege: state.eintraege }, null, 2)], { type: 'application/json;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'bagatellgrenze-backup.json';
-      a.click();
-      URL.revokeObjectURL(url);
+      downloadText(`bagatell-backup-${new Date().toISOString().slice(0,10)}.json`, JSON.stringify({ kollegen: state.kollegen, eintraege: state.eintraege }, null, 2));
     }
 
-    function mergeById(localItems, importedItems) {
-      const map = new Map();
-      localItems.forEach(item => map.set(item.id, item));
-      let added = 0;
-      let updated = 0;
+    function recordConflict(type, localItem, importedItem, resolution) {
+      state.conflicts.push({ type, id: localItem.id || importedItem.id, name: importedItem.name || localItem.name || '', resolution, loggedAt: nowIso() });
+    }
+
+    function sameCore(a, b, type) {
+      if (type === 'Kolleg:in') return a.name === b.name && Number(a.grenze) === Number(b.grenze) && Number(a.quote) === Number(b.quote) && Number(a.vollzeit) === Number(b.vollzeit) && Number(a.teilzeit) === Number(b.teilzeit);
+      return a.datum === b.datum && a.monat === b.monat && a.name === b.name && Number(a.stunden) === Number(b.stunden) && (a.bemerkung || '') === (b.bemerkung || '');
+    }
+
+    function mergeById(localItems, importedItems, type) {
+      const map = new Map(localItems.map(item => [item.id, item]));
+      let added = 0, updated = 0;
       importedItems.forEach(item => {
         const existing = map.get(item.id);
-        if (!existing) {
-          map.set(item.id, item);
-          added += 1;
-          return;
-        }
-        const localUpdated = new Date(existing.updatedAt || existing.createdAt || 0).getTime();
-        const importedUpdated = new Date(item.updatedAt || item.createdAt || 0).getTime();
-        if (importedUpdated > localUpdated) {
-          map.set(item.id, item);
-          updated += 1;
+        if (!existing) { map.set(item.id, item); added += 1; return; }
+        if (!sameCore(existing, item, type)) {
+          const localUpdated = new Date(existing.updatedAt || existing.createdAt || 0).getTime();
+          const importedUpdated = new Date(item.updatedAt || item.createdAt || 0).getTime();
+          if (importedUpdated > localUpdated) {
+            recordConflict(type, existing, item, 'Importierte neuere Version übernommen');
+            map.set(item.id, item); updated += 1;
+          } else {
+            recordConflict(type, existing, item, 'Lokale neuere Version behalten');
+          }
         }
       });
       return { items: [...map.values()], added, updated };
@@ -910,64 +469,114 @@
           if (!Array.isArray(data.kollegen) || !Array.isArray(data.eintraege)) throw new Error('Ungültige Backup-Datei.');
           const importedKollegen = data.kollegen.map(enrichKollege);
           const importedEintraege = data.eintraege.map(enrichEintrag);
-          const mode = prompt('Import-Modus eingeben: merge, neu oder ersetzen', 'merge');
+          const mode = prompt('Import-Modus: merge, neu oder ersetzen', 'merge');
           if (!mode) return;
           const choice = mode.trim().toLowerCase();
+          state.importReport = { neu: 0, aktualisiert: 0, konflikte: 0 };
           if (choice === 'ersetzen') {
-            if (!confirm('Lokale Daten wirklich komplett ersetzen?')) return;
+            if (!confirm('Lokale Daten wirklich vollständig ersetzen?')) return;
             state.kollegen = importedKollegen;
             state.eintraege = importedEintraege;
-            clearKollegeForm();
-            clearEintragForm();
-            refreshAll();
-            alert('Backup komplett übernommen.');
-            return;
-          }
-          if (choice === 'neu') {
+            state.conflicts.push({ type:'System', id:uid(), name:'', resolution:'Lokaler Datenbestand komplett ersetzt', loggedAt: nowIso() });
+            state.importReport = { neu: importedKollegen.length + importedEintraege.length, aktualisiert: 0, konflikte: 0 };
+          } else if (choice === 'neu') {
             const localKIds = new Set(state.kollegen.map(k => k.id));
             const localEIds = new Set(state.eintraege.map(e => e.id));
-            const neueKollegen = importedKollegen.filter(k => !localKIds.has(k.id));
-            const neueEintraege = importedEintraege.filter(e => !localEIds.has(e.id));
-            state.kollegen = [...state.kollegen, ...neueKollegen];
-            state.eintraege = [...state.eintraege, ...neueEintraege];
-            refreshAll();
-            alert(`Nur neue Daten übernommen. Neu: ${neueKollegen.length} Kolleg:innen, ${neueEintraege.length} Einträge.`);
-            return;
+            const neueK = importedKollegen.filter(k => !localKIds.has(k.id));
+            const neueE = importedEintraege.filter(e => !localEIds.has(e.id));
+            state.kollegen = [...state.kollegen, ...neueK];
+            state.eintraege = [...state.eintraege, ...neueE];
+            state.importReport = { neu: neueK.length + neueE.length, aktualisiert: 0, konflikte: 0 };
+          } else {
+            const mk = mergeById(state.kollegen, importedKollegen, 'Kolleg:in');
+            const me = mergeById(state.eintraege, importedEintraege, 'Eintrag');
+            state.kollegen = mk.items;
+            state.eintraege = me.items;
+            state.importReport = { neu: mk.added + me.added, aktualisiert: mk.updated + me.updated, konflikte: state.conflicts.length };
+            alert(`Zusammengeführt: Kolleg:innen +${mk.added}, aktualisiert ${mk.updated}; Einträge +${me.added}, aktualisiert ${me.updated}`);
           }
-          const mk = mergeById(state.kollegen, importedKollegen);
-          const me = mergeById(state.eintraege, importedEintraege);
-          state.kollegen = mk.items;
-          state.eintraege = me.items;
-          clearKollegeForm();
-          clearEintragForm();
           refreshAll();
-          alert(`Zusammenführen abgeschlossen. Kolleg:innen: +${mk.added}, aktualisiert ${mk.updated}; Einträge: +${me.added}, aktualisiert ${me.updated}.`);
-        } catch (err) {
-          alert(err.message);
-        }
+        } catch (err) { alert(err.message); }
       };
       reader.readAsText(file, 'utf-8');
     }
 
-    document.getElementById('saveKollegeBtn').addEventListener('click', saveKollege);
-    document.getElementById('updateKollegeBtn').addEventListener('click', updateKollege);
-    document.getElementById('deleteKollegeBtn').addEventListener('click', deleteKollege);
-    document.getElementById('clearKollegeBtn').addEventListener('click', clearKollegeForm);
-    document.getElementById('saveEintragBtn').addEventListener('click', saveEintrag);
-    document.getElementById('updateEintragBtn').addEventListener('click', updateEintrag);
-    document.getElementById('deleteEintragBtn').addEventListener('click', deleteEintrag);
-    document.getElementById('clearEintragBtn').addEventListener('click', clearEintragForm);
-    els.monatFilter.addEventListener('change', () => { renderKollegen(); renderEintraege(); });
-    els.nameFilter.addEventListener('change', renderEintraege);
-    els.historieName.addEventListener('change', renderHistorie);
-    els.exportMonatBtn.addEventListener('click', exportMonatsuebersicht);
-    els.exportHistorieBtn.addEventListener('click', exportHistorie);
-    els.exportEintraegeBtn.addEventListener('click', exportEintraege);
-    els.exportBackupBtn.addEventListener('click', exportBackup);
-    els.importFile.addEventListener('change', (e) => { if (e.target.files[0]) importBackup(e.target.files[0]); e.target.value = ''; });
+    function exportMonthSummary() {
+      const month = getMonth();
+      const rows = [['Name','Monat','Stunden','Bagatellgrenze','Noch offen','Vergütbar','Hinweis']];
+      state.kollegen.slice().sort((a,b)=>a.name.localeCompare(b.name,'de')).forEach(k => {
+        const st = monthStats(k, month);
+        rows.push([k.name, month, st.sum, k.grenze, st.rest, st.payable, st.hint]);
+      });
+      downloadText(`monatsuebersicht-${month}.csv`, toCsv(rows), 'text/csv;charset=utf-8');
+    }
 
-    loadState();
-    refreshAll();
+    function exportAccounting() {
+      const month = getMonth();
+      const rows = [['Name','Monat','Erfasste Stunden','Bagatellgrenze','Abrechnungsstunden']];
+      state.kollegen.slice().sort((a,b)=>a.name.localeCompare(b.name,'de')).forEach(k => {
+        const st = monthStats(k, month);
+        rows.push([k.name, month, st.sum, k.grenze, st.payable]);
+      });
+      downloadText(`abrechnungsstunden-${month}.csv`, toCsv(rows), 'text/csv;charset=utf-8');
+    }
+
+    function exportEntries() {
+      const rows = [['Datum','Monat','Name','Stunden','Bemerkung','UpdatedAt']];
+      state.eintraege.slice().sort((a,b)=>(a.datum||'').localeCompare(b.datum||'')).forEach(e => rows.push([e.datum,e.monat,e.name,e.stunden,e.bemerkung,e.updatedAt]));
+      downloadText(`eintraege-${getMonth()}.csv`, toCsv(rows), 'text/csv;charset=utf-8');
+    }
+
+    function bindEvents() {
+      document.querySelectorAll('[data-role-view]').forEach(btn => btn.addEventListener('click', () => switchRole(btn.dataset.roleView)));
+      document.querySelectorAll('[data-add-hours]').forEach(btn => btn.addEventListener('click', () => { const delta = Number(btn.dataset.addHours || 0); const input = el('eintragStunden'); const current = Number(input.value || 0); input.value = Math.max(0, current + delta); }));
+      el('prevMonthBtn').addEventListener('click', () => shiftMonth(-1));
+      el('nextMonthBtn').addEventListener('click', () => shiftMonth(1));
+      el('activePersonSelect').addEventListener('change', e => { state.selectedKollegeId = e.target.value || null; clearEintragForm(); renderEmployeeStats(); renderEmployeeEntries(); });
+      el('monatInput').addEventListener('change', refreshAll);
+      el('saveKollegeBtn').addEventListener('click', saveKollege);
+      el('clearKollegeBtn').addEventListener('click', () => { clearKollegeForm(); refreshPersonSelect(); renderEmployeeStats(); });
+      el('deleteKollegeBtn').addEventListener('click', deleteKollege);
+      el('saveEintragBtn').addEventListener('click', saveEintrag);
+      el('clearEintragBtn').addEventListener('click', () => { clearEintragForm(); renderEmployeeEntries(); });
+      el('deleteEintragBtn').addEventListener('click', deleteEintrag);
+      el('exportBackupBtn').addEventListener('click', exportBackup);
+      el('importBackupInput').addEventListener('change', e => { const file = e.target.files[0]; if (file) importBackup(file); e.target.value = ''; });
+      el('exportMonthSummaryBtn').addEventListener('click', exportMonthSummary);
+      el('exportAccountingBtn').addEventListener('click', exportAccounting);
+      el('exportEntriesBtn').addEventListener('click', exportEntries);
+      el('employeeEntriesBody').addEventListener('click', e => {
+        const id = e.target.dataset.editEntry; if (!id) return;
+        const entry = state.eintraege.find(x => x.id === id); if (!entry) return;
+        state.selectedEintragId = id; fillEintragForm(entry); renderEmployeeEntries();
+      });
+      el('themeToggle').addEventListener('click', () => {
+        const root = document.documentElement;
+        const current = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        const next = current === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next); el('themeToggle').textContent = next === 'dark' ? '☀️' : '🌙';
+      });
+    }
+
+    function shiftMonth(delta) {
+      const raw = getMonth() + '-01';
+      const d = new Date(raw);
+      d.setMonth(d.getMonth() + delta);
+      el('monatInput').value = d.toISOString().slice(0,7);
+      refreshAll();
+    }
+
+    function init() {
+      const prefDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.setAttribute('data-theme', prefDark ? 'dark' : 'light');
+      el('themeToggle').textContent = prefDark ? '☀️' : '🌙';
+      el('monatInput').value = new Date().toISOString().slice(0,7);
+      loadState();
+      bindEvents();
+      refreshAll();
+      switchRole('employee');
+    }
+    init();
   </script>
 </body>
 </html>
