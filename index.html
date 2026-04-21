@@ -249,7 +249,7 @@ function updateStammdaten() {
   const vollzeitInput = document.getElementById('vollzeit');
   const quoteInput = document.getElementById('quote');
   const grenzeInput = document.getElementById('grenze');
-
+if (!teilzeitInput || !vollzeitInput || !quoteInput || !grenzeInput) return;
   const teilzeit = Number.parseFloat(teilzeitInput.value);
 
   if (!Number.isNaN(teilzeit) && teilzeit > 0 && teilzeit <= VOLLVZEIT_STUNDEN) {
