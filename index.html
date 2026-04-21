@@ -273,44 +273,35 @@ if (!teilzeitInput || !vollzeitInput || !quoteInput || !grenzeInput) return;
 function getBagatellgrenze() {
   return BAGATELL_VOLLZEIT * (teilzeitStunden / VOLLVZEIT_STUNDEN);
 }
-    function updateStats() {
-  const key = getMonthKey();
-  const monthEntries = entries[key] || [];
-
-  const total = monthEntries.reduce((sum, e) => sum + e.hours, 0);
+   function updateStats() {
+  const key = getMonthKey ? getMonthKey() : (el('monatInput') ? el('monatInput').value : '');
+  const monthEntries = (state.eintraege || []).filter(e => e.monat === key || e.datum?.startsWith(key));
+  const total = monthEntries.reduce((sum, e) => sum + Number(e.stunden || e.hours || 0), 0);
   const bagatell = getBagatellgrenze();
   const remaining = bagatell - total;
 
-  const totalHoursEl = document.getElementById('totalHours');
-  const remainingHoursEl = document.getElementById('remainingHours');
-  const statusDiv = document.getElementById('statusText');
-  const banner = document.getElementById('warningBanner');
+  // Stat-Kacheln aktualisieren
+  const totalEl = document.getElementById('empMonthHours');
+  const remainingEl = document.getElementById('empRemaining');
+  const lbl = document.getElementById('remainingLabel');
 
-  if (!totalHoursEl || !remainingHoursEl || !statusDiv || !banner) return;
-
-  totalHoursEl.textContent = total.toFixed(2);
-
-  // Rest bis zur Bagatellgrenze – aber nicht negativ anzeigen
- remainingHoursEl.textContent = remaining > 0 ? remaining.toFixed(2) : total.toFixed(2);
+  if (totalEl) totalEl.textContent = total.toFixed(2);
 
   if (remaining > 0) {
-    // Bagatellgrenze noch nicht erreicht
-    statusDiv.className = 'status-neutral';
-    statusDiv.textContent = 'Unter Bagatellgrenze';
-    if (remaining > 0) {
-  statusDiv.className = 'status-neutral';
-  statusDiv.textContent = 'Unter Bagatellgrenze';
-  banner.classList.add('hidden');
-  const lbl = document.getElementById('remainingLabel');
-  if (lbl) lbl.textContent = 'Noch offen';
-} else {
-  statusDiv.className = 'status-error';
-  statusDiv.textContent = 'Bagatellgrenze erreicht – Abrechnung möglich';
-  banner.classList.remove('hidden');
-  banner.textContent = '💶 Alle Mehrarbeitsstunden dieses Monats können abgerechnet werden.';
-  const lbl = document.getElementById('remainingLabel');
-  if (lbl) lbl.textContent = 'Vergütbar';
+    if (remainingEl) remainingEl.textContent = remaining.toFixed(2);
+    if (lbl) lbl.textContent = 'Noch offen';
+    // Hinweisfeld
+    const sf = document.getElementById('statusField');
+    if (sf) sf.value = 'Unter Bagatellgrenze – noch ' + remaining.toFixed(2) + ' Std. offen';
+  } else {
+    if (remainingEl) remainingEl.textContent = total.toFixed(2);
+    if (lbl) lbl.textContent = 'Vergütbar';
+    // Hinweisfeld
+    const sf = document.getElementById('statusField');
+    if (sf) sf.value = '💶 Bagatellgrenze erreicht – alle ' + total.toFixed(2) + ' Std. können abgerechnet werden';
+  }
 }
+
     banner.classList.add('hidden');
     banner.textContent = '⚠️ Bagatellgrenze noch nicht erreicht.';
   } else {
