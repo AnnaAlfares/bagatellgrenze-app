@@ -262,8 +262,7 @@ if (!teilzeitInput || !vollzeitInput || !quoteInput || !grenzeInput) return;
 
     teilzeitStunden = teilzeit;
     localStorage.setItem('teilzeitStunden', String(teilzeitStunden));
-    renderEmployeeStats();
-  } else {
+      } else {
     quoteInput.value = '';
     grenzeInput.value = '';
   }
