@@ -327,7 +327,7 @@ function getBagatellgrenze() {
     function monthStats(k, month) {
       const sum = entriesFor(k.name, month).reduce((a, e) => a + Number(e.stunden || 0), 0);
       const rest = Math.max(Number(k.grenze || 0) - sum, 0);
-      const payable = Math.max(sum - Number(k.grenze || 0), 0);
+      const payable = sum > Number(k.grenze || 0) ? sum : 0;
       const hint = payable > 0 ? `Abrechnung möglich: ${fmt(payable)} Std` : `Noch nicht abrechenbar`; 
       return { sum, rest, payable, hint };
     }
