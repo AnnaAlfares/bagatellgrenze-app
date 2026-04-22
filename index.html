@@ -207,6 +207,15 @@
             <div class="section-head"><div><h2>Monatsübersicht</h2><p>Automatisch aus allen Einträgen berechnet.</p></div><div class="small-actions"><button class="ghost" id="exportMonthSummaryBtn">Monatsübersicht CSV</button><button class="ghost" id="exportAccountingBtn">Abrechnungsstunden CSV</button></div></div>
             <div class="table-wrap"><table><thead><tr><th>Name</th><th>Monat</th><th>Stunden</th><th>Bagatellgrenze</th><th>Noch offen</th><th>Vergütbar</th><th>Hinweis</th></tr></thead><tbody id="summaryBody"></tbody></table></div>
           </section>
+                  <section class="panel">
+          <div class="section-head">
+            <div>
+              <h2>Vertretungsplanung – Hinweise</h2>
+              <p>Wer braucht noch wie viele Stunden, um die Bagatellgrenze zu erreichen?</p>
+            </div>
+          </div>
+          <div id="vertretungsHinweisBody"></div>
+        </section>
 
           <section class="panel">
             <div class="section-head"><div><h2>Konflikte beim Import</h2><p>Wenn lokale und importierte Datensätze dieselbe ID, aber unterschiedliche Inhalte haben, wird das hier protokolliert.</p></div></div>
@@ -473,7 +482,32 @@ function getBagatellgrenze() {
       el('employeeView').classList.toggle('hidden', view !== 'employee');
       el('adminView').classList.toggle('hidden', view !== 'admin');
     }
-
+function renderVertretungsHinweis() {
+  const wrap = el('vertretungsHinweisBody');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  const month = getMonth();
+  const people = state.kollegen.slice().sort((a, b) => {
+    const ra = monthStats(a, month).rest;
+    const rb = monthStats(b, month).rest;
+    return ra - rb; // aufsteigend: wer fast drüber ist, steht oben
+  });
+  if (!people.length) {
+    wrap.innerHTML = '<div class="row-muted">Noch keine Kolleg:innen angelegt.</div>';
+    return;
+  }
+  people.forEach(k => {
+    const st = monthStats(k, month);
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:.75rem .9rem;border-bottom:1px solid var(--color-divider)';
+    const istErreicht = st.payable > 0;
+    const hinweis = istErreicht
+      ? `<span class="pill">✅ Alle ${fmt(st.sum)} Std. vergütbar</span>`
+      : `<span style="color:var(--color-warning);font-weight:700">⚠️ Noch ${fmt(st.rest)} Std. bis zur Grenze</span>`;
+    div.innerHTML = `<span><strong>${k.name}</strong> &nbsp;<span class="row-muted">${fmt(st.sum)} / ${fmt(k.grenze)} Std.</span></span>${hinweis}`;
+    wrap.appendChild(div);
+  });
+}
     function refreshAll() {
       refreshPersonSelect();
       renderEmployeeStats();
