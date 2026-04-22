@@ -180,6 +180,22 @@
           <section class="panel">
             <div class="section-head"><div><h2>Eigene Einträge</h2><p>Nur Einträge der ausgewählten Person im gewählten Monat.</p></div></div>
             <div class="table-wrap"><table><thead><tr><th>Datum</th><th>Monat</th><th>Name</th><th>Stunden</th><th>Bemerkung</th><th>Aktion</th></tr></thead><tbody id="employeeEntriesBody"></tbody></table></div>
+                    <div class="section-head" style="margin-top:var(--space-6)">
+          <div>
+            <h2>Monatsübersicht</h2>
+            <p>Deine erfassten Stunden und der Status für den gewählten Monat.</p>
+          </div>
+        </div>
+        <div class="stats" style="margin-bottom:var(--space-5)">
+          <div class="stat"><div class="k">Stunden im Monat</div><div class="v" id="empMonthHoursDetail">0,0</div></div>
+          <div class="stat"><div class="k">Bagatellgrenze</div><div class="v" id="empLimitDetail">0,0</div></div>
+          <div class="stat"><div class="k">Noch offen</div><div class="v" id="empRemainingDetail">0,0</div></div>
+          <div class="stat"><div class="k">Vergütbar</div><div class="v" id="empPayableDetail">0,0</div></div>
+        </div>
+        <div class="banner">
+          📁 Bitte exportiere dein Backup und leite es an die verantwortliche Person weiter.<br>
+          <button class="button primary" id="exportBackupBtnEmployee" style="margin-top:var(--space-3)">Backup exportieren</button>
+        </div>
           </section>
         </section>
 
@@ -383,6 +399,10 @@ function getBagatellgrenze() {
       el('statusField').value = st.payable > 0 ? `Abrechnung möglich: ${fmt(st.payable)} Std` : 'Noch nicht abrechenbar';
       el('statusField').className = st.payable > 0 ? 'status-card status-go' : 'status-card status-neutral';
       fillKollegeForm(k);
+        if (el('empMonthHoursDetail')) el('empMonthHoursDetail').textContent = fmt(st.sum);
+  if (el('empLimitDetail')) el('empLimitDetail').textContent = fmt(k.grenze);
+  if (el('empRemainingDetail')) el('empRemainingDetail').textContent = fmt(st.rest);
+  if (el('empPayableDetail')) el('empPayableDetail').textContent = fmt(st.payable);
     }
 
     function renderEmployeeEntries() {
@@ -640,6 +660,7 @@ function getBagatellgrenze() {
       el('clearEintragBtn').addEventListener('click', () => { clearEintragForm(); renderEmployeeEntries(); });
       el('deleteEintragBtn').addEventListener('click', deleteEintrag);
       el('exportBackupBtn').addEventListener('click', exportBackup);
+        el('exportBackupBtnEmployee').addEventListener('click', exportBackup);
       el('importBackupInput').addEventListener('change', e => { const file = e.target.files[0]; if (file) importBackup(file); e.target.value = ''; });
       el('exportMonthSummaryBtn').addEventListener('click', exportMonthSummary);
       el('exportAccountingBtn').addEventListener('click', exportAccounting);
