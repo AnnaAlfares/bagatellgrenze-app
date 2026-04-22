@@ -336,8 +336,16 @@ function getBagatellgrenze() {
       el('kollegeName').value = k?.name || '';
       el('vollzeit').value = k?.vollzeit ?? '';
       el('teilzeit').value = k?.teilzeit ?? '';
-      el('quote').value = k?.quote ?? '';
-      el('grenze').value = k?.grenze ?? '';
+  const tz = Number(k?.teilzeit || 0);
+  const vz = Number(k?.vollzeit || 28);
+  if (tz > 0 && vz > 0) {
+    const q = tz / vz;
+    el('quote').value = q.toFixed(2);
+    el('grenze').value = (BAGATELL_VOLLZEIT * q).toFixed(2);
+  } else {
+    el('quote').value = k?.quote ?? '';
+    el('grenze').value = k?.grenze ?? '';
+  }
     }
     function fillEintragForm(e) {
       el('eintragDatum').value = e?.datum || '';
@@ -461,8 +469,8 @@ function getBagatellgrenze() {
       const name = el('kollegeName').value.trim();
       const vollzeit = Number(el('vollzeit').value || 0);
       const teilzeit = Number(el('teilzeit').value || 0);
-      const quote = Number(el('quote').value || 0);
-      const grenze = Number(el('grenze').value || 0);
+      const quote = vollzeit > 0 ? teilzeit / vollzeit : 0;
+      const grenze = BAGATELL_VOLLZEIT * quote;
       if (!name) return alert('Bitte Namen eingeben.');
       if (!state.selectedKollegeId) {
         const ts = nowIso();
