@@ -273,7 +273,7 @@ function getBagatellgrenze() {
   return BAGATELL_VOLLZEIT * (teilzeitStunden / VOLLVZEIT_STUNDEN);
 }
    function updateStats() {
-  const key = getMonth(); getMonthKey() : (el('monatInput') ? el('monatInput').value : '');
+  const key = getMonth();
   const monthEntries = (state.eintraege || []).filter(e => e.monat === key || e.datum?.startsWith(key));
   const total = monthEntries.reduce((sum, e) => sum + Number(e.stunden || e.hours || 0), 0);
   const bagatell = getBagatellgrenze();
