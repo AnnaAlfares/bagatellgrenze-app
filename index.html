@@ -334,7 +334,7 @@ function getBagatellgrenze() {
 
     function fillKollegeForm(k) {
       el('kollegeName').value = k?.name || '';
-      el('vollzeit').value = k?.vollzeit ?? '';
+      el('vollzeit').value = k?.vollzeit || 28;
       el('teilzeit').value = k?.teilzeit ?? '';
   const tz = Number(k?.teilzeit || 0);
   const vz = Number(k?.vollzeit || 28);
