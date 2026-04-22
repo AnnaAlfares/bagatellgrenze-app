@@ -262,7 +262,7 @@ if (!teilzeitInput || !vollzeitInput || !quoteInput || !grenzeInput) return;
 
     teilzeitStunden = teilzeit;
     localStorage.setItem('teilzeitStunden', String(teilzeitStunden));
-    updateStats(); // nutzt die neue Grenze in der Monatslogik
+    renderEmployeeStats();
   } else {
     quoteInput.value = '';
     grenzeInput.value = '';
@@ -273,7 +273,7 @@ function getBagatellgrenze() {
   return BAGATELL_VOLLZEIT * (teilzeitStunden / VOLLVZEIT_STUNDEN);
 }
    function updateStats() {
-  const key = getMonthKey ? getMonthKey() : (el('monatInput') ? el('monatInput').value : '');
+  const key = getMonth(); getMonthKey() : (el('monatInput') ? el('monatInput').value : '');
   const monthEntries = (state.eintraege || []).filter(e => e.monat === key || e.datum?.startsWith(key));
   const total = monthEntries.reduce((sum, e) => sum + Number(e.stunden || e.hours || 0), 0);
   const bagatell = getBagatellgrenze();
@@ -301,16 +301,8 @@ function getBagatellgrenze() {
   }
 }
 
-    banner.classList.add('hidden');
-    banner.textContent = '⚠️ Bagatellgrenze noch nicht erreicht.';
-  } else {
-    // Bagatellgrenze erreicht oder überschritten → alle Stunden vergütbar
-    statusDiv.className = 'status-error';
-    statusDiv.textContent = 'Bagatellgrenze erreicht – Abrechnung möglich';
-    banner.classList.remove('hidden');
-    banner.textContent = '💶 Alle Mehrarbeitsstunden dieses Monats können abgerechnet werden.';
-  }
-}
+    
+
     function downloadText(filename, content, type = 'application/json;charset=utf-8') {
       const blob = new Blob([content], { type });
       const url = URL.createObjectURL(blob);
