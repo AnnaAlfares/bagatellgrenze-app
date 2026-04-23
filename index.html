@@ -251,7 +251,7 @@
   <script>
     const state = { kollegen: [], eintraege: [], roleView: 'employee', selectedKollegeId: null, selectedEintragId: null, adminUnlocked: false, conflicts: [], importReport: { neu: 0, aktualisiert: 0, konflikte: 0 } };
 
-    const el = id => document.getElementById(id);
+    const el = id => document.getElementById(id) || { addEventListener(){}, onchange: null, value: '', textContent: '', checked: false };
     const fmt = n => Number(n || 0).toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
     const uid = () => crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
     const monthFromDate = value => value ? value.slice(0, 7) : '';
