@@ -210,6 +210,12 @@
           <div class="import-report panel" id="importReport"><div class="status-card"><div class="k">Neu</div><div class="v" id="reportNew">0</div></div><div class="status-card"><div class="k">Aktualisiert</div><div class="v" id="reportUpdated">0</div></div><div class="status-card"><div class="k">Konflikte</div><div class="v" id="reportConflicts">0</div></div></div>
 
           <section class="panel">
+            <div class="filter-bar">
+  abel style="margin:0;font-weight:600;font-size:var(--text-sm)">Person filtern</label>
+  <select id="adminPersonFilter" onchange="renderSummary(); renderAdminEntries();">
+    <option value="">Alle Personen</option>
+  </select>
+</div>
             <div class="section-head"><div><h2>Monatsübersicht</h2><p>Automatisch aus allen Einträgen berechnet.</p></div><div class="small-actions"><button class="ghost" id="exportMonthSummaryBtn">Monatsübersicht CSV</button><button class="ghost" id="exportAccountingBtn">Abrechnungsstunden CSV</button></div></div>
             <div class="table-wrap"><table><thead><tr><th>Name</th><th>Monat</th><th>Stunden</th><th>Bagatellgrenze</th><th>Noch offen</th><th>Vergütbar</th><th>Hinweis</th></tr></thead><tbody id="summaryBody"></tbody></table></div>
           </section>
@@ -397,6 +403,19 @@ function getBagatellgrenze() {
       });
       if (!state.selectedKollegeId && state.kollegen[0]) { state.selectedKollegeId = state.kollegen[0].id; }
       select.value = state.selectedKollegeId || '';
+        // Auch Admin-Filter aktualisieren
+  const adminFilter = el('adminPersonFilter');
+  if (adminFilter) {
+    const current = adminFilter.value;
+    adminFilter.innerHTML = '<option value="">Alle Personen</option>';
+    state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
+      const opt = document.createElement('option');
+      opt.value = k.name;
+      opt.textContent = k.name;
+      if (k.name === current) opt.selected = true;
+      adminFilter.appendChild(opt);
+    });
+  }
     }
 
     function renderEmployeeStats() {
@@ -440,7 +459,10 @@ function getBagatellgrenze() {
     function renderSummary() {
       const body = el('summaryBody'); body.innerHTML = '';
       const month = getMonth();
-      const people = state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de'));
+      const filterName = el('adminPersonFilter') ? el('adminPersonFilter').value : '';
+const people = state.kollegen
+  .filter(k => !filterName || k.name === filterName)
+  .slice().sort((a,b) => a.name.localeCompare(b.name,'de'));
       if (!people.length) { body.innerHTML = '<tr><td colspan="7" class="row-muted">Noch keine Kolleg:innen angelegt.</td></tr>'; return; }
       people.forEach(k => {
         const st = monthStats(k, month);
@@ -453,7 +475,10 @@ function getBagatellgrenze() {
 
     function renderAdminEntries() {
       const body = el('adminEntriesBody'); body.innerHTML = '';
-      const rows = state.eintraege.slice().sort((a,b) => (b.datum||'').localeCompare(a.datum||''));
+      const filterName = el('adminPersonFilter') ? el('adminPersonFilter').value : '';
+const rows = state.eintraege
+  .filter(e => !filterName || e.name === filterName)
+  .slice().sort((a,b) => (b.datum||'').localeCompare(a.datum||''));
       if (!rows.length) { body.innerHTML = '<tr><td colspan="6" class="row-muted">Noch keine Einträge vorhanden.</td></tr>'; return; }
       rows.forEach(r => {
         const tr = document.createElement('tr');
