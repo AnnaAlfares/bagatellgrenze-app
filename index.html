@@ -130,7 +130,11 @@
       <p>Hier wird deine individuelle Bagatellgrenze automatisch berechnet.</p>
     </div>
   </div>
-    <label>
+          <label>
+          Kürzel
+          <input id="kollege Kuerzel" type="text" placeholder="z. B. MU" maxlength="3" oninput="this.value=this.value.toUpperCase()" />
+        </label>
+            <label>
       Name
       <input id="kollegeName" type="text" placeholder="z. B. Frau Muster" />
     </label>
@@ -217,7 +221,7 @@
     <option value="">Alle Personen</option>
   </select>
 </div>
-            <div class="section-head"><div><h2>Monatsübersicht</h2><p>Automatisch aus allen Einträgen berechnet.</p></div><div class="small-actions"><button class="ghost" id="exportMonthSummaryBtn">Monatsübersicht CSV</button><button class="ghost" id="exportAccountingBtn">Abrechnungsstunden CSV</button></div></div>
+            <div class="section-head"><div><h2>Monatsübersicht</h2><p>Automatisch aus allen Einträgen berechnet.</p></div><div class="small-actions"><button class="ghost" id="exportMonthSummaryBtn">Monatsübersicht CSV</button><button class="ghost" id="exportAccountingBtn">Abrechnungsstunden CSV</button></div></div><button class="ghost" onclick="exportRollout()">Rollout exportieren</button>
             <div class="table-wrap"><table><thead><tr><th>Name</th><th>Monat</th><th>Stunden</th><th>Bagatellgrenze</th><th>Noch offen</th><th>Vergütbar</th><th>Hinweis</th></tr></thead><tbody id="summaryBody"></tbody></table></div>
           </section>
                   <section class="panel">
@@ -256,7 +260,7 @@
     const byDate = (a, b) => (a.datum || '').localeCompare(b.datum || '') || (a.updatedAt || '').localeCompare(b.updatedAt || '');
 
     function enrichKollege(k) {
-      return { id: k.id || uid(), name: k.name || '', vollzeit: Number(k.vollzeit || 0), teilzeit: Number(k.teilzeit || 0), quote: Number(k.quote || 0), grenze: Number(k.grenze || 0), createdAt: normTs(k.createdAt), updatedAt: normTs(k.updatedAt) };
+      return { id: k.id || uid(), name: k.name || '', kuerzel: (k.kuerzel || '').toUpperCase().slice(0,3), vollzeit: Number(k.vollzeit || 0), teilzeit: Number(k.teilzeit || 0), quote: Number(k.quote || 0), grenze: Number(k.grenze || 0), createdAt: normTs(k.createdAt), updatedAt: normTs(k.updatedAt) };
     }
     function enrichEintrag(e) {
       return { id: e.id || uid(), datum: e.datum || '', monat: e.monat || monthFromDate(e.datum || '') || '', name: e.name || '', stunden: Number(e.stunden || 0), bemerkung: e.bemerkung || '', createdAt: normTs(e.createdAt), updatedAt: normTs(e.updatedAt) };
@@ -371,7 +375,7 @@ function getBagatellgrenze() {
     }
 
     function fillKollegeForm(k) {
-      el('kollegeName').value = k?.name || '';
+      el('kollege Kuerzel').value = k?.kuerzel || ''; el('kollegeName').value = k?.name || '';
       el('vollzeit').value = k?.vollzeit || 28;
       el('teilzeit').value = k?.teilzeit ?? '';
   const tz = Number(k?.teilzeit || 0);
@@ -557,7 +561,7 @@ function renderVertretungsHinweis() {
     }
 
     function saveKollege() {
-      const name = el('kollegeName').value.trim();
+      const kuerzel = el('kollege Kuerzel').value.trim().toUpperCase().slice(0,3); const name = el('kollegeName').value.trim(); if (!kuerzel) return alert('Bitte Kürzel eingeben (2–3 Buchstaben).');
       const vollzeit = Number(el('vollzeit').value || 0);
       const teilzeit = Number(el('teilzeit').value || 0);
       const quote = vollzeit > 0 ? teilzeit / vollzeit : 0;
@@ -565,14 +569,14 @@ function renderVertretungsHinweis() {
       if (!name) return alert('Bitte Namen eingeben.');
       if (!state.selectedKollegeId) {
         const ts = nowIso();
-        const k = { id: uid(), name, vollzeit, teilzeit, quote, grenze, createdAt: ts, updatedAt: ts };
+        const k = { id: uid(), kuerzel, name, vollzeit, teilzeit, quote, grenze, createdAt: ts, updatedAt: ts };
         state.kollegen.push(k);
         state.selectedKollegeId = k.id;
       } else {
         const k = getSelectedKollege();
         if (!k) return;
         const oldName = k.name;
-        Object.assign(k, { name, vollzeit, teilzeit, quote, grenze, updatedAt: nowIso() });
+        Object.assign(k, { kuerzel, name, vollzeit, teilzeit, quote, grenze, updatedAt: nowIso() });
         if (oldName !== name) state.eintraege.forEach(e => { if (e.name === oldName) { e.name = name; e.updatedAt = nowIso(); } });
       }
       refreshAll();
@@ -617,7 +621,7 @@ function renderVertretungsHinweis() {
       clearEintragForm();
       refreshAll();
     }
-
+    function exportRollout() { downloadText(`rollout-stammdaten-${new Date().toISOString().slice(0,10)}.json`, JSON.stringify({ rollout: true, kollegen: state.kollegen.map(k => ({ id: k.id, kuerzel: k.kuerzel, name: k.name, vollzeit: k.vollzeit, teilzeit: k.teilzeit, quote: k.quote, grenze: k.grenze })) }, null, 2)); }
     function exportBackup() {
       downloadText(`bagatell-backup-${new Date().toISOString().slice(0,10)}.json`, JSON.stringify({ kollegen: state.kollegen, eintraege: state.eintraege }, null, 2));
     }
