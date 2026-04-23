@@ -209,7 +209,8 @@
           <div class="banner">Verantwortlichenansicht: Backups aus Kollegien zusammenführen, Konflikte prüfen und Monatsdaten für die Abrechnung exportieren.</div>
           <div class="import-report panel" id="importReport"><div class="status-card"><div class="k">Neu</div><div class="v" id="reportNew">0</div></div><div class="status-card"><div class="k">Aktualisiert</div><div class="v" id="reportUpdated">0</div></div><div class="status-card"><div class="k">Konflikte</div><div class="v" id="reportConflicts">0</div></div></div>
 
-          <section class="panel">
+                  <section class="panel"><div class="section-head"><div><h2>Stammdaten verwalten</h2><p>Teilzeitstunden und Bagatellgrenze pro Person anpassen.</p></div></div><div class="grid two" style="margin-top:var(--space-4)"><label>Person auswählen<select id="adminStammPersonSelect" onchange="loadAdminStamm()"><option value="">Person wählen…</option></select></label><label>Vollzeitstunden<input id="adminStammVollzeit" type="number" value="28" readonly></label><label>Teilzeitstunden<input id="adminStammTeilzeit" type="number" step="0.5" min="0" max="28" onchange="updateAdminStammdaten()"></label><label>Quote<input id="adminStammQuote" type="number" step="0.01" readonly></label><label>Bagatellgrenze (Monat)<input id="adminStammGrenze" type="number" step="0.1" readonly></label></div><div style="margin-top:var(--space-4)"><button class="button primary" onclick="saveAdminStamm()">Stammdaten speichern</button></div></section>
+<section class="panel">
             <div class="filter-bar">
   <label style="margin:0;font-weight:600;font-size:var(--text-sm)">Person filtern</label>
   <select id="adminPersonFilter" onchange="renderSummary(); renderAdminEntries();">
@@ -507,6 +508,10 @@ const rows = state.eintraege
       });
     }
 
+function refreshAdminStammSelect() { const sel = el('adminStammPersonSelect'); if (!sel) return; const cur = sel.value; sel.innerHTML = '<option value="">Person wählen…</option>'; state.kollegen.slice().sort((a,b)=>a.name.localeCompare(b.name,'de')).forEach(k => { const o = document.createElement('option'); o.value = k.id; o.textContent = k.name; if (k.id === cur) o.selected = true; sel.appendChild(o); }); }
+function loadAdminStamm() { const id = el('adminStammPersonSelect').value; const k = state.kollegen.find(x => x.id === id); if (!k) { el('adminStammVollzeit').value = 28; el('adminStammTeilzeit').value = ''; el('adminStammQuote').value = ''; el('adminStammGrenze').value = ''; return; } el('adminStammVollzeit').value = k.vollzeit || 28; el('adminStammTeilzeit').value = k.teilzeit || ''; const tz = Number(k.teilzeit || 0); const vz = Number(k.vollzeit || 28); if (tz > 0 && vz > 0) { const q = tz / vz; el('adminStammQuote').value = q.toFixed(2); el('adminStammGrenze').value = (3 * q).toFixed(2); } else { el('adminStammQuote').value = k.quote || ''; el('adminStammGrenze').value = k.grenze || ''; } }
+function updateAdminStammdaten() { const tz = Number(el('adminStammTeilzeit').value); const vz = 28; if (!Number.isNaN(tz) && tz > 0 && tz <= vz) { el('adminStammVollzeit').value = vz; const q = tz / vz; el('adminStammQuote').value = q.toFixed(2); el('adminStammGrenze').value = (3 * q).toFixed(2); } else { el('adminStammQuote').value = ''; el('adminStammGrenze').value = ''; } }
+function saveAdminStamm() { const id = el('adminStammPersonSelect').value; if (!id) return alert('Bitte zuerst eine Person auswählen.'); const k = state.kollegen.find(x => x.id === id); if (!k) return; const teilzeit = Number(el('adminStammTeilzeit').value || 0); const vollzeit = 28; if (teilzeit <= 0) return alert('Bitte Teilzeitstunden eingeben.'); const quote = teilzeit / vollzeit; const grenze = 3 * quote; const oldName = k.name; Object.assign(k, { vollzeit, teilzeit, quote, grenze, updatedAt: new Date().toISOString() }); state.eintraege.forEach(e => { if (e.name === oldName) e.updatedAt = new Date().toISOString(); }); refreshAll(); alert('Stammdaten für ' + k.name + ' gespeichert.'); }
     function switchRole(view) {
       state.roleView = view;
       document.querySelectorAll('[data-role-view]').forEach(btn => btn.classList.toggle('active', btn.dataset.roleView === view));
@@ -547,7 +552,7 @@ function renderVertretungsHinweis() {
       renderAdminEntries();
       renderConflicts();
         renderVertretungsHinweis();
-      renderImportReport();
+      renderImportReport(); refreshAdminStammSelect();
       saveState();
     }
 
