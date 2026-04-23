@@ -718,7 +718,7 @@ function renderVertretungsHinweis() {
     }
 
     function bindEvents() {
-      document.querySelectorAll('[data-role-view]').forEach(btn => btn.addEventListener('click', () => btn.dataset.roleView==='admin'?openPinModal():switchRole('employee')));
+      document.querySelectorAll('[data-role-view]').forEach(btn => btn.addEventListener('click', () => btn.dataset.roleView==='admin'?openPinOverlay():switchRole('employee')));
       document.querySelectorAll('[data-add-hours]').forEach(btn => btn.addEventListener('click', () => { const delta = Number(btn.dataset.addHours || 0); const input = el('eintragStunden'); const current = Number(input.value || 0); input.value = Math.max(0, current + delta); }));
       el('prevMonthBtn').addEventListener('click', () => shiftMonth(-1));
       el('nextMonthBtn').addEventListener('click', () => shiftMonth(1));
