@@ -132,7 +132,7 @@
   </div>
           <label>
           Kürzel
-          <input id="kollege Kuerzel" type="text" placeholder="z. B. MU" maxlength="3" oninput="this.value=this.value.toUpperCase()" />
+          <input id="kollegeKuerzel" type="text" placeholder="z. B. MU" maxlength="3" oninput="this.value=this.value.toUpperCase()" />
         </label>
             <label>
       Name
@@ -375,7 +375,7 @@ function getBagatellgrenze() {
     }
 
     function fillKollegeForm(k) {
-      el('kollege Kuerzel').value = k?.kuerzel || ''; el('kollegeName').value = k?.name || '';
+      el('kollegeKuerzel').value = k?.kuerzel || ''; el('kollegeName').value = k?.name || '';
       el('vollzeit').value = k?.vollzeit || 28;
       el('teilzeit').value = k?.teilzeit ?? '';
   const tz = Number(k?.teilzeit || 0);
@@ -561,7 +561,7 @@ function renderVertretungsHinweis() {
     }
 
     function saveKollege() {
-      const kuerzel = el('kollege Kuerzel').value.trim().toUpperCase().slice(0,3); const name = el('kollegeName').value.trim(); if (!kuerzel) return alert('Bitte Kürzel eingeben (2–3 Buchstaben).');
+      const kuerzel = el('kollegeKuerzel').value.trim().toUpperCase().slice(0,3); const name = el('kollegeName').value.trim(); if (!kuerzel) return alert('Bitte Kürzel eingeben (2–3 Buchstaben).');
       const vollzeit = Number(el('vollzeit').value || 0);
       const teilzeit = Number(el('teilzeit').value || 0);
       const quote = vollzeit > 0 ? teilzeit / vollzeit : 0;
