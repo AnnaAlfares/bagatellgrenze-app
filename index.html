@@ -396,6 +396,14 @@ function getBagatellgrenze() {
     function clearEintragForm() { state.selectedEintragId = null; fillEintragForm(null); }
 
     function refreshPersonSelect() {
+      const meineKollege = state.kollegen.find(k => k.kuerzel && el('kollegeKuerzel').value && k.kuerzel === el('kollegeKuerzel').value);
+      if (meineKollege) {
+  state.selectedKollegeId = meineKollege.id;
+  el('activePersonSelect').innerHTML = `<option value="${meineKollege.id}">${meineKollege.name}</option>`;
+  el('activePersonSelect').disabled = true;
+  return;
+}
+el('activePersonSelect').disabled = false;
       const select = el('activePersonSelect');
       select.innerHTML = '';
       const placeholder = document.createElement('option');
