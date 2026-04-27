@@ -693,7 +693,10 @@ function getBagatellgrenze() {
     function clearKollegeForm() { state.selectedKollegeId = null; fillKollegeForm(null); }
     function clearEintragForm() { state.selectedEintragId = null; fillEintragForm(null); }
 
-        function refreshPersonSelect() {
+            function refreshPersonSelect() {
+      const activePersonSelect = el('activePersonSelect');
+      if (!activePersonSelect) return; // Sicherheitscheck
+      
       // In Mitarbeiteransicht: Nur eigene Person
       if (state.roleView === 'employee') {
         const myPersonId = localStorage.getItem('myPersonId');
@@ -702,8 +705,8 @@ function getBagatellgrenze() {
           const myPerson = state.kollegen.find(k => k.id === myPersonId);
           if (myPerson) {
             state.selectedKollegeId = myPersonId;
-            el('activePersonSelect').innerHTML = `<option value="${myPerson.id}">${myPerson.name}</option>`;
-            el('activePersonSelect').disabled = true;
+            activePersonSelect.innerHTML = `<option value="${myPerson.id}">${myPerson.name}</option>`;
+            activePersonSelect.disabled = true;
             return;
           }
         }
@@ -713,32 +716,32 @@ function getBagatellgrenze() {
           WhoAreYouDialog.show();
         }
         
-        el('activePersonSelect').innerHTML = '<option value="">Bitte Person auswählen</option>';
-        el('activePersonSelect').disabled = true;
+        activePersonSelect.innerHTML = '<option value="">Bitte Person auswählen</option>';
+        activePersonSelect.disabled = true;
         return;
       }
       
       // In Admin-Ansicht: Alle Personen
-      el('activePersonSelect').disabled = false;
-      const select = el('activePersonSelect');
-      select.innerHTML = '';
+      activePersonSelect.disabled = false;
+      activePersonSelect.innerHTML = '';
+      
       const placeholder = document.createElement('option');
       placeholder.value = '';
       placeholder.textContent = state.kollegen.length ? 'Person auswählen' : 'Noch keine Person angelegt';
-      select.appendChild(placeholder);
+      activePersonSelect.appendChild(placeholder);
       
       state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
         const opt = document.createElement('option');
         opt.value = k.id;
         opt.textContent = k.name;
         if (k.id === state.selectedKollegeId) opt.selected = true;
-        select.appendChild(opt);
+        activePersonSelect.appendChild(opt);
       });
       
       if (!state.selectedKollegeId && state.kollegen[0]) {
         state.selectedKollegeId = state.kollegen[0].id;
       }
-      select.value = state.selectedKollegeId || '';
+      activePersonSelect.value = state.selectedKollegeId || '';
       
       // Admin-Filter aktualisieren
       const adminFilter = el('adminPersonFilter');
