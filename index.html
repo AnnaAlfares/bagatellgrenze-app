@@ -916,16 +916,17 @@ function renderVertretungsHinweis() {
     wrap.appendChild(div);
   });
 }
-    function refreshAll() {
+        function refreshAll() {
+      saveState();
       refreshPersonSelect();
+      refreshAdminPersonSelect();
       renderEmployeeStats();
       renderEmployeeEntries();
       renderSummary();
       renderAdminEntries();
       renderConflicts();
-        renderVertretungsHinweis();
+      renderVertretungsHinweis();
       renderImportReport();
-      saveState();
     }
 
         function saveKollege() {
@@ -1366,15 +1367,28 @@ function renderVertretungsHinweis() {
         alert('🔒 Verantwortlichenansicht wurde gesperrt.');
       });
     }
-
-
-    function shiftMonth(delta) {
+      
+        function shiftMonth(delta) {
       const raw = getMonth() + '-01';
       const d = new Date(raw);
       d.setMonth(d.getMonth() + delta);
-      el('monatInput').value = d.toISOString().slice(0,7);
+      const monatInput = el('monatInput');
+      if (monatInput) monatInput.value = d.toISOString().slice(0,7);
       refreshAll();
-            refreshAdminPersonSelect();
+    }
+
+
+          function refreshAll() {
+      saveState();
+      refreshPersonSelect();
+      refreshAdminPersonSelect();
+      renderEmployeeStats();
+      renderEmployeeEntries();
+      renderSummary();
+      renderAdminEntries();
+      renderConflicts();
+      renderVertretungsHinweis();
+      renderImportReport();
     }
 
            function init() {
