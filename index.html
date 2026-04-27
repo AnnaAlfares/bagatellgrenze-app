@@ -999,5 +999,31 @@ function renderVertretungsHinweis() {
     }
     init();
   </script>
+  <!-- PIN-Dialoge -->
+<div id="pinDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center;">
+  <div style="background: var(--color-surface); padding: 30px; border-radius: var(--radius-xl); max-width: 400px; width: 90%; border: 1px solid var(--color-border);">
+    <h3 style="margin-top:0">🔒 Verantwortlichenansicht entsperren</h3>
+    <p>Bitte PIN eingeben:</p>
+    <input type="password" id="pinInput" placeholder="PIN eingeben" style="width: 100%; padding: 12px; font-size: 16px; margin: 15px 0; border: 2px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface-2); color: var(--color-text);">
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+      <button id="pinSubmit" class="button primary" style="flex: 1;">Entsperren</button>
+      <button id="pinCancel" class="danger" style="flex: 1;">Abbrechen</button>
+    </div>
+    <p id="pinError" style="color: var(--color-error); margin-top: 10px; display: none; font-weight: 700;">❌ Falsche PIN!</p>
+  </div>
+</div>
+
+<div id="pinSetupDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center;">
+  <div style="background: var(--color-surface); padding: 30px; border-radius: var(--radius-xl); max-width: 400px; width: 90%; border: 1px solid var(--color-border);">
+    <h3 style="margin-top:0">🔐 PIN festlegen</h3>
+    <p>Legen Sie eine PIN fest, um die Verantwortlichenansicht zu schützen.</p>
+    <input type="password" id="pinSetupInput" placeholder="Neue PIN (mind. 4 Zeichen)" style="width: 100%; padding: 12px; font-size: 16px; margin: 15px 0; border: 2px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface-2); color: var(--color-text);">
+    <input type="password" id="pinSetupConfirm" placeholder="PIN wiederholen" style="width: 100%; padding: 12px; font-size: 16px; margin-bottom: 15px; border: 2px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface-2); color: var(--color-text);">
+    <button id="pinSetupSubmit" class="button primary" style="width: 100%;">PIN festlegen</button>
+    <p id="pinSetupError" style="color: var(--color-error); margin-top: 10px; display: none; font-weight: 700;"></p>
+  </div>
+</div>
+
+
 </body>
 </html>
