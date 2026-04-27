@@ -1229,20 +1229,26 @@ function renderVertretungsHinweis() {
       refreshAll();
     }
 
-        function init() {
+           function init() {
       const prefDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       document.documentElement.setAttribute('data-theme', prefDark ? 'dark' : 'light');
-      el('themeToggle').textContent = prefDark ? '☀️' : '🌙';
-      el('monatInput').value = new Date().toISOString().slice(0,7);
+      
+      const themeToggle = el('themeToggle');
+      if (themeToggle) themeToggle.textContent = prefDark ? '☀️' : '🌙';
+      
+      const monatInput = el('monatInput');
+      if (monatInput) monatInput.value = new Date().toISOString().slice(0,7);
+      
       loadState();
       PINDialog.init();
-      WhoAreYouDialog.init(); // "Wer bist du?"-Dialog initialisieren
+      WhoAreYouDialog.init();
       bindEvents();
       refreshAll();
       switchRole('employee');
     }
-
+    
     init();
+
   </script>
 
 </body>
