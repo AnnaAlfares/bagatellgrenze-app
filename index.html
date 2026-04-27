@@ -848,8 +848,15 @@ function renderVertretungsHinweis() {
     }
 
     function exportBackup() {
-      downloadText(`bagatell-backup-${new Date().toISOString().slice(0,10)}.json`, JSON.stringify({ kollegen: state.kollegen, eintraege: state.eintraege }, null, 2));
-    }
+  const adminPIN = localStorage.getItem('adminPIN');
+  const backupData = { 
+    kollegen: state.kollegen, 
+    eintraege: state.eintraege,
+    adminPIN: adminPIN // PIN wird mit exportiert
+  };
+  downloadText(`bagatell-backup-${new Date().toISOString().slice(0,10)}.json`, JSON.stringify(backupData, null, 2));
+}
+
 
     function recordConflict(type, localItem, importedItem, resolution) {
       state.conflicts.push({ type, id: localItem.id || importedItem.id, name: importedItem.name || localItem.name || '', resolution, loggedAt: nowIso() });
