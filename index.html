@@ -255,11 +255,18 @@
               </label>
             </div>
             
-            <div class="small-actions" style="margin-top:1rem">
-              <button class="button primary" id="adminSavePersonBtn">Person anlegen</button>
-              <button class="ghost" id="adminClearPersonBtn">Leeren</button>
-              <button class="danger" id="adminDeletePersonBtn">Person löschen</button>
-            </div>
+            <label style="margin-top: 1rem;">Person auswählen (zum Bearbeiten)
+  <select id="adminPersonSelect" style="width: 100%;">
+    <option value="">Neue Person anlegen...</option>
+  </select>
+</label>
+
+<div class="small-actions" style="margin-top:1rem">
+  <button class="button primary" id="adminSavePersonBtn">Speichern</button>
+  <button class="ghost" id="adminClearPersonBtn">Neu anlegen</button>
+  <button class="danger" id="adminDeletePersonBtn">Person löschen</button>
+</div>
+
             
             <div class="footer-note">
               Tipp: Lege alle Kolleg:innen mit Name und Kürzel an. Die Teilzeitstunden werden von den Mitarbeitenden selbst ergänzt.
@@ -1115,6 +1122,47 @@ function renderVertretungsHinweis() {
       state.eintraege.slice().sort((a,b)=>(a.datum||'').localeCompare(b.datum||'')).forEach(e => rows.push([e.datum,e.monat,e.name,e.stunden,e.bemerkung,e.updatedAt]));
       downloadText(`eintraege-${getMonth()}.csv`, toCsv(rows), 'text/csv;charset=utf-8');
     }
+        // Admin: Person zum Bearbeiten auswählen
+    function adminSelectPerson() {
+      const select = el('adminPersonSelect');
+      if (!select) return;
+      
+      const personId = select.value;
+      
+      if (!personId) {
+        // Neue Person anlegen
+        adminClearPerson();
+        return;
+      }
+      
+      const person = state.kollegen.find(k => k.id === personId);
+      if (!person) return;
+      
+      state.selectedKollegeId = personId;
+      
+      const kuerzelEl = el('adminKuerzel');
+      const nameEl = el('adminName');
+      
+      if (kuerzelEl) kuerzelEl.value = person.kuerzel;
+      if (nameEl) nameEl.value = person.name;
+    }
+    
+    // Admin: Personen-Dropdown aktualisieren
+    function refreshAdminPersonSelect() {
+      const select = el('adminPersonSelect');
+      if (!select) return;
+      
+      select.innerHTML = '<option value="">Neue Person anlegen...</option>';
+      
+      state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
+        const opt = document.createElement('option');
+        opt.value = k.id;
+        opt.textContent = `${k.name} (${k.kuerzel})`;
+        if (k.id === state.selectedKollegeId) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+
     // ========== ADMIN: PERSONEN VERWALTEN ==========
     function adminSavePerson() {
       const kuerzel = el('adminKuerzel').value.trim().toUpperCase();
@@ -1143,7 +1191,9 @@ function renderVertretungsHinweis() {
         };
         state.kollegen.push(k);
         state.selectedKollegeId = k.id;
-        alert(`✅ ${name} wurde angelegt!`);
+                alert(`✅ ${name} wurde angelegt!`);
+        refreshAdminPersonSelect();
+
       } else {
         // Bestehende Person bearbeiten
         const k = getSelectedKollege();
@@ -1160,13 +1210,22 @@ function renderVertretungsHinweis() {
             }
           });
         }
-        alert(`✅ ${name} wurde aktualisiert!`);
+                alert(`✅ ${name} wurde aktualisiert!`);
+        refreshAdminPersonSelect();
+
       }
       
-      adminClearPerson();
-      refreshAll();
+         function adminClearPerson() {
+      state.selectedKollegeId = null;
+      const kuerzelEl = el('adminKuerzel');
+      const nameEl = el('adminName');
+      const selectEl = el('adminPersonSelect');
+      
+      if (kuerzelEl) kuerzelEl.value = '';
+      if (nameEl) nameEl.value = '';
+      if (selectEl) selectEl.value = '';
     }
-    
+
         function adminClearPerson() {
       state.selectedKollegeId = null;
       const kuerzelEl = el('adminKuerzel');
@@ -1287,6 +1346,8 @@ function renderVertretungsHinweis() {
       const adminClearBtn = el('adminClearPersonBtn');
       const adminDeleteBtn = el('adminDeletePersonBtn');
       if (adminSaveBtn) adminSaveBtn.addEventListener('click', adminSavePerson);
+      const adminPersonSelect = el('adminPersonSelect');
+      if (adminPersonSelect) adminPersonSelect.addEventListener('change', adminSelectPerson);
       if (adminClearBtn) adminClearBtn.addEventListener('click', adminClearPerson);
       if (adminDeleteBtn) adminDeleteBtn.addEventListener('click', adminDeletePerson);
       
@@ -1306,6 +1367,7 @@ function renderVertretungsHinweis() {
       d.setMonth(d.getMonth() + delta);
       el('monatInput').value = d.toISOString().slice(0,7);
       refreshAll();
+            refreshAdminPersonSelect();
     }
 
            function init() {
