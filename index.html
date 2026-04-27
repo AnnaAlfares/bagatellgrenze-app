@@ -94,25 +94,49 @@
       </aside>
 
       <main class="main">
-        <section class="panel" id="sharedPanel">
-          <div class="section-head">
-            <div>
-              <h2>Arbeitsmonat</h2>
-              <p>Monat auswählen, um Summen, Rest bis zur Bagatellgrenze und Einträge zu filtern.</p>
-            </div>
-          </div>
-          <div class="grid three">
-            <label>Monat
-              <div class="small-actions"><button type="button" id="prevMonthBtn">←</button><input id="monatInput" type="month" /><button type="button" id="nextMonthBtn">→</button></div>
-            </label>
-            <label>Mitarbeitende auswählen
-              <select id="activePersonSelect"></select>
-            </label>
-            <label>Hinweis
-              <input id="statusField" type="text" disabled />
-            </label>
-          </div>
-        </section>
+        <section class="panel">
+  <div class="section-head">
+    <div>
+      <h2>Eigene Stammdaten</h2>
+      <p>Ergänze deine Teilzeitstunden – Name und Kürzel wurden von der Verwaltung angelegt.</p>
+    </div>
+  </div>
+
+  <label>Kürzel
+    <input id="kollegeKuerzel" type="text" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+  </label>         
+  
+  <label>Name
+    <input id="kollegeName" type="text" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+  </label>
+
+  <label>Vollzeitstunden
+    <input id="vollzeit" type="number" value="28" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+  </label>
+
+  <label>Teilzeitstunden
+    <input id="teilzeit" type="number" step="0.5" min="0" max="28" onchange="updateStammdaten()">
+  </label>
+
+  <label>Quote
+    <input id="quote" type="number" step="0.01" min="0" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+  </label>
+
+  <label>Bagatellgrenze (Monat)
+    <input id="grenze" type="number" step="0.1" min="0" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+  </label>
+
+  <div class="small-actions" style="margin-top:1rem">
+    <button class="button primary" id="saveKollegeBtn">Teilzeitstunden speichern</button>
+    <button class="ghost" id="clearKollegeBtn">Leeren</button>
+  </div>
+
+  <div class="footer-note">
+    Tipp: Nur Teilzeitstunden sind editierbar. Name und Kürzel werden von der Verwaltung gepflegt.
+  </div>
+</section>
+
+              
 
         <section id="employeeView" class="grid">
           <div class="stats">
@@ -212,6 +236,36 @@
             🔒 Verantwortlichenansicht: Backups aus Kollegien zusammenführen, Konflikte prüfen und Monatsdaten für die Abrechnung exportieren.
             <button class="danger" id="lockAdminBtn" style="margin-top:var(--space-3)">🔒 Ansicht sperren</button>
           </div>
+                    <!-- Personen verwalten -->
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Personen verwalten</h2>
+                <p>Hier können neue Kolleg:innen angelegt werden. Teilzeitstunden werden von den Mitarbeitenden selbst ergänzt.</p>
+              </div>
+            </div>
+            
+            <div class="grid two">
+              <label>Kürzel
+                <input id="adminKuerzel" type="text" placeholder="z. B. MU" maxlength="3" style="text-transform: uppercase;">
+              </label>
+              
+              <label>Name
+                <input id="adminName" type="text" placeholder="z. B. Frau Muster">
+              </label>
+            </div>
+            
+            <div class="small-actions" style="margin-top:1rem">
+              <button class="button primary" id="adminSavePersonBtn">Person anlegen</button>
+              <button class="ghost" id="adminClearPersonBtn">Leeren</button>
+              <button class="danger" id="adminDeletePersonBtn">Person löschen</button>
+            </div>
+            
+            <div class="footer-note">
+              Tipp: Lege alle Kolleg:innen mit Name und Kürzel an. Die Teilzeitstunden werden von den Mitarbeitenden selbst ergänzt.
+            </div>
+          </section>
+
           <div class="import-report panel" id="importReport"><div class="status-card"><div class="k">Neu</div><div class="v" id="reportNew">0</div></div><div class="status-card"><div class="k">Aktualisiert</div><div class="v" id="reportUpdated">0</div></div><div class="status-card"><div class="k">Konflikte</div><div class="v" id="reportConflicts">0</div></div></div>
 
           <section class="panel">
@@ -289,7 +343,27 @@
       <p id="pinSetupError" style="color: var(--color-error); margin-top: 10px; display: none; font-weight: 700;"></p>
     </div>
   </div>
-  
+    <!-- Wer bist du Dialog -->
+  <div id="whoAreYouDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center;">
+    <div style="background: var(--color-surface); padding: 30px; border-radius: var(--radius-xl); max-width: 500px; width: 90%; border: 1px solid var(--color-border);">
+      <h3 style="margin-top:0">👤 Wer bist du?</h3>
+      <p>Bitte wähle deinen Namen aus der Liste. Deine Stammdaten wurden bereits von der Verwaltung angelegt.</p>
+      
+      <label style="margin: 20px 0; display: block;">
+        <strong>Person auswählen:</strong>
+        <select id="whoAreYouSelect" style="width: 100%; padding: 12px; font-size: 16px; margin-top: 10px; border: 2px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface-2); color: var(--color-text);">
+          <option value="">Bitte auswählen...</option>
+        </select>
+      </label>
+      
+      <button id="whoAreYouSubmit" class="button primary" style="width: 100%; margin-top: 20px;">
+        Auswählen
+      </button>
+      
+      <p id="whoAreYouError" style="color: var(--color-error); margin-top: 10px; display: none; font-weight: 700;">⚠️ Bitte wähle eine Person aus!</p>
+    </div>
+  </div>
+
   <script>
     // ========== PIN-VERWALTUNG ==========
     const PINManager = {
@@ -334,6 +408,49 @@
         return sessionStorage.getItem('adminUnlocked') === 'true';
       }
     };
+    // ========== WER BIST DU DIALOG ==========
+    const WhoAreYouDialog = {
+      show() {
+        const dialog = document.getElementById('whoAreYouDialog');
+        const select = document.getElementById('whoAreYouSelect');
+        
+        // Liste mit allen Personen füllen
+        select.innerHTML = '<option value="">Bitte auswählen...</option>';
+        state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
+          const opt = document.createElement('option');
+          opt.value = k.id;
+          opt.textContent = `${k.name} (${k.kuerzel})`;
+          select.appendChild(opt);
+        });
+        
+        dialog.style.display = 'flex';
+        document.getElementById('whoAreYouError').style.display = 'none';
+      },
+      
+      hide() {
+        document.getElementById('whoAreYouDialog').style.display = 'none';
+      },
+      
+      init() {
+        document.getElementById('whoAreYouSubmit').addEventListener('click', () => {
+          const selectedId = document.getElementById('whoAreYouSelect').value;
+          
+          if (!selectedId) {
+            document.getElementById('whoAreYouError').style.display = 'block';
+            return;
+          }
+          
+          // Auswahl speichern
+          localStorage.setItem('myPersonId', selectedId);
+          state.selectedKollegeId = selectedId;
+          
+          this.hide();
+          refreshAll();
+          alert('✅ Erfolgreich ausgewählt! Du kannst jetzt deine Teilzeitstunden ergänzen.');
+        });
+      }
+    };
+
 
     const PINDialog = {
       show() {
@@ -532,22 +649,42 @@ function getBagatellgrenze() {
       return { sum, rest, payable, hint };
     }
 
-    function fillKollegeForm(k) {
+        function fillKollegeForm(k) {
       el('kollegeKuerzel').value = k?.kuerzel || '';
       el('kollegeName').value = k?.name || '';
       el('vollzeit').value = k?.vollzeit || 28;
       el('teilzeit').value = k?.teilzeit ?? '';
-  const tz = Number(k?.teilzeit || 0);
-  const vz = Number(k?.vollzeit || 28);
-  if (tz > 0 && vz > 0) {
-    const q = tz / vz;
-    el('quote').value = q.toFixed(2);
-    el('grenze').value = (BAGATELL_VOLLZEIT * q).toFixed(2);
-  } else {
-    el('quote').value = k?.quote ?? '';
-    el('grenze').value = k?.grenze ?? '';
-  }
+      
+      const tz = Number(k?.teilzeit || 0);
+      const vz = Number(k?.vollzeit || 28);
+      if (tz > 0 && vz > 0) {
+        const q = tz / vz;
+        el('quote').value = q.toFixed(2);
+        el('grenze').value = (BAGATELL_VOLLZEIT * q).toFixed(2);
+      } else {
+        el('quote').value = k?.quote ?? '';
+        el('grenze').value = k?.grenze ?? '';
+      }
+      
+      // In Mitarbeiteransicht: Felder sperren
+      if (state.roleView === 'employee') {
+        el('kollegeKuerzel').readOnly = true;
+        el('kollegeName').readOnly = true;
+        el('vollzeit').readOnly = true;
+        el('teilzeit').readOnly = false; // NUR Teilzeit editierbar
+        el('quote').readOnly = true;
+        el('grenze').readOnly = true;
+      } else {
+        // In Admin-Ansicht: Alle Felder editierbar
+        el('kollegeKuerzel').readOnly = false;
+        el('kollegeName').readOnly = false;
+        el('vollzeit').readOnly = true; // Vollzeit immer 28
+        el('teilzeit').readOnly = false;
+        el('quote').readOnly = true;
+        el('grenze').readOnly = true;
+      }
     }
+
     function fillEintragForm(e) {
       el('eintragDatum').value = e?.datum || '';
       el('eintragStunden').value = e?.stunden ?? '';
@@ -556,39 +693,68 @@ function getBagatellgrenze() {
     function clearKollegeForm() { state.selectedKollegeId = null; fillKollegeForm(null); }
     function clearEintragForm() { state.selectedEintragId = null; fillEintragForm(null); }
 
-    function refreshPersonSelect() {
-      const meineKollege = state.kollegen.find(k => k.kuerzel && el('kollegeKuerzel').value && k.kuerzel === el('kollegeKuerzel').value);
-      if (meineKollege) {
-  state.selectedKollegeId = meineKollege.id;
-  el('activePersonSelect').innerHTML = `<option value="${meineKollege.id}">${meineKollege.name}</option>`;
-  el('activePersonSelect').disabled = true;
-  return;
-}
-el('activePersonSelect').disabled = false;
+        function refreshPersonSelect() {
+      // In Mitarbeiteransicht: Nur eigene Person
+      if (state.roleView === 'employee') {
+        const myPersonId = localStorage.getItem('myPersonId');
+        
+        if (myPersonId) {
+          const myPerson = state.kollegen.find(k => k.id === myPersonId);
+          if (myPerson) {
+            state.selectedKollegeId = myPersonId;
+            el('activePersonSelect').innerHTML = `<option value="${myPerson.id}">${myPerson.name}</option>`;
+            el('activePersonSelect').disabled = true;
+            return;
+          }
+        }
+        
+        // Keine Person ausgewählt → Dialog zeigen
+        if (state.kollegen.length > 0) {
+          WhoAreYouDialog.show();
+        }
+        
+        el('activePersonSelect').innerHTML = '<option value="">Bitte Person auswählen</option>';
+        el('activePersonSelect').disabled = true;
+        return;
+      }
+      
+      // In Admin-Ansicht: Alle Personen
+      el('activePersonSelect').disabled = false;
       const select = el('activePersonSelect');
       select.innerHTML = '';
       const placeholder = document.createElement('option');
-      placeholder.value = ''; placeholder.textContent = state.kollegen.length ? 'Person auswählen' : 'Noch keine Person angelegt';
+      placeholder.value = '';
+      placeholder.textContent = state.kollegen.length ? 'Person auswählen' : 'Noch keine Person angelegt';
       select.appendChild(placeholder);
+      
       state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
-        const opt = document.createElement('option'); opt.value = k.id; opt.textContent = k.name; if (k.id === state.selectedKollegeId) opt.selected = true; select.appendChild(opt);
+        const opt = document.createElement('option');
+        opt.value = k.id;
+        opt.textContent = k.name;
+        if (k.id === state.selectedKollegeId) opt.selected = true;
+        select.appendChild(opt);
       });
-      if (!state.selectedKollegeId && state.kollegen[0]) { state.selectedKollegeId = state.kollegen[0].id; }
+      
+      if (!state.selectedKollegeId && state.kollegen[0]) {
+        state.selectedKollegeId = state.kollegen[0].id;
+      }
       select.value = state.selectedKollegeId || '';
-        // Auch Admin-Filter aktualisieren
-  const adminFilter = el('adminPersonFilter');
-  if (adminFilter) {
-    const current = adminFilter.value;
-    adminFilter.innerHTML = '<option value="">Alle Personen</option>';
-    state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
-      const opt = document.createElement('option');
-      opt.value = k.name;
-      opt.textContent = k.name;
-      if (k.name === current) opt.selected = true;
-      adminFilter.appendChild(opt);
-    });
-  }
+      
+      // Admin-Filter aktualisieren
+      const adminFilter = el('adminPersonFilter');
+      if (adminFilter) {
+        const current = adminFilter.value;
+        adminFilter.innerHTML = '<option value="">Alle Personen</option>';
+        state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
+          const opt = document.createElement('option');
+          opt.value = k.name;
+          opt.textContent = k.name;
+          if (k.name === current) opt.selected = true;
+          adminFilter.appendChild(opt);
+        });
+      }
     }
+
 
     function renderEmployeeStats() {
       const k = getSelectedKollege();
@@ -743,14 +909,30 @@ function renderVertretungsHinweis() {
       saveState();
     }
 
-    function saveKollege() {
+        function saveKollege() {
       const name = el('kollegeName').value.trim();
       const kuerzel = el('kollegeKuerzel').value.trim().toUpperCase();
       const vollzeit = Number(el('vollzeit').value || 0);
       const teilzeit = Number(el('teilzeit').value || 0);
       const quote = vollzeit > 0 ? teilzeit / vollzeit : 0;
       const grenze = BAGATELL_VOLLZEIT * quote;
+      
       if (!name) return alert('Bitte Namen eingeben.');
+      
+      // In Mitarbeiteransicht: Nur Teilzeitstunden speichern
+      if (state.roleView === 'employee') {
+        const k = getSelectedKollege();
+        if (!k) return alert('Bitte zuerst Person auswählen.');
+        
+        if (teilzeit <= 0) return alert('Bitte Teilzeitstunden größer 0 eingeben.');
+        
+        Object.assign(k, { teilzeit, quote, grenze, updatedAt: nowIso() });
+        refreshAll();
+        alert('✅ Teilzeitstunden gespeichert!');
+        return;
+      }
+      
+      // In Admin-Ansicht: Vollständige Person anlegen/bearbeiten
       if (!state.selectedKollegeId) {
         const ts = nowIso();
         const k = { id: uid(), kuerzel, name, vollzeit, teilzeit, quote, grenze, createdAt: ts, updatedAt: ts };
@@ -765,6 +947,7 @@ function renderVertretungsHinweis() {
       }
       refreshAll();
     }
+
 
     function deleteKollege() {
       const k = getSelectedKollege();
@@ -920,6 +1103,78 @@ function renderVertretungsHinweis() {
       state.eintraege.slice().sort((a,b)=>(a.datum||'').localeCompare(b.datum||'')).forEach(e => rows.push([e.datum,e.monat,e.name,e.stunden,e.bemerkung,e.updatedAt]));
       downloadText(`eintraege-${getMonth()}.csv`, toCsv(rows), 'text/csv;charset=utf-8');
     }
+    // ========== ADMIN: PERSONEN VERWALTEN ==========
+    function adminSavePerson() {
+      const kuerzel = el('adminKuerzel').value.trim().toUpperCase();
+      const name = el('adminName').value.trim();
+      
+      if (!kuerzel) return alert('Bitte Kürzel eingeben.');
+      if (!name) return alert('Bitte Namen eingeben.');
+      
+      // Prüfen ob Kürzel bereits existiert
+      const existing = state.kollegen.find(k => k.kuerzel === kuerzel && k.id !== state.selectedKollegeId);
+      if (existing) return alert(`Kürzel "${kuerzel}" wird bereits von ${existing.name} verwendet.`);
+      
+      if (!state.selectedKollegeId) {
+        // Neue Person anlegen
+        const ts = nowIso();
+        const k = { 
+          id: uid(), 
+          kuerzel, 
+          name, 
+          vollzeit: 28, 
+          teilzeit: 0, // Wird von Mitarbeitenden ergänzt
+          quote: 0, 
+          grenze: 0, 
+          createdAt: ts, 
+          updatedAt: ts 
+        };
+        state.kollegen.push(k);
+        state.selectedKollegeId = k.id;
+        alert(`✅ ${name} wurde angelegt!`);
+      } else {
+        // Bestehende Person bearbeiten
+        const k = getSelectedKollege();
+        if (!k) return;
+        const oldName = k.name;
+        Object.assign(k, { kuerzel, name, updatedAt: nowIso() });
+        
+        // Einträge umbenennen
+        if (oldName !== name) {
+          state.eintraege.forEach(e => {
+            if (e.name === oldName) {
+              e.name = name;
+              e.updatedAt = nowIso();
+            }
+          });
+        }
+        alert(`✅ ${name} wurde aktualisiert!`);
+      }
+      
+      adminClearPerson();
+      refreshAll();
+    }
+    
+    function adminClearPerson() {
+      state.selectedKollegeId = null;
+      el('adminKuerzel').value = '';
+      el('adminName').value = '';
+    }
+    
+    function adminDeletePerson() {
+      const k = getSelectedKollege();
+      if (!k) return alert('Bitte zuerst eine Person auswählen.');
+      
+      if (!confirm(`${k.name} und alle zugehörigen Einträge wirklich löschen?`)) return;
+      
+      state.kollegen = state.kollegen.filter(x => x.id !== k.id);
+      state.eintraege = state.eintraege.filter(e => e.name !== k.name);
+      
+      adminClearPerson();
+      refreshAll();
+      alert(`✅ ${k.name} wurde gelöscht.`);
+    }
+
 
     function bindEvents() {
       document.querySelectorAll('[data-role-view]').forEach(btn => btn.addEventListener('click', () => switchRole(btn.dataset.roleView)));
@@ -931,6 +1186,15 @@ function renderVertretungsHinweis() {
       el('saveKollegeBtn').addEventListener('click', saveKollege);
       el('clearKollegeBtn').addEventListener('click', () => { clearKollegeForm(); refreshPersonSelect(); renderEmployeeStats(); });
       el('deleteKollegeBtn').addEventListener('click', deleteKollege);
+            // Admin: Personen verwalten
+      const adminSaveBtn = el('adminSavePersonBtn');
+      const adminClearBtn = el('adminClearPersonBtn');
+      const adminDeleteBtn = el('adminDeletePersonBtn');
+      
+      if (adminSaveBtn) adminSaveBtn.addEventListener('click', adminSavePerson);
+      if (adminClearBtn) adminClearBtn.addEventListener('click', adminClearPerson);
+      if (adminDeleteBtn) adminDeleteBtn.addEventListener('click', adminDeletePerson);
+
       el('saveEintragBtn').addEventListener('click', saveEintrag);
       el('clearEintragBtn').addEventListener('click', () => { clearEintragForm(); renderEmployeeEntries(); });
       el('deleteEintragBtn').addEventListener('click', deleteEintrag);
@@ -961,17 +1225,19 @@ function renderVertretungsHinweis() {
       refreshAll();
     }
 
-    function init() {
+        function init() {
       const prefDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       document.documentElement.setAttribute('data-theme', prefDark ? 'dark' : 'light');
       el('themeToggle').textContent = prefDark ? '☀️' : '🌙';
       el('monatInput').value = new Date().toISOString().slice(0,7);
       loadState();
-      PINDialog.init(); // PIN-Dialog initialisieren
+      PINDialog.init();
+      WhoAreYouDialog.init(); // "Wer bist du?"-Dialog initialisieren
       bindEvents();
       refreshAll();
       switchRole('employee');
     }
+
     init();
   </script>
 
