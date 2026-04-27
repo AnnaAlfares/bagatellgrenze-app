@@ -289,164 +289,8 @@
       <p id="pinSetupError" style="color: var(--color-error); margin-top: 10px; display: none; font-weight: 700;"></p>
     </div>
   </div>
-
+  
   <script>
-    // ========== PIN-VERWALTUNG ==========
-    const PINManager = {
-      hashPIN(pin) {
-        let hash = 0;
-        for (let i = 0; i < pin.length; i++) {
-          const char = pin.charCodeAt(i);
-          hash = ((hash << 5) - hash) + char;
-          hash = hash & hash;
-        }
-        return hash.toString();
-      },
-      
-      setPIN(pin) {
-        if (!pin || pin.length < 4) {
-          alert('PIN muss mindestens 4 Zeichen lang sein');
-          return false;
-        }
-        localStorage.setItem('adminPIN', this.hashPIN(pin));
-        return true;
-      },
-      
-      checkPIN(pin) {
-        const storedHash = localStorage.getItem('adminPIN');
-        if (!storedHash) return false;
-        return this.hashPIN(pin) === storedHash;
-      },
-      
-      hasPIN() {
-        return localStorage.getItem('adminPIN') !== null;
-      },
-      
-      unlockSession() {
-        sessionStorage.setItem('adminUnlocked', 'true');
-      },
-      
-      lockSession() {
-        sessionStorage.removeItem('adminUnlocked');
-      },
-      
-      isUnlocked() {
-        return sessionStorage.getItem('adminUnlocked') === 'true';
-      },
-      
-      changePIN(oldPIN, newPIN) {
-        if (!this.checkPIN(oldPIN)) {
-          alert('Alte PIN ist falsch');
-          return false;
-        }
-        return this.setPIN(newPIN);
-      }
-    };
-
-    // ========== PIN-DIALOG STEUERUNG ==========
-    const PINDialog = {
-      show() {
-        const dialog = document.getElementById('pinDialog');
-        dialog.style.display = 'flex';
-        document.getElementById('pinInput').value = '';
-        document.getElementById('pinError').style.display = 'none';
-        document.getElementById('pinInput').focus();
-      },
-      
-      hide() {
-        document.getElementById('pinDialog').style.display = 'none';
-      },
-      
-      showSetup() {
-        const dialog = document.getElementById('pinSetupDialog');
-        dialog.style.display = 'flex';
-        document.getElementById('pinSetupInput').value = '';
-        document.getElementById('pinSetupConfirm').value = '';
-        document.getElementById('pinSetupError').style.display = 'none';
-        document.getElementById('pinSetupInput').focus();
-      },
-      
-      hideSetup() {
-        document.getElementById('pinSetupDialog').style.display = 'none';
-      },
-      
-      init() {
-        // PIN-Eingabe Submit
-        document.getElementById('pinSubmit').addEventListener('click', () => {
-          const pin = document.getElementById('pinInput').value;
-          if (PINManager.checkPIN(pin)) {
-            PINManager.unlockSession();
-            this.hide();
-            switchRole('admin', true); // true = bereits entsperrt
-          } else {
-            document.getElementById('pinError').style.display = 'block';
-            document.getElementById('pinInput').value = '';
-            document.getElementById('pinInput').focus();
-          }
-        });
-        
-        // PIN-Eingabe Abbrechen
-        document.getElementById('pinCancel').addEventListener('click', () => {
-          this.hide();
-        });
-        
-        // Enter-Taste im PIN-Feld
-        document.getElementById('pinInput').addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') {
-            document.getElementById('pinSubmit').click();
-          }
-        });
-        
-        // PIN-Setup Submit
-        document.getElementById('pinSetupSubmit').addEventListener('click', () => {
-          const pin = document.getElementById('pinSetupInput').value;
-          const confirm = document.getElementById('pinSetupConfirm').value;
-          const errorEl = document.getElementById('pinSetupError');
-          
-          if (pin.length < 4) {
-            errorEl.textContent = 'PIN muss mindestens 4 Zeichen lang sein';
-            errorEl.style.display = 'block';
-            return;
-          }
-          
-          if (pin !== confirm) {
-            errorEl.textContent = 'PINs stimmen nicht überein';
-            errorEl.style.display = 'block';
-            return;
-          }
-          
-          if (PINManager.setPIN(pin)) {
-            PINManager.unlockSession();
-            this.hideSetup();
-            alert('✅ PIN erfolgreich festgelegt!');
-            switchRole('admin', true);
-          }
-        });
-
-        // Enter-Taste in Setup-Feldern
-        document.getElementById('pinSetupInput').addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') {
-            document.getElementById('pinSetupConfirm').focus();
-          }
-        });
-        document.getElementById('pinSetupConfirm').addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') {
-            document.getElementById('pinSetupSubmit').click();
-          }
-        });
-
-        // Sperr-Button
-        const lockBtn = document.getElementById('lockAdminBtn');
-        if (lockBtn) {
-          lockBtn.addEventListener('click', () => {
-            PINManager.lockSession();
-            switchRole('employee');
-            alert('🔒 Verantwortlichenansicht wurde gesperrt');
-          });
-        }
-      }
-    };
-    <script>
     // ========== PIN-VERWALTUNG ==========
     const PINManager = {
       hashPIN(pin) {
@@ -1007,6 +851,15 @@ function renderVertretungsHinweis() {
       reader.onload = () => {
         try {
           const data = JSON.parse(reader.result);
+          
+                // PIN aus Backup übernehmen (falls vorhanden)
+      if (data.adminPIN) {
+        const overwritePIN = confirm('Das Backup enthält eine PIN. Soll die lokale PIN überschrieben werden?\n\nJa = PIN aus Backup übernehmen\nNein = lokale PIN behalten');
+        if (overwritePIN) {
+          localStorage.setItem('adminPIN', data.adminPIN);
+          alert('✅ PIN aus Backup wurde übernommen');
+        }
+      }
           if (!Array.isArray(data.kollegen) || !Array.isArray(data.eintraege)) throw new Error('Ungültige Backup-Datei.');
           const importedKollegen = data.kollegen.map(enrichKollege);
           const importedEintraege = data.eintraege.map(enrichEintrag);
@@ -1121,31 +974,6 @@ function renderVertretungsHinweis() {
     }
     init();
   </script>
-  <!-- PIN-Dialoge -->
-<div id="pinDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center;">
-  <div style="background: var(--color-surface); padding: 30px; border-radius: var(--radius-xl); max-width: 400px; width: 90%; border: 1px solid var(--color-border);">
-    <h3 style="margin-top:0">🔒 Verantwortlichenansicht entsperren</h3>
-    <p>Bitte PIN eingeben:</p>
-    <input type="password" id="pinInput" placeholder="PIN eingeben" style="width: 100%; padding: 12px; font-size: 16px; margin: 15px 0; border: 2px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface-2); color: var(--color-text);">
-    <div style="display: flex; gap: 10px; margin-top: 20px;">
-      <button id="pinSubmit" class="button primary" style="flex: 1;">Entsperren</button>
-      <button id="pinCancel" class="danger" style="flex: 1;">Abbrechen</button>
-    </div>
-    <p id="pinError" style="color: var(--color-error); margin-top: 10px; display: none; font-weight: 700;">❌ Falsche PIN!</p>
-  </div>
-</div>
-
-<div id="pinSetupDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center;">
-  <div style="background: var(--color-surface); padding: 30px; border-radius: var(--radius-xl); max-width: 400px; width: 90%; border: 1px solid var(--color-border);">
-    <h3 style="margin-top:0">🔐 PIN festlegen</h3>
-    <p>Legen Sie eine PIN fest, um die Verantwortlichenansicht zu schützen.</p>
-    <input type="password" id="pinSetupInput" placeholder="Neue PIN (mind. 4 Zeichen)" style="width: 100%; padding: 12px; font-size: 16px; margin: 15px 0; border: 2px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface-2); color: var(--color-text);">
-    <input type="password" id="pinSetupConfirm" placeholder="PIN wiederholen" style="width: 100%; padding: 12px; font-size: 16px; margin-bottom: 15px; border: 2px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface-2); color: var(--color-text);">
-    <button id="pinSetupSubmit" class="button primary" style="width: 100%;">PIN festlegen</button>
-    <p id="pinSetupError" style="color: var(--color-error); margin-top: 10px; display: none; font-weight: 700;"></p>
-  </div>
-</div>
-
 
 </body>
 </html>
