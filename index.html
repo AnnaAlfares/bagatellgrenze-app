@@ -1048,27 +1048,31 @@ function renderVertretungsHinweis() {
       return { items: [...map.values()], added, updated };
     }
 
-    function importBackup(file) {
+        function importBackup(file) {
       const reader = new FileReader();
       reader.onload = () => {
         try {
           const data = JSON.parse(reader.result);
           
-                // PIN aus Backup übernehmen (falls vorhanden)
-      if (data.adminPIN) {
-        const overwritePIN = confirm('Das Backup enthält eine PIN. Soll die lokale PIN überschrieben werden?\n\nJa = PIN aus Backup übernehmen\nNein = lokale PIN behalten');
-        if (overwritePIN) {
-          localStorage.setItem('adminPIN', data.adminPIN);
-          alert('✅ PIN aus Backup wurde übernommen');
-        }
-      }
+          // PIN aus Backup übernehmen (falls vorhanden)
+          if (data.adminPIN) {
+            const overwritePIN = confirm('Das Backup enthält eine PIN. Soll die lokale PIN überschrieben werden?\n\nJa = PIN aus Backup übernehmen\nNein = lokale PIN behalten');
+            if (overwritePIN) {
+              localStorage.setItem('adminPIN', data.adminPIN);
+              alert('✅ PIN aus Backup wurde übernommen');
+            }
+          }
+          
           if (!Array.isArray(data.kollegen) || !Array.isArray(data.eintraege)) throw new Error('Ungültige Backup-Datei.');
+          
           const importedKollegen = data.kollegen.map(enrichKollege);
           const importedEintraege = data.eintraege.map(enrichEintrag);
           const mode = prompt('Import-Modus: merge, neu oder ersetzen', 'merge');
           if (!mode) return;
+          
           const choice = mode.trim().toLowerCase();
           state.importReport = { neu: 0, aktualisiert: 0, konflikte: 0 };
+          
           if (choice === 'ersetzen') {
             if (!confirm('Lokale Daten wirklich vollständig ersetzen?')) return;
             state.kollegen = importedKollegen;
@@ -1091,8 +1095,11 @@ function renderVertretungsHinweis() {
             state.importReport = { neu: mk.added + me.added, aktualisiert: mk.updated + me.updated, konflikte: state.conflicts.length };
             alert(`Zusammengeführt: Kolleg:innen +${mk.added}, aktualisiert ${mk.updated}; Einträge +${me.added}, aktualisiert ${me.updated}`);
           }
+          
           refreshAll();
-        } catch (err) { alert(err.message); }
+        } catch (err) { 
+          alert(err.message); 
+        }
       };
       reader.readAsText(file, 'utf-8');
     }
