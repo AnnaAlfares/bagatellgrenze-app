@@ -446,6 +446,121 @@
         }
       }
     };
+    <script>
+    // ========== PIN-VERWALTUNG ==========
+    const PINManager = {
+      hashPIN(pin) {
+        let hash = 0;
+        for (let i = 0; i < pin.length; i++) {
+          const char = pin.charCodeAt(i);
+          hash = ((hash << 5) - hash) + char;
+          hash = hash & hash;
+        }
+        return hash.toString();
+      },
+      
+      setPIN(pin) {
+        if (!pin || pin.length < 4) {
+          alert('PIN muss mindestens 4 Zeichen lang sein');
+          return false;
+        }
+        localStorage.setItem('adminPIN', this.hashPIN(pin));
+        return true;
+      },
+      
+      checkPIN(pin) {
+        const storedHash = localStorage.getItem('adminPIN');
+        if (!storedHash) return false;
+        return this.hashPIN(pin) === storedHash;
+      },
+      
+      hasPIN() {
+        return localStorage.getItem('adminPIN') !== null;
+      },
+      
+      unlockSession() {
+        sessionStorage.setItem('adminUnlocked', 'true');
+      },
+      
+      lockSession() {
+        sessionStorage.removeItem('adminUnlocked');
+      },
+      
+      isUnlocked() {
+        return sessionStorage.getItem('adminUnlocked') === 'true';
+      }
+    };
+
+    const PINDialog = {
+      show() {
+        document.getElementById('pinDialog').style.display = 'flex';
+        document.getElementById('pinInput').value = '';
+        document.getElementById('pinError').style.display = 'none';
+        document.getElementById('pinInput').focus();
+      },
+      
+      hide() {
+        document.getElementById('pinDialog').style.display = 'none';
+      },
+      
+      showSetup() {
+        document.getElementById('pinSetupDialog').style.display = 'flex';
+        document.getElementById('pinSetupInput').value = '';
+        document.getElementById('pinSetupConfirm').value = '';
+        document.getElementById('pinSetupError').style.display = 'none';
+        document.getElementById('pinSetupInput').focus();
+      },
+      
+      hideSetup() {
+        document.getElementById('pinSetupDialog').style.display = 'none';
+      },
+      
+      init() {
+        document.getElementById('pinSubmit').addEventListener('click', () => {
+          const pin = document.getElementById('pinInput').value;
+          if (PINManager.checkPIN(pin)) {
+            PINManager.unlockSession();
+            this.hide();
+            switchRole('admin', true);
+          } else {
+            document.getElementById('pinError').style.display = 'block';
+            document.getElementById('pinInput').value = '';
+            document.getElementById('pinInput').focus();
+          }
+        });
+        
+        document.getElementById('pinCancel').addEventListener('click', () => this.hide());
+        
+        document.getElementById('pinInput').addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') document.getElementById('pinSubmit').click();
+        });
+        
+        document.getElementById('pinSetupSubmit').addEventListener('click', () => {
+          const pin = document.getElementById('pinSetupInput').value;
+          const confirm = document.getElementById('pinSetupConfirm').value;
+          const errorEl = document.getElementById('pinSetupError');
+          
+          if (pin.length < 4) {
+            errorEl.textContent = 'PIN muss mindestens 4 Zeichen lang sein';
+            errorEl.style.display = 'block';
+            return;
+          }
+          
+          if (pin !== confirm) {
+            errorEl.textContent = 'PINs stimmen nicht überein';
+            errorEl.style.display = 'block';
+            return;
+          }
+          
+          if (PINManager.setPIN(pin)) {
+            PINManager.unlockSession();
+            this.hideSetup();
+            alert('✅ PIN erfolgreich festgelegt!');
+            switchRole('admin', true);
+          }
+        });
+      }
+    };
 
     // ========== BESTEHENDER CODE ==========
     const state = { kollegen: [], eintraege: [], roleView: 'employee', selectedKollegeId: null, selectedEintragId: null, conflicts: [], importReport: { neu: 0, aktualisiert: 0, konflikte: 0 } };
