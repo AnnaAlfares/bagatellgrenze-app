@@ -1155,11 +1155,14 @@ function renderVertretungsHinweis() {
       refreshAll();
     }
     
-    function adminClearPerson() {
+        function adminClearPerson() {
       state.selectedKollegeId = null;
-      el('adminKuerzel').value = '';
-      el('adminName').value = '';
+      const kuerzelEl = el('adminKuerzel');
+      const nameEl = el('adminName');
+      if (kuerzelEl) kuerzelEl.value = '';
+      if (nameEl) nameEl.value = '';
     }
+
     
     function adminDeletePerson() {
       const k = getSelectedKollege();
@@ -1186,7 +1189,7 @@ function renderVertretungsHinweis() {
       el('saveKollegeBtn').addEventListener('click', saveKollege);
       el('clearKollegeBtn').addEventListener('click', () => { clearKollegeForm(); refreshPersonSelect(); renderEmployeeStats(); });
       el('deleteKollegeBtn').addEventListener('click', deleteKollege);
-            // Admin: Personen verwalten
+                  // Admin: Personen verwalten
       const adminSaveBtn = el('adminSavePersonBtn');
       const adminClearBtn = el('adminClearPersonBtn');
       const adminDeleteBtn = el('adminDeletePersonBtn');
@@ -1194,6 +1197,7 @@ function renderVertretungsHinweis() {
       if (adminSaveBtn) adminSaveBtn.addEventListener('click', adminSavePerson);
       if (adminClearBtn) adminClearBtn.addEventListener('click', adminClearPerson);
       if (adminDeleteBtn) adminDeleteBtn.addEventListener('click', adminDeletePerson);
+
 
       el('saveEintragBtn').addEventListener('click', saveEintrag);
       el('clearEintragBtn').addEventListener('click', () => { clearEintragForm(); renderEmployeeEntries(); });
