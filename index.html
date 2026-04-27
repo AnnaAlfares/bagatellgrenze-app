@@ -636,8 +636,10 @@ function getBagatellgrenze() {
       return state.kollegen.find(k => k.id === state.selectedKollegeId) || null;
     }
     function getMonth() {
-      return el('monatInput').value || new Date().toISOString().slice(0, 7);
-    }
+  const monatInput = el('monatInput');
+  return monatInput ? monatInput.value : new Date().toISOString().slice(0,7); // ✅ Fallback
+}
+
     function entriesFor(name, month) {
       return state.eintraege.filter(e => e.name === name && e.monat === month).sort(byDate);
     }
