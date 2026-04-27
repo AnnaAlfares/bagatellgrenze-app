@@ -759,25 +759,32 @@ function getBagatellgrenze() {
     }
 
 
-    function renderEmployeeStats() {
+        function renderEmployeeStats() {
       const k = getSelectedKollege();
-      if (!k) {
-        el('empMonthHours').textContent = el('empLimit').textContent = el('empRemaining').textContent = el('empPayable').textContent = '0,0';
-        el('statusField').value = 'Bitte Person anlegen oder auswählen';
-        return;
-      }
-      const st = monthStats(k, getMonth());
-      el('empMonthHours').textContent = fmt(st.sum);
-      el('empLimit').textContent = fmt(k.grenze);
-      el('empRemaining').textContent = fmt(st.rest);
-      el('empPayable').textContent = fmt(st.payable);
-      el('statusField').value = st.payable > 0 ? `Abrechnung möglich: ${fmt(st.payable)} Std` : 'Noch nicht abrechenbar';
-      el('statusField').className = st.payable > 0 ? 'status-card status-go' : 'status-card status-neutral';
+      
+      // Felder füllen
       fillKollegeForm(k);
-        if (el('empMonthHoursDetail')) el('empMonthHoursDetail').textContent = fmt(st.sum);
-  if (el('empLimitDetail')) el('empLimitDetail').textContent = fmt(k.grenze);
-  if (el('empRemainingDetail')) el('empRemainingDetail').textContent = fmt(st.rest);
-  if (el('empPayableDetail')) el('empPayableDetail').textContent = fmt(st.payable);
+      
+      // Stats berechnen
+      const monat = el('monatInput')?.value;
+      if (!monat) return;
+      
+      const entries = state.eintraege.filter(e => e.name === k?.name && e.datum.startsWith(monat));
+      const summe = entries.reduce((acc, e) => acc + Number(e.stunden || 0), 0);
+      const grenze = Number(k?.grenze || 0);
+      const ueber = Math.max(0, summe - grenze);
+      
+      // Stats anzeigen
+      const statSumme = el('statSumme');
+      const statGrenze = el('statGrenze');
+      const statUeber = el('statUeber');
+      
+      if (statSumme) statSumme.textContent = summe.toFixed(2);
+      if (statGrenze) statGrenze.textContent = grenze.toFixed(2);
+      if (statUeber) {
+        statUeber.textContent = ueber.toFixed(2);
+        statUeber.style.color = ueber > 0 ? 'var(--color-success)' : 'inherit';
+      }
     }
 
     function renderEmployeeEntries() {
