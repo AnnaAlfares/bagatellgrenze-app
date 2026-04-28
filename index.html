@@ -546,8 +546,6 @@
 const VOLLVZEIT_STUNDEN = 28;
 const BAGATELL_VOLLZEIT = 3;
 
-let teilzeitStunden = 28;
-
 function updateStammdaten() {
   const teilzeitInput = document.getElementById('teilzeit');
   const vollzeitInput = document.getElementById('vollzeit');
@@ -565,45 +563,12 @@ if (!teilzeitInput || !vollzeitInput || !quoteInput || !grenzeInput) return;
     const grenze = BAGATELL_VOLLZEIT * quote;
     grenzeInput.value = grenze.toFixed(2);
 
-    teilzeitStunden = teilzeit;
-    localStorage.setItem('teilzeitStunden', String(teilzeitStunden));
       } else {
     quoteInput.value = '';
     grenzeInput.value = '';
   }
 }
 
-function getBagatellgrenze() {
-  return BAGATELL_VOLLZEIT * (teilzeitStunden / VOLLVZEIT_STUNDEN);
-}
-   function updateStats() {
-  const key = getMonth();
-  const monthEntries = (state.eintraege || []).filter(e => e.monat === key || e.datum?.startsWith(key));
-  const total = monthEntries.reduce((sum, e) => sum + Number(e.stunden || e.hours || 0), 0);
-  const bagatell = getBagatellgrenze();
-  const remaining = bagatell - total;
-
-  // Stat-Kacheln aktualisieren
-  const totalEl = document.getElementById('empMonthHours');
-  const remainingEl = document.getElementById('empRemaining');
-  const lbl = document.getElementById('remainingLabel');
-
-  if (totalEl) totalEl.textContent = total.toFixed(2);
-
-  if (remaining > 0) {
-    if (remainingEl) remainingEl.textContent = remaining.toFixed(2);
-    if (lbl) lbl.textContent = 'Noch offen';
-    // Hinweisfeld
-    const sf = document.getElementById('statusField');
-    if (sf) sf.value = 'Unter Bagatellgrenze – noch ' + remaining.toFixed(2) + ' Std. offen';
-  } else {
-    if (remainingEl) remainingEl.textContent = total.toFixed(2);
-    if (lbl) lbl.textContent = 'Vergütbar';
-    // Hinweisfeld
-    const sf = document.getElementById('statusField');
-    if (sf) sf.value = '💶 Bagatellgrenze erreicht – alle ' + total.toFixed(2) + ' Std. können abgerechnet werden';
-  }
-}
 
     
 
