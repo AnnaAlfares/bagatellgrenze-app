@@ -94,6 +94,25 @@
       </aside>
 
       <main class="main">
+                <!-- MONATS- UND PERSONENAUSWAHL -->
+        <section class="panel">
+          <div class="grid two">
+            <label>Monat auswählen
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <button class="ghost" id="prevMonthBtn" style="min-width: 44px;">◀</button>
+                <input id="monatInput" type="month" style="flex: 1;" />
+                <button class="ghost" id="nextMonthBtn" style="min-width: 44px;">▶</button>
+              </div>
+            </label>
+            
+            <label>Aktive Person
+              <select id="activePersonSelect">
+                <option value="">Person auswählen</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
         <section class="panel">
   <div class="section-head">
     <div>
@@ -154,12 +173,54 @@
           </div>
 
           <div class="grid two">
-            <section class="panel">
-  <div class="section-head">
-    <div>
-     
+              <!-- STAMMDATEN PANEL -->
+    <section class="panel">
+      <div class="section-head">
+        <div>
+          <h2>Eigene Stammdaten</h2>
+          <p>Ergänze deine Teilzeitstunden – Name und Kürzel wurden von der Verwaltung angelegt.</p>
+        </div>
+      </div>
 
-            <section class="panel">
+      <label>Kürzel
+        <input id="kollegeKuerzel" type="text" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+      </label>         
+      
+      <label>Name
+        <input id="kollegeName" type="text" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+      </label>
+
+      <label>Vollzeitstunden
+        <input id="vollzeit" type="number" value="28" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+      </label>
+
+      <label>Teilzeitstunden
+        <input id="teilzeit" type="number" step="0.5" min="0" max="28" placeholder="z. B. 14 oder 21" onchange="updateStammdaten()">
+      </label>
+
+      <label>Quote
+        <input id="quote" type="number" step="0.01" min="0" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+      </label>
+
+      <label>Bagatellgrenze (Monat)
+        <input id="grenze" type="number" step="0.1" min="0" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+      </label>
+
+      <div class="small-actions" style="margin-top:1rem">
+        <button class="button primary" id="saveKollegeBtn">Teilzeitstunden speichern</button>
+        <button class="ghost" id="clearKollegeBtn">Zurücksetzen</button>
+      </div>
+
+      <div class="footer-note">
+        💡 <strong>Hinweise:</strong><br>
+        • Nur <strong>Teilzeitstunden</strong> sind änderbar<br>
+        • Quote und Bagatellgrenze werden automatisch berechnet (Quote = Teilzeit ÷ 28 | Grenze = 3 × Quote)<br>
+        • Name und Kürzel können nur in der Verantwortlichenansicht geändert werden
+      </div>
+    </section>
+
+    <!-- MEHRARBEITS-EINTRAG PANEL -->
+  
               <div class="section-head"><div><h2>Mehrarbeits-Eintrag</h2><p>Einzelne Einträge mit Datum und Bemerkung sichern die spätere Buchhaltung ab.</p></div></div>
               <div class="grid two">
                 <label>Datum<input id="eintragDatum" type="date" /></label>
@@ -1199,15 +1260,6 @@ function renderVertretungsHinweis() {
       if (nameEl) nameEl.value = '';
       if (selectEl) selectEl.value = '';
     }
-
-        function adminClearPerson() {
-      state.selectedKollegeId = null;
-      const kuerzelEl = el('adminKuerzel');
-      const nameEl = el('adminName');
-      if (kuerzelEl) kuerzelEl.value = '';
-      if (nameEl) nameEl.value = '';
-    }
-
     
     function adminDeletePerson() {
       const k = getSelectedKollege();
