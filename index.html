@@ -97,6 +97,9 @@
         <section class="panel">
   <div class="section-head">
     <div>
+      <section class="panel">
+  <div class="section-head">
+    <div>
       <h2>Eigene Stammdaten</h2>
       <p>Ergänze deine Teilzeitstunden – Name und Kürzel wurden von der Verwaltung angelegt.</p>
     </div>
@@ -115,7 +118,7 @@
   </label>
 
   <label>Teilzeitstunden
-    <input id="teilzeit" type="number" step="0.5" min="0" max="28" onchange="updateStammdaten()">
+    <input id="teilzeit" type="number" step="0.5" min="0" max="28" placeholder="z. B. 14 oder 21" onchange="updateStammdaten()">
   </label>
 
   <label>Quote
@@ -128,13 +131,17 @@
 
   <div class="small-actions" style="margin-top:1rem">
     <button class="button primary" id="saveKollegeBtn">Teilzeitstunden speichern</button>
-    <button class="ghost" id="clearKollegeBtn">Leeren</button>
+    <button class="ghost" id="clearKollegeBtn">Zurücksetzen</button>
   </div>
 
   <div class="footer-note">
-    Tipp: Nur Teilzeitstunden sind editierbar. Name und Kürzel werden von der Verwaltung gepflegt.
+    💡 <strong>Hinweise:</strong><br>
+    • Nur <strong>Teilzeitstunden</strong> sind änderbar<br>
+    • Quote und Bagatellgrenze werden automatisch berechnet (Quote = Teilzeit ÷ 28 | Grenze = 3 × Quote)<br>
+    • Name und Kürzel können nur in der Verantwortlichenansicht geändert werden
   </div>
 </section>
+
 
               
 
@@ -150,48 +157,7 @@
             <section class="panel">
   <div class="section-head">
     <div>
-      <h2>Eigene Stammdaten</h2>
-      <p>Hier wird deine individuelle Bagatellgrenze automatisch berechnet.</p>
-    </div>
-  </div>
-     <label>Kürzel
-  <input id="kollegeKuerzel" type="text" placeholder="z. B. MU" maxlength="3" oninput="this.value=this.value.toUpperCase()">
-</label>         
-    <label> Name
-      <input id="kollegeName" type="text" placeholder="z. B. Frau Muster" />
-    </label>
-
-    <label>
-      Vollzeitstunden
-      <input id="vollzeit" type="number" value="28" readonly />
-    </label>
-
-    <label>
-      Teilzeitstunden
-      <input id="teilzeit" type="number" step="0.5" min="0" max="28" onchange="updateStammdaten()" />
-    </label>
-
-    <label>
-      Quote
-      <input id="quote" type="number" step="0.01" min="0" readonly />
-    </label>
-
-    <label>
-      Bagatellgrenze (Monat)
-      <input id="grenze" type="number" step="0.1" min="0" readonly />
-    </label>
-  </div>
-
-  <div class="small-actions" style="margin-top:1rem">
-    <button class="button primary" id="saveKollegeBtn">Speichern</button>
-    <button class="ghost" id="clearKollegeBtn">Leeren</button>
-    <button class="danger" id="deleteKollegeBtn">Löschen</button>
-  </div>
-
-  <div class="footer-note">
-    Tipp: Teilzeitstunden eintragen – Quote und Bagatellgrenze werden automatisch aus 28 Stunden Vollzeit und 3 Stunden Bagatellgrenze berechnet.
-  </div>
-</section>
+     
 
             <section class="panel">
               <div class="section-head"><div><h2>Mehrarbeits-Eintrag</h2><p>Einzelne Einträge mit Datum und Bemerkung sichern die spätere Buchhaltung ab.</p></div></div>
@@ -1220,9 +1186,9 @@ function renderVertretungsHinweis() {
         }
                 alert(`✅ ${name} wurde aktualisiert!`);
         refreshAdminPersonSelect();
-
       }
-      
+      refreshAll();
+    }
          function adminClearPerson() {
       state.selectedKollegeId = null;
       const kuerzelEl = el('adminKuerzel');
