@@ -1133,29 +1133,29 @@ function renderVertretungsHinweis() {
       downloadText(`eintraege-${getMonth()}.csv`, toCsv(rows), 'text/csv;charset=utf-8');
     }
         // Admin: Person zum Bearbeiten auswählen
-    function adminSelectPerson() {
-      const select = el('adminPersonSelect');
-      if (!select) return;
-      
-      const personId = select.value;
-      
-      if (!personId) {
-        // Neue Person anlegen
-        adminClearPerson();
-        return;
-      }
-      
-      const person = state.kollegen.find(k => k.id === personId);
-      if (!person) return;
-      
-      state.selectedKollegeId = personId;
-      
-      const kuerzelEl = el('adminKuerzel');
-      const nameEl = el('adminName');
-      
-      if (kuerzelEl) kuerzelEl.value = person.kuerzel;
-      if (nameEl) nameEl.value = person.name;
-    }
+   function adminSelectPerson() {
+  const select = el('adminPersonSelect');
+  if (!select) return;
+
+  const personId = select.value;
+
+  if (!personId) {
+    adminClearPerson();
+    return;
+  }
+
+  const person = state.kollegen.find(k => k.id === personId);
+  if (!person) return;
+
+  state.selectedKollegeId = personId;
+
+  if (el('adminKuerzel')) el('adminKuerzel').value = person.kuerzel || '';
+  if (el('adminName')) el('adminName').value = person.name || '';
+  if (el('adminVollzeit')) el('adminVollzeit').value = person.vollzeit ?? VOLLVZEIT_STUNDEN;
+  if (el('adminTeilzeit')) el('adminTeilzeit').value = person.teilzeit ?? '';
+  if (el('adminQuote')) el('adminQuote').value = Number(person.quote || 0).toFixed(2);
+  if (el('adminGrenze')) el('adminGrenze').value = Number(person.grenze || 0).toFixed(2);
+} 
     
     // Admin: Personen-Dropdown aktualisieren
     function refreshAdminPersonSelect() {
@@ -1175,66 +1175,85 @@ function renderVertretungsHinweis() {
 
     // ========== ADMIN: PERSONEN VERWALTEN ==========
     function adminSavePerson() {
-      const kuerzel = el('adminKuerzel').value.trim().toUpperCase();
-      const name = el('adminName').value.trim();
-      
-      if (!kuerzel) return alert('Bitte Kürzel eingeben.');
-      if (!name) return alert('Bitte Namen eingeben.');
-      
-      // Prüfen ob Kürzel bereits existiert
-      const existing = state.kollegen.find(k => k.kuerzel === kuerzel && k.id !== state.selectedKollegeId);
-      if (existing) return alert(`Kürzel "${kuerzel}" wird bereits von ${existing.name} verwendet.`);
-      
-      if (!state.selectedKollegeId) {
-        // Neue Person anlegen
-        const ts = nowIso();
-        const k = { 
-          id: uid(), 
-          kuerzel, 
-          name, 
-          vollzeit: 28, 
-          teilzeit: 0, // Wird von Mitarbeitenden ergänzt
-          quote: 0, 
-          grenze: 0, 
-          createdAt: ts, 
-          updatedAt: ts 
-        };
-        state.kollegen.push(k);
-        state.selectedKollegeId = k.id;
-                alert(`✅ ${name} wurde angelegt!`);
-        refreshAdminPersonSelect();
+  const kuerzel = el('adminKuerzel').value.trim().toUpperCase();
+  const name = el('adminName').value.trim();
+  const vollzeit = VOLLVZEIT_STUNDEN;
+  const teilzeit = Number(el('adminTeilzeit')?.value || 0);
 
-      } else {
-        // Bestehende Person bearbeiten
-        const k = getSelectedKollege();
-        if (!k) return;
-        const oldName = k.name;
-        Object.assign(k, { kuerzel, name, updatedAt: nowIso() });
-        
-        // Einträge umbenennen
-        if (oldName !== name) {
-          state.eintraege.forEach(e => {
-            if (e.name === oldName) {
-              e.name = name;
-              e.updatedAt = nowIso();
-            }
-          });
+  if (!kuerzel) return alert('Bitte Kürzel eingeben.');
+  if (!name) return alert('Bitte Namen eingeben.');
+  if (Number.isNaN(teilzeit) || teilzeit < 0 || teilzeit > vollzeit) {
+    return alert(`Bitte gültige Teilzeitstunden zwischen 0 und ${vollzeit} eingeben.`);
+  }
+
+  const quote = vollzeit > 0 ? teilzeit / vollzeit : 0;
+  const grenze = BAGATELL_VOLLZEIT * quote;
+
+  const existing = state.kollegen.find(
+    k => k.kuerzel === kuerzel && k.id !== state.selectedKollegeId
+  );
+  if (existing) {
+    return alert(`Kürzel "${kuerzel}" wird bereits von ${existing.name} verwendet.`);
+  }
+
+  if (!state.selectedKollegeId) {
+    const ts = nowIso();
+    const k = {
+      id: uid(),
+      kuerzel,
+      name,
+      vollzeit,
+      teilzeit,
+      quote,
+      grenze,
+      createdAt: ts,
+      updatedAt: ts
+    };
+    state.kollegen.push(k);
+    state.selectedKollegeId = k.id;
+    alert(`✅ ${name} wurde angelegt!`);
+    refreshAdminPersonSelect();
+  } else {
+    const k = getSelectedKollege();
+    if (!k) return;
+
+    const oldName = k.name;
+    Object.assign(k, {
+      kuerzel,
+      name,
+      vollzeit,
+      teilzeit,
+      quote,
+      grenze,
+      updatedAt: nowIso()
+    });
+
+    if (oldName !== name) {
+      state.eintraege.forEach(e => {
+        if (e.name === oldName) {
+          e.name = name;
+          e.updatedAt = nowIso();
         }
-                alert(`✅ ${name} wurde aktualisiert!`);
-        refreshAdminPersonSelect();
-      }
-      refreshAll();
+      });
     }
-         function adminClearPerson() {
-      state.selectedKollegeId = null;
-      const kuerzelEl = el('adminKuerzel');
-      const nameEl = el('adminName');
-      const selectEl = el('adminPersonSelect');
-      
-      if (kuerzelEl) kuerzelEl.value = '';
-      if (nameEl) nameEl.value = '';
-      if (selectEl) selectEl.value = '';
-    }
+
+    alert(`✅ ${name} wurde aktualisiert!`);
+    refreshAdminPersonSelect();
+  }
+
+  refreshAll();
+}
+       function adminClearPerson() {
+  state.selectedKollegeId = null;
+
+  if (el('adminKuerzel')) el('adminKuerzel').value = '';
+  if (el('adminName')) el('adminName').value = '';
+  if (el('adminVollzeit')) el('adminVollzeit').value = VOLLVZEIT_STUNDEN;
+  if (el('adminTeilzeit')) el('adminTeilzeit').value = '';
+  if (el('adminQuote')) el('adminQuote').value = '';
+  if (el('adminGrenze')) el('adminGrenze').value = '';
+  if (el('adminPersonSelect')) el('adminPersonSelect').value = '';
+}
     
     function adminDeletePerson() {
       const k = getSelectedKollege();
@@ -1284,7 +1303,16 @@ function renderVertretungsHinweis() {
       const monatInput = el('monatInput');
       if (monatInput) monatInput.addEventListener('change', refreshAll);
       const teilzeitInput = el('teilzeit');
-if (teilzeitInput) teilzeitInput.addEventListener('change', updateStammdaten);
+if (teilzeitInput) {
+  teilzeitInput.addEventListener('input', updateStammdaten);
+  teilzeitInput.addEventListener('change', updateStammdaten);
+}
+
+const adminTeilzeitInput = el('adminTeilzeit');
+if (adminTeilzeitInput) {
+  adminTeilzeitInput.addEventListener('input', updateAdminStammdaten);
+  adminTeilzeitInput.addEventListener('change', updateAdminStammdaten);
+}
 
 const adminPersonFilter = el('adminPersonFilter');
 if (adminPersonFilter) adminPersonFilter.addEventListener('change', () => {
