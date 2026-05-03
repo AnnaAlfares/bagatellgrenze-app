@@ -219,40 +219,55 @@
           </div>
                     <!-- Personen verwalten -->
           <section class="panel">
-            <div class="section-head">
-              <div>
-                <h2>Personen verwalten</h2>
-                <p>Hier können neue Kolleg:innen angelegt werden. Teilzeitstunden werden von den Mitarbeitenden selbst ergänzt.</p>
-              </div>
-            </div>
-            
-            <div class="grid two">
-              <label>Kürzel
-                <input id="adminKuerzel" type="text" placeholder="z. B. MU" maxlength="3" style="text-transform: uppercase;">
-              </label>
-              
-              <label>Name
-                <input id="adminName" type="text" placeholder="z. B. Frau Muster">
-              </label>
-            </div>
-            
-            <label style="margin-top: 1rem;">Person auswählen (zum Bearbeiten)
-  <select id="adminPersonSelect" style="width: 100%;">
-    <option value="">Neue Person anlegen...</option>
-  </select>
-</label>
+  <div class="section-head">
+    <div>
+      <h2>Personen verwalten</h2>
+      <p>Hier können neue Kolleg:innen angelegt werden. Teilzeitstunden werden direkt hier eingetragen; Quote und Bagatellgrenze werden automatisch berechnet.</p>
+    </div>
+  </div>
 
-<div class="small-actions" style="margin-top:1rem">
-  <button class="button primary" id="adminSavePersonBtn">Speichern</button>
-  <button class="ghost" id="adminClearPersonBtn">Neu anlegen</button>
-  <button class="danger" id="adminDeletePersonBtn">Person löschen</button>
-</div>
+  <div class="grid two">
+    <label>Kürzel
+      <input id="adminKuerzel" type="text" placeholder="z. B. MU" maxlength="3" style="text-transform: uppercase;">
+    </label>
 
-            
-            <div class="footer-note">
-              Tipp: Lege alle Kolleg:innen mit Name und Kürzel an. Die Teilzeitstunden werden von den Mitarbeitenden selbst ergänzt.
-            </div>
-          </section>
+    <label>Name
+      <input id="adminName" type="text" placeholder="z. B. Frau Muster">
+    </label>
+
+    <label>Vollzeitstunden
+      <input id="adminVollzeit" type="number" value="28" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+    </label>
+
+    <label>Teilzeitstunden
+      <input id="adminTeilzeit" type="number" step="0.1" min="0" max="28" placeholder="z. B. 14">
+    </label>
+
+    <label>Quote
+      <input id="adminQuote" type="number" step="0.01" min="0" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+    </label>
+
+    <label>Bagatellgrenze (Monat)
+      <input id="adminGrenze" type="number" step="0.1" min="0" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+    </label>
+  </div>
+
+  <label style="margin-top: 1rem;">Person auswählen (zum Bearbeiten)
+    <select id="adminPersonSelect" style="width: 100%;">
+      <option value="">Neue Person anlegen...</option>
+    </select>
+  </label>
+
+  <div class="small-actions" style="margin-top:1rem">
+    <button class="button primary" id="adminSavePersonBtn">Speichern</button>
+    <button class="ghost" id="adminClearPersonBtn">Neu anlegen</button>
+    <button class="danger" id="adminDeletePersonBtn">Person löschen</button>
+  </div>
+
+  <div class="footer-note">
+    Tipp: Lege alle Kolleg:innen mit Name, Kürzel und Teilzeitstunden an. Quote und Bagatellgrenze werden automatisch berechnet.
+  </div>
+</section>
 
           <div class="import-report panel" id="importReport"><div class="status-card"><div class="k">Neu</div><div class="v" id="reportNew">0</div></div><div class="status-card"><div class="k">Aktualisiert</div><div class="v" id="reportUpdated">0</div></div><div class="status-card"><div class="k">Konflikte</div><div class="v" id="reportConflicts">0</div></div></div>
 
@@ -569,7 +584,28 @@ if (!teilzeitInput || !vollzeitInput || !quoteInput || !grenzeInput) return;
   }
 }
 
+    function updateAdminStammdaten() {
+  const teilzeitInput = el('adminTeilzeit');
+  const vollzeitInput = el('adminVollzeit');
+  const quoteInput = el('adminQuote');
+  const grenzeInput = el('adminGrenze');
 
+  if (!teilzeitInput || !vollzeitInput || !quoteInput || !grenzeInput) return;
+
+  const teilzeit = Number.parseFloat(teilzeitInput.value);
+  vollzeitInput.value = VOLLVZEIT_STUNDEN;
+
+  if (!Number.isNaN(teilzeit) && teilzeit >= 0 && teilzeit <= VOLLVZEIT_STUNDEN) {
+    const quote = teilzeit / VOLLVZEIT_STUNDEN;
+    const grenze = BAGATELL_VOLLZEIT * quote;
+
+    quoteInput.value = quote.toFixed(2);
+    grenzeInput.value = grenze.toFixed(2);
+  } else {
+    quoteInput.value = '';
+    grenzeInput.value = '';
+  }
+}
     
 
     function downloadText(filename, content, type = 'application/json;charset=utf-8') {
@@ -1097,29 +1133,29 @@ function renderVertretungsHinweis() {
       downloadText(`eintraege-${getMonth()}.csv`, toCsv(rows), 'text/csv;charset=utf-8');
     }
         // Admin: Person zum Bearbeiten auswählen
-    function adminSelectPerson() {
-      const select = el('adminPersonSelect');
-      if (!select) return;
-      
-      const personId = select.value;
-      
-      if (!personId) {
-        // Neue Person anlegen
-        adminClearPerson();
-        return;
-      }
-      
-      const person = state.kollegen.find(k => k.id === personId);
-      if (!person) return;
-      
-      state.selectedKollegeId = personId;
-      
-      const kuerzelEl = el('adminKuerzel');
-      const nameEl = el('adminName');
-      
-      if (kuerzelEl) kuerzelEl.value = person.kuerzel;
-      if (nameEl) nameEl.value = person.name;
-    }
+   function adminSelectPerson() {
+  const select = el('adminPersonSelect');
+  if (!select) return;
+
+  const personId = select.value;
+
+  if (!personId) {
+    adminClearPerson();
+    return;
+  }
+
+  const person = state.kollegen.find(k => k.id === personId);
+  if (!person) return;
+
+  state.selectedKollegeId = personId;
+
+  if (el('adminKuerzel')) el('adminKuerzel').value = person.kuerzel || '';
+  if (el('adminName')) el('adminName').value = person.name || '';
+  if (el('adminVollzeit')) el('adminVollzeit').value = person.vollzeit ?? VOLLVZEIT_STUNDEN;
+  if (el('adminTeilzeit')) el('adminTeilzeit').value = person.teilzeit ?? '';
+  if (el('adminQuote')) el('adminQuote').value = Number(person.quote || 0).toFixed(2);
+  if (el('adminGrenze')) el('adminGrenze').value = Number(person.grenze || 0).toFixed(2);
+} 
     
     // Admin: Personen-Dropdown aktualisieren
     function refreshAdminPersonSelect() {
@@ -1139,66 +1175,85 @@ function renderVertretungsHinweis() {
 
     // ========== ADMIN: PERSONEN VERWALTEN ==========
     function adminSavePerson() {
-      const kuerzel = el('adminKuerzel').value.trim().toUpperCase();
-      const name = el('adminName').value.trim();
-      
-      if (!kuerzel) return alert('Bitte Kürzel eingeben.');
-      if (!name) return alert('Bitte Namen eingeben.');
-      
-      // Prüfen ob Kürzel bereits existiert
-      const existing = state.kollegen.find(k => k.kuerzel === kuerzel && k.id !== state.selectedKollegeId);
-      if (existing) return alert(`Kürzel "${kuerzel}" wird bereits von ${existing.name} verwendet.`);
-      
-      if (!state.selectedKollegeId) {
-        // Neue Person anlegen
-        const ts = nowIso();
-        const k = { 
-          id: uid(), 
-          kuerzel, 
-          name, 
-          vollzeit: 28, 
-          teilzeit: 0, // Wird von Mitarbeitenden ergänzt
-          quote: 0, 
-          grenze: 0, 
-          createdAt: ts, 
-          updatedAt: ts 
-        };
-        state.kollegen.push(k);
-        state.selectedKollegeId = k.id;
-                alert(`✅ ${name} wurde angelegt!`);
-        refreshAdminPersonSelect();
+  const kuerzel = el('adminKuerzel').value.trim().toUpperCase();
+  const name = el('adminName').value.trim();
+  const vollzeit = VOLLVZEIT_STUNDEN;
+  const teilzeit = Number(el('adminTeilzeit')?.value || 0);
 
-      } else {
-        // Bestehende Person bearbeiten
-        const k = getSelectedKollege();
-        if (!k) return;
-        const oldName = k.name;
-        Object.assign(k, { kuerzel, name, updatedAt: nowIso() });
-        
-        // Einträge umbenennen
-        if (oldName !== name) {
-          state.eintraege.forEach(e => {
-            if (e.name === oldName) {
-              e.name = name;
-              e.updatedAt = nowIso();
-            }
-          });
+  if (!kuerzel) return alert('Bitte Kürzel eingeben.');
+  if (!name) return alert('Bitte Namen eingeben.');
+  if (Number.isNaN(teilzeit) || teilzeit < 0 || teilzeit > vollzeit) {
+    return alert(`Bitte gültige Teilzeitstunden zwischen 0 und ${vollzeit} eingeben.`);
+  }
+
+  const quote = vollzeit > 0 ? teilzeit / vollzeit : 0;
+  const grenze = BAGATELL_VOLLZEIT * quote;
+
+  const existing = state.kollegen.find(
+    k => k.kuerzel === kuerzel && k.id !== state.selectedKollegeId
+  );
+  if (existing) {
+    return alert(`Kürzel "${kuerzel}" wird bereits von ${existing.name} verwendet.`);
+  }
+
+  if (!state.selectedKollegeId) {
+    const ts = nowIso();
+    const k = {
+      id: uid(),
+      kuerzel,
+      name,
+      vollzeit,
+      teilzeit,
+      quote,
+      grenze,
+      createdAt: ts,
+      updatedAt: ts
+    };
+    state.kollegen.push(k);
+    state.selectedKollegeId = k.id;
+    alert(`✅ ${name} wurde angelegt!`);
+    refreshAdminPersonSelect();
+  } else {
+    const k = getSelectedKollege();
+    if (!k) return;
+
+    const oldName = k.name;
+    Object.assign(k, {
+      kuerzel,
+      name,
+      vollzeit,
+      teilzeit,
+      quote,
+      grenze,
+      updatedAt: nowIso()
+    });
+
+    if (oldName !== name) {
+      state.eintraege.forEach(e => {
+        if (e.name === oldName) {
+          e.name = name;
+          e.updatedAt = nowIso();
         }
-                alert(`✅ ${name} wurde aktualisiert!`);
-        refreshAdminPersonSelect();
-      }
-      refreshAll();
+      });
     }
-         function adminClearPerson() {
-      state.selectedKollegeId = null;
-      const kuerzelEl = el('adminKuerzel');
-      const nameEl = el('adminName');
-      const selectEl = el('adminPersonSelect');
-      
-      if (kuerzelEl) kuerzelEl.value = '';
-      if (nameEl) nameEl.value = '';
-      if (selectEl) selectEl.value = '';
-    }
+
+    alert(`✅ ${name} wurde aktualisiert!`);
+    refreshAdminPersonSelect();
+  }
+
+  refreshAll();
+}
+       function adminClearPerson() {
+  state.selectedKollegeId = null;
+
+  if (el('adminKuerzel')) el('adminKuerzel').value = '';
+  if (el('adminName')) el('adminName').value = '';
+  if (el('adminVollzeit')) el('adminVollzeit').value = VOLLVZEIT_STUNDEN;
+  if (el('adminTeilzeit')) el('adminTeilzeit').value = '';
+  if (el('adminQuote')) el('adminQuote').value = '';
+  if (el('adminGrenze')) el('adminGrenze').value = '';
+  if (el('adminPersonSelect')) el('adminPersonSelect').value = '';
+}
     
     function adminDeletePerson() {
       const k = getSelectedKollege();
@@ -1248,7 +1303,16 @@ function renderVertretungsHinweis() {
       const monatInput = el('monatInput');
       if (monatInput) monatInput.addEventListener('change', refreshAll);
       const teilzeitInput = el('teilzeit');
-if (teilzeitInput) teilzeitInput.addEventListener('change', updateStammdaten);
+if (teilzeitInput) {
+  teilzeitInput.addEventListener('input', updateStammdaten);
+  teilzeitInput.addEventListener('change', updateStammdaten);
+}
+
+const adminTeilzeitInput = el('adminTeilzeit');
+if (adminTeilzeitInput) {
+  adminTeilzeitInput.addEventListener('input', updateAdminStammdaten);
+  adminTeilzeitInput.addEventListener('change', updateAdminStammdaten);
+}
 
 const adminPersonFilter = el('adminPersonFilter');
 if (adminPersonFilter) adminPersonFilter.addEventListener('change', () => {
