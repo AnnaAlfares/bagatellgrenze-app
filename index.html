@@ -1077,25 +1077,36 @@ return;
     }
 
     function renderSummary() {
-  const body = el('summaryBody'); body.innerHTML = '';
+  const body = el('summaryBody');
+  if (!body) return; // ← Element existiert nicht (Admin-View ist hidden)
+  
+  body.innerHTML = '';
+  
   const month = getMonth();
   const filterName = el('adminPersonFilter') ? el('adminPersonFilter').value : '';
   const people = state.kollegen
     .filter(k => !filterName || k.name === filterName)
     .slice().sort((a,b) => a.name.localeCompare(b.name,'de'));
-  if (!people.length) { body.innerHTML = '<tr><td colspan="7" class="row-muted">Noch keine Kolleg:innen angelegt.</td></tr>'; return; }
+  
+  if (!people.length) { 
+    body.innerHTML = '<tr><td colspan="7" class="row-muted">Noch keine Kolleg:innen angelegt.</td></tr>'; 
+    return; 
+  }
+  
   people.forEach(k => {
     const st = monthStats(k, month);
     const cls = st.payable > 0 ? 'positive' : '';
     
-    // Tarif-Split berechnen (auch für Vollzeit!)
-    const gesamtStunden = k.teilzeit + st.sum;
+    // Tarif-Split berechnen (mit Sicherheitsprüfungen)
+    const teilzeit = Number(k.teilzeit || 0);
+    const gesamtStunden = teilzeit + st.sum;
     const ueberVollzeit = gesamtStunden > 28;
     
     let hint = st.hint;
+    
     if (ueberVollzeit && st.payable > 0) {
-      const stundenBisVollzeit = Math.max(28 - k.teilzeit, 0);
-      const stundenUeberVollzeit = st.sum - stundenBisVollzeit;
+      const stundenBisVollzeit = Math.max(28 - teilzeit, 0);
+      const stundenUeberVollzeit = Math.max(st.sum - stundenBisVollzeit, 0);
       
       if (stundenBisVollzeit > 0) {
         hint = `⚠️ Tarif-Split: ${fmt(stundenBisVollzeit)} Std. (bis 28) + ${fmt(stundenUeberVollzeit)} Std. (über 28)`;
@@ -1111,39 +1122,60 @@ return;
 }
 
 
+
     function renderAdminEntries() {
-      const body = el('adminEntriesBody'); body.innerHTML = '';
-      const filterName = el('adminPersonFilter') ? el('adminPersonFilter').value : '';
-const rows = state.eintraege
-  .filter(e => !filterName || e.name === filterName)
-  .slice().sort((a,b) => (b.datum||'').localeCompare(a.datum||''));
-      if (!rows.length) { body.innerHTML = '<tr><td colspan="6" class="row-muted">Noch keine Einträge vorhanden.</td></tr>'; return; }
-      rows.forEach(r => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${r.datum}</td><td>${r.monat}</td><td>${r.name}</td><td>${fmt(r.stunden)}</td><td>${r.bemerkung || ''}</td><td>${new Date(r.updatedAt).toLocaleString('de-DE')}</td>`;
-        body.appendChild(tr);
-      });
-    }
+  const body = el('adminEntriesBody');
+  if (!body) return;
+  
+  body.innerHTML = '';
+  
+  const filterName = el('adminPersonFilter') ? el('adminPersonFilter').value : '';
+  const rows = state.eintraege
+    .filter(e => !filterName || e.name === filterName)
+    .slice().sort((a,b) => (b.datum||'').localeCompare(a.datum||''));
+  
+  if (!rows.length) { 
+    body.innerHTML = '<tr><td colspan="6" class="row-muted">Noch keine Einträge vorhanden.</td></tr>'; 
+    return; 
+  }
+  
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.datum}</td><td>${r.monat}</td><td>${r.name}</td><td>${fmt(r.stunden)}</td><td>${r.bemerkung || ''}</td><td>${new Date(r.updatedAt).toLocaleString('de-DE')}</td>`;
+    body.appendChild(tr);
+  });
+}
 
     function renderImportReport() {
-      el('reportNew').textContent = String(state.importReport.neu || 0);
-      el('reportUpdated').textContent = String(state.importReport.aktualisiert || 0);
-      el('reportConflicts').textContent = String(state.importReport.konflikte || 0);
-    }
+  const reportNew = el('reportNew');
+  const reportUpdated = el('reportUpdated');
+  const reportConflicts = el('reportConflicts');
+  
+  if (reportNew) reportNew.textContent = String(state.importReport.neu || 0);
+  if (reportUpdated) reportUpdated.textContent = String(state.importReport.aktualisiert || 0);
+  if (reportConflicts) reportConflicts.textContent = String(state.importReport.konflikte || 0);
+}
 
-    function renderConflicts() {
-      const wrap = el('conflictList'); wrap.innerHTML = '';
-      if (!state.conflicts.length) {
-        wrap.innerHTML = '<div class="row-muted">Zurzeit keine Konflikte protokolliert.</div>';
-        return;
-      }
-      state.conflicts.slice().reverse().slice(0, 20).forEach(c => {
-        const div = document.createElement('div');
-        div.className = 'conflict-box';
-        div.innerHTML = `<strong>${c.type}</strong><div>ID: ${c.id}</div><div>${c.name || ''}</div><div>Entscheidung: ${c.resolution}</div><div class="row-muted">${new Date(c.loggedAt).toLocaleString('de-DE')}</div>`;
-        wrap.appendChild(div);
-      });
-    }
+
+   function renderConflicts() {
+  const wrap = el('conflictList');
+  if (!wrap) return;
+  
+  wrap.innerHTML = '';
+  
+  if (!state.conflicts.length) {
+    wrap.innerHTML = '<div class="row-muted">Zurzeit keine Konflikte protokolliert.</div>';
+    return;
+  }
+  
+  state.conflicts.slice().reverse().slice(0, 20).forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'conflict-box';
+    div.innerHTML = `<strong>${c.type}</strong><div>ID: ${c.id}</div><div>${c.name || ''}</div><div>Entscheidung: ${c.resolution}</div><div class="row-muted">${new Date(c.loggedAt).toLocaleString('de-DE')}</div>`;
+    wrap.appendChild(div);
+  });
+}
+
 
     // ========== ERWEITERTE switchRole MIT PIN-SCHUTZ ==========
     function switchRole(view, alreadyUnlocked = false) {
@@ -1174,17 +1206,21 @@ const rows = state.eintraege
 function renderVertretungsHinweis() {
   const wrap = el('vertretungsHinweisBody');
   if (!wrap) return;
+  
   wrap.innerHTML = '';
+  
   const month = getMonth();
   const people = state.kollegen.slice().sort((a, b) => {
     const ra = monthStats(a, month).rest;
     const rb = monthStats(b, month).rest;
-    return ra - rb; // aufsteigend: wer fast drüber ist, steht oben
+    return ra - rb;
   });
+  
   if (!people.length) {
     wrap.innerHTML = '<div class="row-muted">Noch keine Kolleg:innen angelegt.</div>';
     return;
   }
+  
   people.forEach(k => {
     const st = monthStats(k, month);
     const div = document.createElement('div');
@@ -1197,6 +1233,7 @@ function renderVertretungsHinweis() {
     wrap.appendChild(div);
   });
 }
+
       
         function saveKollege() {
       const name = el('kollegeName').value.trim();
