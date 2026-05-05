@@ -181,38 +181,61 @@
   }
 
   @media (max-width: 700px){
-    .app{padding:var(--space-3)}
-    .topbar{flex-direction:column;gap:var(--space-2);align-items:stretch}
-    .toolbar{gap:var(--space-2)}
-    .button,.ghost,.danger{min-height:38px;padding:.55rem .8rem;font-size:.9rem}
-    .stats{grid-template-columns:1fr;gap:var(--space-2)}
-    .stat{padding:var(--space-3)}
-    .stat .v{font-size:1.25rem}
-    .stat .k{font-size:.7rem}
-    .section-head{flex-direction:column;gap:var(--space-2)}
-    .section-head h2{font-size:1.2rem}
-    .panel{padding:var(--space-3)}
-    label{font-size:.85rem}
-    input,select,textarea{padding:.6rem .75rem;font-size:.9rem}
-    .grid.two,.grid.three{grid-template-columns:1fr}
-    .small-actions button{padding:.35rem .6rem;font-size:.8rem}
-    table{min-width:600px}
-    th,td{padding:.6rem .75rem;font-size:.82rem}
-    .table-wrap::before{
-      content:'Tabelle seitlich wischen';
-      display:block;
-      padding:.6rem .75rem;
-      font-size:var(--text-xs);
-      color:var(--color-text-muted);
-      border-bottom:1px solid var(--color-divider)
-    }
-    .nav-btn{padding:.6rem .75rem;font-size:.9rem}
-    .title h1{font-size:1.4rem}
-    .title p{font-size:.85rem}
-    .banner{padding:var(--space-3);font-size:.88rem}
-    .pill{font-size:.75rem}
-    .quick-add button{min-height:36px;padding:.4rem .65rem;font-size:.88rem}
+  .app{padding:var(--space-3)}
+  .topbar{flex-direction:column;gap:var(--space-2);align-items:stretch}
+  .toolbar{gap:var(--space-2);flex-direction:column}
+  .button,.ghost,.danger{min-height:44px;padding:.7rem 1rem;font-size:1rem;width:100%}
+  
+  /* Stats: 2 Spalten mit größerer Schrift */
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-3)}
+  .stat{padding:var(--space-4)}
+  .stat .k{font-size:.75rem;letter-spacing:.02em}
+  .stat .v{font-size:1.5rem}
+  
+  .section-head{flex-direction:column;gap:var(--space-2)}
+  .section-head h2{font-size:1.3rem}
+  .panel{padding:var(--space-4)}
+  
+  /* Labels und Inputs größer */
+  label{font-size:.9rem;gap:.6rem}
+  input,select,textarea{padding:.85rem 1rem;font-size:1rem;min-height:48px}
+  textarea{min-height:120px}
+  
+  /* Grid immer 1-spaltig */
+  .grid.two,.grid.three{grid-template-columns:1fr;gap:var(--space-4)}
+  
+  /* Small Actions größer */
+  .small-actions{gap:.6rem}
+  .small-actions button{padding:.6rem .9rem;font-size:.9rem;min-height:44px}
+  
+  /* Quick-Add Buttons größer */
+  .quick-add{gap:.6rem;margin-top:.5rem}
+  .quick-add button{min-height:44px;padding:.65rem .85rem;font-size:.95rem}
+  
+  /* Tabellen */
+  table{min-width:600px}
+  th,td{padding:.7rem .8rem;font-size:.85rem}
+  .table-wrap::before{
+    content:'← Tabelle seitlich wischen →';
+    display:block;
+    padding:.7rem .8rem;
+    font-size:.85rem;
+    color:var(--color-text-muted);
+    border-bottom:1px solid var(--color-divider);
+    text-align:center;
+    font-weight:600;
   }
+  
+  .nav-btn{padding:.7rem .85rem;font-size:.95rem}
+  .title h1{font-size:1.5rem}
+  .title p{font-size:.9rem}
+  .banner{padding:var(--space-4);font-size:.9rem}
+  .pill{font-size:.8rem;padding:.4rem .8rem}
+  
+  /* Footer-Note größer */
+  .footer-note{font-size:.85rem;line-height:1.6}
+}
+
 
   @media (max-width: 400px){
     .stats{grid-template-columns:1fr}
@@ -277,11 +300,12 @@
 
 <section id="employeeView" class="grid">
           <div class="stats">
-            <div class="stat"><div class="k">Stunden im Monat</div><div class="v" id="empMonthHours">0,0</div></div>
-            <div class="stat"><div class="k">Bagatellgrenze</div><div class="v" id="empLimit">0,0</div></div>
-            <div class="stat"><div class="k" id="remainingLabel">Noch offen</div><div class="v" id="empRemaining">0,0</div></div>
-            <div class="stat"><div class="k">Vergütbar</div><div class="v" id="empPayable">0,0</div></div>
-          </div>
+  <div class="stat"><div class="k">Stunden</div><div class="v" id="empMonthHours">0,0</div></div>
+  <div class="stat"><div class="k">Grenze</div><div class="v" id="empLimit">0,0</div></div>
+  <div class="stat"><div class="k" id="remainingLabel">Offen</div><div class="v" id="empRemaining">0,0</div></div>
+  <div class="stat"><div class="k">Vergütbar</div><div class="v" id="empPayable">0,0</div></div>
+</div>
+
 
           <div class="grid two">
               <!-- STAMMDATEN PANEL -->
@@ -362,9 +386,9 @@
           </div>
         </div>
         <div class="stats" style="margin-bottom:var(--space-5)">
-          <div class="stat"><div class="k">Stunden im Monat</div><div class="v" id="empMonthHoursDetail">0,0</div></div>
-          <div class="stat"><div class="k">Bagatellgrenze</div><div class="v" id="empLimitDetail">0,0</div></div>
-          <div class="stat"><div class="k">Noch offen</div><div class="v" id="empRemainingDetail">0,0</div></div>
+          <div class="stat"><div class="k">Stunden</div><div class="v" id="empMonthHoursDetail">0,0</div></div>
+          <div class="stat"><div class="k">Grenze</div><div class="v" id="empLimitDetail">0,0</div></div>
+          <div class="stat"><div class="k">Offen</div><div class="v" id="empRemainingDetail">0,0</div></div>
           <div class="stat"><div class="k">Vergütbar</div><div class="v" id="empPayableDetail">0,0</div></div>
         </div>
         <div class="banner">
