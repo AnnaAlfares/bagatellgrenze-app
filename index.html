@@ -521,7 +521,14 @@
   </select>
 </div>
             <div class="section-head"><div><h2>Monatsübersicht</h2><p>Automatisch aus allen Einträgen berechnet.</p></div><div class="small-actions"><button class="ghost" id="exportMonthSummaryBtn">Monatsübersicht CSV</button><button class="ghost" id="exportAccountingBtn">Abrechnungsstunden CSV</button></div></div>
-            <div class="table-wrap"><table><thead><tr><th>Name</th><th>Monat</th><th>Stunden</th><th>Bagatellgrenze</th><th>Noch offen</th><th>Vergütbar</th><th>Hinweis</th></tr></thead><tbody id="summaryBody"></tbody></table></div>
+                      <div class="footer-note" style="margin-top:var(--space-4);padding:var(--space-4);background:var(--color-primary-highlight);border-radius:var(--radius-lg);border:1px solid var(--color-primary)">
+            💡 <strong>Wichtig für die Abrechnung:</strong><br>
+            Mehrarbeitsstunden werden unterschiedlich vergütet:<br>
+            • <strong>Bis zum vollen Deputat (28 Std.):</strong> Höherer Tarif<br>
+            • <strong>Über das volle Deputat hinaus:</strong> Günstigerer Tarif<br>
+            → Prüfen Sie die Spalte "Hinweis" auf Tarif-Splits! Die CSV-Datei enthält separate Spalten für beide Tarife.
+          </div>
+
           </section>
                   <section class="panel">
           <div class="section-head">
@@ -1070,21 +1077,39 @@ return;
     }
 
     function renderSummary() {
-      const body = el('summaryBody'); body.innerHTML = '';
-      const month = getMonth();
-      const filterName = el('adminPersonFilter') ? el('adminPersonFilter').value : '';
-const people = state.kollegen
-  .filter(k => !filterName || k.name === filterName)
-  .slice().sort((a,b) => a.name.localeCompare(b.name,'de'));
-      if (!people.length) { body.innerHTML = '<tr><td colspan="7" class="row-muted">Noch keine Kolleg:innen angelegt.</td></tr>'; return; }
-      people.forEach(k => {
-        const st = monthStats(k, month);
-        const cls = st.payable > 0 ? 'positive' : ''; 
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${k.name}</td><td>${month}</td><td>${fmt(st.sum)}</td><td>${fmt(k.grenze)}</td><td>${fmt(st.rest)}</td><td>${fmt(st.payable)}</td><td class="${cls}">${st.hint}</td>`;
-        body.appendChild(tr);
-      });
+  const body = el('summaryBody'); body.innerHTML = '';
+  const month = getMonth();
+  const filterName = el('adminPersonFilter') ? el('adminPersonFilter').value : '';
+  const people = state.kollegen
+    .filter(k => !filterName || k.name === filterName)
+    .slice().sort((a,b) => a.name.localeCompare(b.name,'de'));
+  if (!people.length) { body.innerHTML = '<tr><td colspan="7" class="row-muted">Noch keine Kolleg:innen angelegt.</td></tr>'; return; }
+  people.forEach(k => {
+    const st = monthStats(k, month);
+    const cls = st.payable > 0 ? 'positive' : '';
+    
+    // Tarif-Split berechnen (auch für Vollzeit!)
+    const gesamtStunden = k.teilzeit + st.sum;
+    const ueberVollzeit = gesamtStunden > 28;
+    
+    let hint = st.hint;
+    if (ueberVollzeit && st.payable > 0) {
+      const stundenBisVollzeit = Math.max(28 - k.teilzeit, 0);
+      const stundenUeberVollzeit = st.sum - stundenBisVollzeit;
+      
+      if (stundenBisVollzeit > 0) {
+        hint = `⚠️ Tarif-Split: ${fmt(stundenBisVollzeit)} Std. (bis 28) + ${fmt(stundenUeberVollzeit)} Std. (über 28)`;
+      } else {
+        hint = `⚠️ Alle ${fmt(stundenUeberVollzeit)} Std. über Vollzeit (günstigerer Tarif)`;
+      }
     }
+    
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${k.name}</td><td>${month}</td><td>${fmt(st.sum)}</td><td>${fmt(k.grenze)}</td><td>${fmt(st.rest)}</td><td>${fmt(st.payable)}</td><td class="${cls}">${hint}</td>`;
+    body.appendChild(tr);
+  });
+}
+
 
     function renderAdminEntries() {
       const body = el('adminEntriesBody'); body.innerHTML = '';
@@ -1361,15 +1386,41 @@ if (data.adminPIN) {
       downloadText(`monatsuebersicht-${month}.csv`, toCsv(rows), 'text/csv;charset=utf-8');
     }
 
-    function exportAccounting() {
-      const month = getMonth();
-      const rows = [['Name','Monat','Erfasste Stunden','Bagatellgrenze','Abrechnungsstunden']];
-      state.kollegen.slice().sort((a,b)=>a.name.localeCompare(b.name,'de')).forEach(k => {
-        const st = monthStats(k, month);
-        rows.push([k.name, month, st.sum, k.grenze, st.payable]);
-      });
-      downloadText(`abrechnungsstunden-${month}.csv`, toCsv(rows), 'text/csv;charset=utf-8');
+   function exportAccounting() {
+  const month = getMonth();
+  const rows = [['Name','Monat','Teilzeit','Erfasste Stunden','Bagatellgrenze','Abrechnungsstunden','Std. bis Vollzeit (höherer Tarif)','Std. über Vollzeit (günstigerer Tarif)','Hinweis']];
+  state.kollegen.slice().sort((a,b)=>a.name.localeCompare(b.name,'de')).forEach(k => {
+    const st = monthStats(k, month);
+    
+    // Tarif-Split berechnen
+    const gesamtStunden = k.teilzeit + st.sum;
+    const ueberVollzeit = gesamtStunden > 28;
+    
+    let stundenBisVollzeit = 0;
+    let stundenUeberVollzeit = 0;
+    let hinweis = '';
+    
+    if (ueberVollzeit && st.payable > 0) {
+      stundenBisVollzeit = Math.max(28 - k.teilzeit, 0);
+      stundenUeberVollzeit = st.sum - stundenBisVollzeit;
+      
+      if (stundenBisVollzeit > 0) {
+        hinweis = 'Tarif-Split beachten';
+      } else {
+        hinweis = 'Alle Stunden über Vollzeit';
+      }
+    } else if (st.payable > 0) {
+      stundenBisVollzeit = st.payable;
+      hinweis = 'Nur höherer Tarif';
+    } else {
+      hinweis = 'Noch nicht abrechenbar';
     }
+    
+    rows.push([k.name, month, k.teilzeit, st.sum, k.grenze, st.payable, stundenBisVollzeit, stundenUeberVollzeit, hinweis]);
+  });
+  downloadText(`abrechnungsstunden-${month}.csv`, toCsv(rows), 'text/csv;charset=utf-8');
+}
+
 
     function exportEntries() {
       const rows = [['Datum','Monat','Name','Stunden','Bemerkung','UpdatedAt']];
