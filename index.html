@@ -1299,14 +1299,16 @@ function renderVertretungsHinweis() {
         try {
           const data = JSON.parse(reader.result);
           
-          // PIN aus Backup übernehmen (falls vorhanden)
-          if (data.adminPIN) {
-            const overwritePIN = confirm('Das Backup enthält eine PIN. Soll die lokale PIN überschrieben werden?\n\nJa = PIN aus Backup übernehmen\nNein = lokale PIN behalten');
-            if (overwritePIN) {
-              localStorage.setItem('adminPIN', data.adminPIN);
-              alert('✅ PIN aus Backup wurde übernommen');
-            }
-          }
+          // PIN aus Backup übernehmen (nur beim ersten Import)
+if (data.adminPIN) {
+  if (!PINManager.hasPIN()) {
+    // Erste Nutzung: Gehashte PIN aus Master-Backup übernehmen
+    localStorage.setItem('adminPIN', data.adminPIN);
+    console.log('✅ PIN aus Master-Backup übernommen');
+  }
+  // Bei bestehender PIN: Ignorieren (keine Überschreibung)
+}
+
           
           if (!Array.isArray(data.kollegen) || !Array.isArray(data.eintraege)) throw new Error('Ungültige Backup-Datei.');
           
