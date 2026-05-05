@@ -934,70 +934,71 @@ if (!teilzeitInput || !vollzeitInput || !quoteInput || !grenzeInput) return;
     function clearEintragForm() { state.selectedEintragId = null; fillEintragForm(null); }
 
             function refreshPersonSelect() {
-      const activePersonSelect = el('activePersonSelect');
-      if (!activePersonSelect) return; // Sicherheitscheck
-      
-      // In Mitarbeiteransicht: Nur eigene Person
-      if (state.roleView === 'employee') {
-        const myPersonId = localStorage.getItem('myPersonId');
-        
-        if (myPersonId) {
-          const myPerson = state.kollegen.find(k => k.id === myPersonId);
-          if (myPerson) {
-            state.selectedKollegeId = myPersonId;
-            activePersonSelect.innerHTML = `<option value="${myPerson.id}">${myPerson.name}</option>`;
-            activePersonSelect.disabled = true;
-            return;
-          }
-        }
-        
-        // Keine Person zugeordnet: bei vorhandenen Personen First-Run-Dialog zeigen
-activePersonSelect.innerHTML = '<option value="">Bitte Person auswählen</option>';
-activePersonSelect.disabled = true;
-
-const dialog = document.getElementById('whoAreYouDialog');
-if (state.kollegen.length > 0 && dialog && dialog.style.display !== 'flex') {
-  WhoAreYouDialog.show();
-}
-return;
-      }
-      
-      // In Admin-Ansicht: Alle Personen
-      activePersonSelect.disabled = false;
-      activePersonSelect.innerHTML = '';
-      
-      const placeholder = document.createElement('option');
-      placeholder.value = '';
-      placeholder.textContent = state.kollegen.length ? 'Person auswählen' : 'Noch keine Person angelegt';
-      activePersonSelect.appendChild(placeholder);
-      
-      state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
-        const opt = document.createElement('option');
-        opt.value = k.id;
-        opt.textContent = k.name;
-        if (k.id === state.selectedKollegeId) opt.selected = true;
-        activePersonSelect.appendChild(opt);
-      });
-      
-      if (!state.selectedKollegeId && state.kollegen[0]) {
-        state.selectedKollegeId = state.kollegen[0].id;
-      }
-      activePersonSelect.value = state.selectedKollegeId || '';
-      
-      // Admin-Filter aktualisieren
-      const adminFilter = el('adminPersonFilter');
-      if (adminFilter) {
-        const current = adminFilter.value;
-        adminFilter.innerHTML = '<option value="">Alle Personen</option>';
-        state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
-          const opt = document.createElement('option');
-          opt.value = k.name;
-          opt.textContent = k.name;
-          if (k.name === current) opt.selected = true;
-          adminFilter.appendChild(opt);
-        });
+  const activePersonSelect = el('activePersonSelect');
+  if (!activePersonSelect) return;
+  
+  // In Mitarbeiteransicht: Nur eigene Person
+  if (state.roleView === 'employee') {
+    const myPersonId = localStorage.getItem('myPersonId');
+    
+    if (myPersonId) {
+      const myPerson = state.kollegen.find(k => k.id === myPersonId);
+      if (myPerson) {
+        state.selectedKollegeId = myPersonId;
+        activePersonSelect.innerHTML = `<option value="${myPerson.id}">${myPerson.name}</option>`;
+        activePersonSelect.disabled = true;
+        return;
       }
     }
+    
+    activePersonSelect.innerHTML = '<option value="">Bitte Person auswählen</option>';
+    activePersonSelect.disabled = true;
+
+    const dialog = document.getElementById('whoAreYouDialog');
+    if (state.kollegen.length > 0 && dialog && dialog.style.display !== 'flex') {
+      WhoAreYouDialog.show();
+    }
+    return;
+  }
+  
+  // In Admin-Ansicht: Alle Personen
+  activePersonSelect.disabled = false;
+  activePersonSelect.innerHTML = '';
+  
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = state.kollegen.length ? 'Person auswählen' : 'Noch keine Person angelegt';
+  activePersonSelect.appendChild(placeholder);
+  
+  state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
+    const opt = document.createElement('option');
+    opt.value = k.id;
+    opt.textContent = k.name;
+    if (k.id === state.selectedKollegeId) opt.selected = true;
+    activePersonSelect.appendChild(opt);
+  });
+  
+  if (!state.selectedKollegeId && state.kollegen[0]) {
+    state.selectedKollegeId = state.kollegen[0].id;
+  }
+  activePersonSelect.value = state.selectedKollegeId || '';
+  
+  // Admin-Filter aktualisieren
+  const adminFilter = el('adminPersonFilter');
+  if (adminFilter) {
+    const currentFilter = adminFilter.value;
+    adminFilter.innerHTML = '<option value="">Alle Personen</option>';
+    
+    state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
+      const opt = document.createElement('option');
+      opt.value = k.name;
+      opt.textContent = k.name;
+      if (k.name === currentFilter) opt.selected = true;
+      adminFilter.appendChild(opt);
+    });
+  }
+}
+
 
 
         function renderEmployeeStats() {
@@ -1603,130 +1604,138 @@ if (data.adminPIN) {
 
 
        function bindEvents() {
-      // Role Tabs
-      document.querySelectorAll('[data-role-view]').forEach(btn => btn.addEventListener('click', () => switchRole(btn.dataset.roleView)));
-      
-      // Quick Add Hours
-      document.querySelectorAll('[data-add-hours]').forEach(btn => btn.addEventListener('click', () => { 
-        const delta = Number(btn.dataset.addHours || 0); 
-        const input = el('eintragStunden'); 
-        if (input) {
-          const current = Number(input.value || 0); 
-          input.value = Math.max(0, current + delta); 
-        }
-      }));
-      
-      // Month Navigation
-      const prevMonthBtn = el('prevMonthBtn');
-      const nextMonthBtn = el('nextMonthBtn');
-      if (prevMonthBtn) prevMonthBtn.addEventListener('click', () => shiftMonth(-1));
-      if (nextMonthBtn) nextMonthBtn.addEventListener('click', () => shiftMonth(1));
-      
-      // Person Select
-      const activePersonSelect = el('activePersonSelect');
-      if (activePersonSelect) activePersonSelect.addEventListener('change', e => { 
-        state.selectedKollegeId = e.target.value || null; 
-        clearEintragForm(); 
-        renderEmployeeStats(); 
-        renderEmployeeEntries(); 
-      });
-      
-      // Month Input
-      const monatInput = el('monatInput');
-      if (monatInput) monatInput.addEventListener('change', refreshAll);
-      const teilzeitInput = el('teilzeit');
-if (teilzeitInput) {
-  teilzeitInput.addEventListener('input', updateStammdaten);
-  teilzeitInput.addEventListener('change', updateStammdaten);
-}
-
-const adminTeilzeitInput = el('adminTeilzeit');
-if (adminTeilzeitInput) {
-  adminTeilzeitInput.addEventListener('input', updateAdminStammdaten);
-  adminTeilzeitInput.addEventListener('change', updateAdminStammdaten);
-}
-
-const adminPersonFilter = el('adminPersonFilter');
-if (adminPersonFilter) adminPersonFilter.addEventListener('change', () => {
-  renderSummary();
-  renderAdminEntries();
-});
-      // Kollege Buttons
-      const saveKollegeBtn = el('saveKollegeBtn');
-      const clearKollegeBtn = el('clearKollegeBtn');
-      const deleteKollegeBtn = el('deleteKollegeBtn');
-      if (saveKollegeBtn) saveKollegeBtn.addEventListener('click', saveKollege);
-      if (clearKollegeBtn) clearKollegeBtn.addEventListener('click', () => { clearKollegeForm(); refreshPersonSelect(); renderEmployeeStats(); });
-      if (deleteKollegeBtn) deleteKollegeBtn.addEventListener('click', deleteKollege);
-      
-      // Eintrag Buttons
-      const saveEintragBtn = el('saveEintragBtn');
-      const clearEintragBtn = el('clearEintragBtn');
-      const deleteEintragBtn = el('deleteEintragBtn');
-      if (saveEintragBtn) saveEintragBtn.addEventListener('click', saveEintrag);
-      if (clearEintragBtn) clearEintragBtn.addEventListener('click', () => { clearEintragForm(); renderEmployeeEntries(); });
-      if (deleteEintragBtn) deleteEintragBtn.addEventListener('click', deleteEintrag);
-      
-      // Export/Import
-      const exportBackupBtn = el('exportBackupBtn');
-      const exportBackupBtnEmployee = el('exportBackupBtnEmployee');
-      const importBackupInput = el('importBackupInput');
-      if (exportBackupBtn) exportBackupBtn.addEventListener('click', exportBackup);
-      if (exportBackupBtnEmployee) exportBackupBtnEmployee.addEventListener('click', exportBackup);
-      if (importBackupInput) importBackupInput.addEventListener('change', e => { 
-        const file = e.target.files[0]; 
-        if (file) importBackup(file); 
-        e.target.value = ''; 
-      });
-      
-      // Admin Exports
-      const exportMonthSummaryBtn = el('exportMonthSummaryBtn');
-      const exportAccountingBtn = el('exportAccountingBtn');
-      const exportEntriesBtn = el('exportEntriesBtn');
-      if (exportMonthSummaryBtn) exportMonthSummaryBtn.addEventListener('click', exportMonthSummary);
-      if (exportAccountingBtn) exportAccountingBtn.addEventListener('click', exportAccounting);
-      if (exportEntriesBtn) exportEntriesBtn.addEventListener('click', exportEntries);
-      
-      // Employee Entries Table
-      const employeeEntriesBody = el('employeeEntriesBody');
-      if (employeeEntriesBody) employeeEntriesBody.addEventListener('click', e => {
-        const id = e.target.dataset.editEntry; 
-        if (!id) return;
-        const entry = state.eintraege.find(x => x.id === id); 
-        if (!entry) return;
-        state.selectedEintragId = id; 
-        fillEintragForm(entry); 
-        renderEmployeeEntries();
-      });
-      
-      // Theme Toggle
-      const themeToggle = el('themeToggle');
-      if (themeToggle) themeToggle.addEventListener('click', () => {
-        const root = document.documentElement;
-        const current = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        const next = current === 'dark' ? 'light' : 'dark';
-        root.setAttribute('data-theme', next); 
-        themeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
-      });
-      
-      // Admin: Personen verwalten
-      const adminSaveBtn = el('adminSavePersonBtn');
-      const adminClearBtn = el('adminClearPersonBtn');
-      const adminDeleteBtn = el('adminDeletePersonBtn');
-      if (adminSaveBtn) adminSaveBtn.addEventListener('click', adminSavePerson);
-      const adminPersonSelect = el('adminPersonSelect');
-      if (adminPersonSelect) adminPersonSelect.addEventListener('change', adminSelectPerson);
-      if (adminClearBtn) adminClearBtn.addEventListener('click', adminClearPerson);
-      if (adminDeleteBtn) adminDeleteBtn.addEventListener('click', adminDeletePerson);
-      
-      // Lock Admin Button
-      const lockAdminBtn = el('lockAdminBtn');
-      if (lockAdminBtn) lockAdminBtn.addEventListener('click', () => {
-        PINManager.lockSession();
-        switchRole('employee');
-        alert('🔒 Verantwortlichenansicht wurde gesperrt.');
-      });
+  // Role Tabs
+  document.querySelectorAll('[data-role-view]').forEach(btn => btn.addEventListener('click', () => switchRole(btn.dataset.roleView)));
+  
+  // Quick Add Hours
+  document.querySelectorAll('[data-add-hours]').forEach(btn => btn.addEventListener('click', () => { 
+    const delta = Number(btn.dataset.addHours || 0); 
+    const input = el('eintragStunden'); 
+    if (input) {
+      const current = Number(input.value || 0); 
+      input.value = Math.max(0, current + delta); 
     }
+  }));
+  
+  // Month Navigation
+  const prevMonthBtn = el('prevMonthBtn');
+  const nextMonthBtn = el('nextMonthBtn');
+  if (prevMonthBtn) prevMonthBtn.addEventListener('click', () => shiftMonth(-1));
+  if (nextMonthBtn) nextMonthBtn.addEventListener('click', () => shiftMonth(1));
+  
+  // Person Select
+  const activePersonSelect = el('activePersonSelect');
+  if (activePersonSelect) activePersonSelect.addEventListener('change', e => { 
+    state.selectedKollegeId = e.target.value || null; 
+    clearEintragForm(); 
+    renderEmployeeStats(); 
+    renderEmployeeEntries(); 
+  });
+  
+  // Month Input
+  const monatInput = el('monatInput');
+  if (monatInput) monatInput.addEventListener('change', refreshAll);
+  
+  // Admin Person Filter
+  const adminPersonFilter = el('adminPersonFilter');
+  if (adminPersonFilter) {
+    adminPersonFilter.addEventListener('change', () => {
+      renderSummary();
+      renderAdminEntries();
+    });
+  }
+  
+  // Teilzeit Input (Mitarbeiteransicht)
+  const teilzeitInput = el('teilzeit');
+  if (teilzeitInput) {
+    teilzeitInput.addEventListener('input', updateStammdaten);
+    teilzeitInput.addEventListener('change', updateStammdaten);
+  }
+
+  // Admin Teilzeit Input
+  const adminTeilzeitInput = el('adminTeilzeit');
+  if (adminTeilzeitInput) {
+    adminTeilzeitInput.addEventListener('input', updateAdminStammdaten);
+    adminTeilzeitInput.addEventListener('change', updateAdminStammdaten);
+  }
+  
+  // Kollege Buttons
+  const saveKollegeBtn = el('saveKollegeBtn');
+  const clearKollegeBtn = el('clearKollegeBtn');
+  const deleteKollegeBtn = el('deleteKollegeBtn');
+  if (saveKollegeBtn) saveKollegeBtn.addEventListener('click', saveKollege);
+  if (clearKollegeBtn) clearKollegeBtn.addEventListener('click', () => { clearKollegeForm(); refreshPersonSelect(); renderEmployeeStats(); });
+  if (deleteKollegeBtn) deleteKollegeBtn.addEventListener('click', deleteKollege);
+  
+  // Eintrag Buttons
+  const saveEintragBtn = el('saveEintragBtn');
+  const clearEintragBtn = el('clearEintragBtn');
+  const deleteEintragBtn = el('deleteEintragBtn');
+  if (saveEintragBtn) saveEintragBtn.addEventListener('click', saveEintrag);
+  if (clearEintragBtn) clearEintragBtn.addEventListener('click', () => { clearEintragForm(); renderEmployeeEntries(); });
+  if (deleteEintragBtn) deleteEintragBtn.addEventListener('click', deleteEintrag);
+  
+  // Export/Import
+  const exportBackupBtn = el('exportBackupBtn');
+  const exportBackupBtnEmployee = el('exportBackupBtnEmployee');
+  const importBackupInput = el('importBackupInput');
+  if (exportBackupBtn) exportBackupBtn.addEventListener('click', exportBackup);
+  if (exportBackupBtnEmployee) exportBackupBtnEmployee.addEventListener('click', exportBackup);
+  if (importBackupInput) importBackupInput.addEventListener('change', e => { 
+    const file = e.target.files[0]; 
+    if (file) importBackup(file); 
+    e.target.value = ''; 
+  });
+  
+  // Admin Exports
+  const exportMonthSummaryBtn = el('exportMonthSummaryBtn');
+  const exportAccountingBtn = el('exportAccountingBtn');
+  const exportEntriesBtn = el('exportEntriesBtn');
+  if (exportMonthSummaryBtn) exportMonthSummaryBtn.addEventListener('click', exportMonthSummary);
+  if (exportAccountingBtn) exportAccountingBtn.addEventListener('click', exportAccounting);
+  if (exportEntriesBtn) exportEntriesBtn.addEventListener('click', exportEntries);
+  
+  // Employee Entries Table
+  const employeeEntriesBody = el('employeeEntriesBody');
+  if (employeeEntriesBody) employeeEntriesBody.addEventListener('click', e => {
+    const id = e.target.dataset.editEntry; 
+    if (!id) return;
+    const entry = state.eintraege.find(x => x.id === id); 
+    if (!entry) return;
+    state.selectedEintragId = id; 
+    fillEintragForm(entry); 
+    renderEmployeeEntries();
+  });
+  
+  // Theme Toggle
+  const themeToggle = el('themeToggle');
+  if (themeToggle) themeToggle.addEventListener('click', () => {
+    const root = document.documentElement;
+    const current = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const next = current === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next); 
+    themeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  
+  // Admin: Personen verwalten
+  const adminSaveBtn = el('adminSavePersonBtn');
+  const adminClearBtn = el('adminClearPersonBtn');
+  const adminDeleteBtn = el('adminDeletePersonBtn');
+  if (adminSaveBtn) adminSaveBtn.addEventListener('click', adminSavePerson);
+  const adminPersonSelect = el('adminPersonSelect');
+  if (adminPersonSelect) adminPersonSelect.addEventListener('change', adminSelectPerson);
+  if (adminClearBtn) adminClearBtn.addEventListener('click', adminClearPerson);
+  if (adminDeleteBtn) adminDeleteBtn.addEventListener('click', adminDeletePerson);
+  
+  // Lock Admin Button
+  const lockAdminBtn = el('lockAdminBtn');
+  if (lockAdminBtn) lockAdminBtn.addEventListener('click', () => {
+    PINManager.lockSession();
+    switchRole('employee');
+    alert('🔒 Verantwortlichenansicht wurde gesperrt.');
+  });
+}
+
       
         function shiftMonth(delta) {
       const raw = getMonth() + '-01';
