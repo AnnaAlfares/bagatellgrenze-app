@@ -983,22 +983,23 @@ if (!teilzeitInput || !vollzeitInput || !quoteInput || !grenzeInput) return;
   }
   activePersonSelect.value = state.selectedKollegeId || '';
   
-  // Admin-Filter aktualisieren
-  const adminFilter = el('adminPersonFilter');
-  if (adminFilter) {
-    const currentFilter = adminFilter.value;
-    adminFilter.innerHTML = '<option value="">Alle Personen</option>';
-    
-    state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
-      const opt = document.createElement('option');
-      opt.value = k.name;
-      opt.textContent = k.name;
-      if (k.name === currentFilter) opt.selected = true;
-      adminFilter.appendChild(opt);
-    });
-  }
 }
 
+      function refreshAdminFilter() {
+  const adminFilter = el('adminPersonFilter');
+  if (!adminFilter) return;
+  
+  const currentFilter = adminFilter.value;
+  adminFilter.innerHTML = '<option value="">Alle Personen</option>';
+  
+  state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
+    const opt = document.createElement('option');
+    opt.value = k.name;
+    opt.textContent = k.name;
+    if (k.name === currentFilter) opt.selected = true;
+    adminFilter.appendChild(opt);
+  });
+}
 
 
         function renderEmployeeStats() {
@@ -1763,6 +1764,7 @@ if (data.adminPIN) {
       saveState();
       refreshPersonSelect();
       refreshAdminPersonSelect();
+      refreshAdminFilter();
       renderEmployeeStats();
       renderEmployeeEntries();
       renderSummary();
