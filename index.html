@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
-   <head>
+<head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bagatellgrenze Mehrarbeit</title>
@@ -185,7 +185,6 @@
   .topbar{flex-direction:column;gap:var(--space-3);align-items:stretch}
   .toolbar{gap:var(--space-3);flex-direction:column}
   
-  /* ALLE BUTTONS GROSS - wie Stats-Zahlen */
   .button,.ghost,.danger{
     min-height:56px;
     padding:1rem 1.3rem;
@@ -194,14 +193,12 @@
     font-weight:700;
   }
   
-  /* Label-Buttons (für File-Input) auch groß */
   label.button{
     font-size:1.1rem;
     font-weight:700;
     min-height:56px;
   }
   
-  /* Stats: 2 Spalten mit großer Schrift */
   .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-3)}
   .stat{padding:var(--space-4)}
   .stat .k{font-size:.9rem;letter-spacing:.02em;font-weight:600}
@@ -212,14 +209,12 @@
   .section-head p{font-size:1rem}
   .panel{padding:var(--space-4)}
   
-  /* Labels GROSS */
   label{
     font-size:1.1rem;
     gap:.8rem;
     font-weight:700;
   }
   
-  /* Inputs und Selects GROSS - wie Stats-Zahlen */
   input,select,textarea{
     padding:1.1rem 1.2rem;
     font-size:1.1rem;
@@ -227,7 +222,6 @@
     font-weight:600;
   }
   
-  /* Select (Aktive Person) extra groß */
   select{
     font-size:1.1rem;
     font-weight:700;
@@ -235,10 +229,8 @@
   
   textarea{min-height:140px}
   
-  /* Grid immer 1-spaltig */
   .grid.two,.grid.three{grid-template-columns:1fr;gap:var(--space-4)}
   
-  /* Small Actions größer */
   .small-actions{gap:.8rem;margin-top:var(--space-4)}
   .small-actions button{
     padding:.9rem 1.2rem;
@@ -247,7 +239,6 @@
     font-weight:700;
   }
   
-  /* Quick-Add Buttons GROSS wie Haupt-Buttons */
   .quick-add{gap:.8rem;margin-top:.8rem}
   .quick-add button{
     min-height:56px;
@@ -256,7 +247,6 @@
     font-weight:700;
   }
   
-  /* Tabellen */
   table{min-width:600px}
   th,td{padding:.9rem 1rem;font-size:.95rem}
   .table-wrap::before{
@@ -270,7 +260,6 @@
     font-weight:700;
   }
   
-  /* Navigation Buttons groß */
   .nav-btn{
     padding:1rem 1.1rem;
     font-size:1.1rem;
@@ -282,10 +271,8 @@
   .banner{padding:var(--space-4);font-size:1rem;line-height:1.7}
   .pill{font-size:.9rem;padding:.5rem .9rem;font-weight:700}
   
-  /* Footer-Note größer */
   .footer-note{font-size:.95rem;line-height:1.8}
   
-  /* Monat-Navigation Buttons */
   #prevMonthBtn, #nextMonthBtn{
     min-width:56px !important;
     font-size:1.3rem !important;
@@ -335,90 +322,89 @@
       </aside>
 
       <main class="main">
-                <!-- MONATS- UND PERSONENAUSWAHL -->
-<section class="panel">
-  <div class="grid two">
-    <label>Monat auswählen
-      <div style="display: flex; gap: 0.5rem; align-items: center;">
-        <button class="ghost" id="prevMonthBtn" style="min-width: 44px;">◀</button>
-        <input id="monatInput" type="month" style="flex: 1;" />
-        <button class="ghost" id="nextMonthBtn" style="min-width: 44px;">▶</button>
-      </div>
-    </label>
+        <!-- MONATS- UND PERSONENAUSWAHL -->
+        <section class="panel">
+          <div class="grid two">
+            <label>Monat auswählen
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <button class="ghost" id="prevMonthBtn" style="min-width: 44px;">◀</button>
+                <input id="monatInput" type="month" style="flex: 1;" />
+                <button class="ghost" id="nextMonthBtn" style="min-width: 44px;">▶</button>
+              </div>
+            </label>
 
-    <label>Aktive Person
-      <select id="activePersonSelect">
-        <option value="">Person auswählen</option>
-      </select>
-    </label>
-  </div>
-</section>
+            <label>Aktive Person
+              <select id="activePersonSelect">
+                <option value="">Person auswählen</option>
+              </select>
+            </label>
+          </div>
+        </section>
 
-<section id="employeeView" class="grid">
+        <section id="employeeView" class="grid">
           <div class="stats">
-  <div class="stat"><div class="k">Stunden</div><div class="v" id="empMonthHours">0,0</div></div>
-  <div class="stat"><div class="k">Grenze</div><div class="v" id="empLimit">0,0</div></div>
-  <div class="stat"><div class="k" id="remainingLabel">Offen</div><div class="v" id="empRemaining">0,0</div></div>
-  <div class="stat"><div class="k">Vergütbar</div><div class="v" id="empPayable">0,0</div></div>
-</div>
-
+            <div class="stat"><div class="k">Stunden</div><div class="v" id="empMonthHours">0,0</div></div>
+            <div class="stat"><div class="k">Grenze</div><div class="v" id="empLimit">0,0</div></div>
+            <div class="stat"><div class="k" id="remainingLabel">Offen</div><div class="v" id="empRemaining">0,0</div></div>
+            <div class="stat"><div class="k">Vergütbar</div><div class="v" id="empPayable">0,0</div></div>
+          </div>
 
           <div class="grid two">
-              <!-- STAMMDATEN PANEL -->
-    <section class="panel">
-      <div class="section-head">
-        <div>
-          <h2>Eigene Stammdaten</h2>
-          <p>Ergänze deine Teilzeitstunden – Name und Kürzel wurden von der Verwaltung angelegt.</p>
-        </div>
-      </div>
+            <!-- STAMMDATEN PANEL -->
+            <section class="panel">
+              <div class="section-head">
+                <div>
+                  <h2>Eigene Stammdaten</h2>
+                  <p>Ergänze deine Teilzeitstunden – Name und Kürzel wurden von der Verwaltung angelegt.</p>
+                </div>
+              </div>
 
-      <label>Kürzel
-        <input id="kollegeKuerzel" type="text" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
-      </label>         
-      
-      <label>Name
-        <input id="kollegeName" type="text" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
-      </label>
+              <label>Kürzel
+                <input id="kollegeKuerzel" type="text" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+              </label>         
+              
+              <label>Name
+                <input id="kollegeName" type="text" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+              </label>
 
-      <label>Vollzeitstunden
-        <input id="vollzeit" type="number" value="28" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
-      </label>
+              <label>Vollzeitstunden
+                <input id="vollzeit" type="number" value="28" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+              </label>
 
-      <label>Teilzeitstunden
-        <input id="teilzeit" type="number" ...>
-      </label>
+              <label>Teilzeitstunden
+                <input id="teilzeit" type="number">
+              </label>
 
-      <label>Quote
-        <input id="quote" type="number" step="0.01" min="0" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
-      </label>
+              <label>Quote
+                <input id="quote" type="number" step="0.01" min="0" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+              </label>
 
-      <label>Bagatellgrenze (Monat)
-        <input id="grenze" type="number" step="0.1" min="0" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
-      </label>
+              <label>Bagatellgrenze (Monat)
+                <input id="grenze" type="number" step="0.1" min="0" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+              </label>
 
-      <div class="small-actions" style="margin-top:1rem">
-        <button class="button primary" id="saveKollegeBtn">Teilzeitstunden speichern</button>
-        <button class="ghost" id="clearKollegeBtn">Zurücksetzen</button>
-      </div>
+              <div class="small-actions" style="margin-top:1rem">
+                <button class="button primary" id="saveKollegeBtn">Teilzeitstunden speichern</button>
+                <button class="ghost" id="clearKollegeBtn">Zurücksetzen</button>
+              </div>
 
-      <div class="footer-note">
-        💡 <strong>Hinweise:</strong><br>
-        • Nur <strong>Teilzeitstunden</strong> sind änderbar<br>
-        • Quote und Bagatellgrenze werden automatisch berechnet (Quote = Teilzeit ÷ 28 | Grenze = 3 × Quote)<br>
-        • Name und Kürzel können nur in der Verantwortlichenansicht geändert werden
-      </div>
-    </section>
+              <div class="footer-note">
+                💡 <strong>Hinweise:</strong><br>
+                • Nur <strong>Teilzeitstunden</strong> sind änderbar<br>
+                • Quote und Bagatellgrenze werden automatisch berechnet (Quote = Teilzeit ÷ 28 | Grenze = 3 × Quote)<br>
+                • Name und Kürzel können nur in der Verantwortlichenansicht geändert werden
+              </div>
+            </section>
 
-   <!-- MEHRARBEITS-EINTRAG PANEL -->
-<section class="panel">
-  <div class="section-head">
-    <div>
-      <h2>Mehrarbeits-Eintrag</h2>
-      <p>Einzelne Einträge mit Datum und Bemerkung sichern die spätere Buchhaltung ab.</p>
-    </div>
-  </div>
-  <div class="grid two">
+            <!-- MEHRARBEITS-EINTRAG PANEL -->
+            <section class="panel">
+              <div class="section-head">
+                <div>
+                  <h2>Mehrarbeits-Eintrag</h2>
+                  <p>Einzelne Einträge mit Datum und Bemerkung sichern die spätere Buchhaltung ab.</p>
+                </div>
+              </div>
+              <div class="grid two">
                 <label>Datum<input id="eintragDatum" type="date" /></label>
                 <label>Stunden<input id="eintragStunden" type="number" step="0.5" min="0" /></label>
                 <div class="quick-add" style="align-self:end"><button type="button" data-add-hours="0.5">+0,5</button><button type="button" data-add-hours="1">+1</button><button type="button" data-add-hours="2">+2</button><button type="button" data-add-hours="-1">-1</button></div>
@@ -435,22 +421,22 @@
           <section class="panel">
             <div class="section-head"><div><h2>Eigene Einträge</h2><p>Nur Einträge der ausgewählten Person im gewählten Monat.</p></div></div>
             <div class="table-wrap"><table><thead><tr><th>Datum</th><th>Monat</th><th>Name</th><th>Stunden</th><th>Bemerkung</th><th>Aktion</th></tr></thead><tbody id="employeeEntriesBody"></tbody></table></div>
-                    <div class="section-head" style="margin-top:var(--space-6)">
-          <div>
-            <h2>Monatsübersicht</h2>
-            <p>Deine erfassten Stunden und der Status für den gewählten Monat.</p>
-          </div>
-        </div>
-        <div class="stats" style="margin-bottom:var(--space-5)">
-          <div class="stat"><div class="k">Stunden</div><div class="v" id="empMonthHoursDetail">0,0</div></div>
-          <div class="stat"><div class="k">Grenze</div><div class="v" id="empLimitDetail">0,0</div></div>
-          <div class="stat"><div class="k">Offen</div><div class="v" id="empRemainingDetail">0,0</div></div>
-          <div class="stat"><div class="k">Vergütbar</div><div class="v" id="empPayableDetail">0,0</div></div>
-        </div>
-        <div class="banner">
-          📁 Bitte exportiere dein Backup und leite es an die verantwortliche Person weiter.<br>
-          <button class="button primary" id="exportBackupBtnEmployee" style="margin-top:var(--space-3)">Backup exportieren</button>
-        </div>
+            <div class="section-head" style="margin-top:var(--space-6)">
+              <div>
+                <h2>Monatsübersicht</h2>
+                <p>Deine erfassten Stunden und der Status für den gewählten Monat.</p>
+              </div>
+            </div>
+            <div class="stats" style="margin-bottom:var(--space-5)">
+              <div class="stat"><div class="k">Stunden</div><div class="v" id="empMonthHoursDetail">0,0</div></div>
+              <div class="stat"><div class="k">Grenze</div><div class="v" id="empLimitDetail">0,0</div></div>
+              <div class="stat"><div class="k">Offen</div><div class="v" id="empRemainingDetail">0,0</div></div>
+              <div class="stat"><div class="k">Vergütbar</div><div class="v" id="empPayableDetail">0,0</div></div>
+            </div>
+            <div class="banner">
+              📁 Bitte exportiere dein Backup und leite es an die verantwortliche Person weiter.<br>
+              <button class="button primary" id="exportBackupBtnEmployee" style="margin-top:var(--space-3)">Backup exportieren</button>
+            </div>
           </section>
         </section>
 
@@ -459,113 +445,154 @@
             🔒 Verantwortlichenansicht: Backups aus Kollegien zusammenführen, Konflikte prüfen und Monatsdaten für die Abrechnung exportieren.
             <button class="danger" id="lockAdminBtn" style="margin-top:var(--space-3)">🔒 Ansicht sperren</button>
           </div>
-                    <!-- Personen verwalten -->
+
+          <!-- Personen verwalten -->
           <section class="panel">
-  <div class="section-head">
-    <div>
-      <h2>Personen verwalten</h2>
-      <p>Hier können neue Kolleg:innen angelegt werden. Teilzeitstunden werden direkt hier eingetragen; Quote und Bagatellgrenze werden automatisch berechnet.</p>
-    </div>
-  </div>
+            <div class="section-head">
+              <div>
+                <h2>Personen verwalten</h2>
+                <p>Hier können neue Kolleg:innen angelegt werden. Teilzeitstunden werden direkt hier eingetragen; Quote und Bagatellgrenze werden automatisch berechnet.</p>
+              </div>
+            </div>
 
-  <div class="grid two">
-    <label>Kürzel
-      <input id="adminKuerzel" type="text" placeholder="z. B. MU" maxlength="3" style="text-transform: uppercase;">
-    </label>
+            <div class="grid two">
+              <label>Kürzel
+                <input id="adminKuerzel" type="text" placeholder="z. B. MU" maxlength="3" style="text-transform: uppercase;">
+              </label>
 
-    <label>Name
-      <input id="adminName" type="text" placeholder="z. B. Frau Muster">
-    </label>
+              <label>Name
+                <input id="adminName" type="text" placeholder="z. B. Frau Muster">
+              </label>
 
-    <label>Vollzeitstunden
-      <input id="adminVollzeit" type="number" value="28" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
-    </label>
+              <label>Vollzeitstunden
+                <input id="adminVollzeit" type="number" value="28" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+              </label>
 
-    <label>Teilzeitstunden
-      <input id="adminTeilzeit" type="number" step="0.1" min="0" max="28" placeholder="z. B. 14">
-    </label>
+              <label>Teilzeitstunden
+                <input id="adminTeilzeit" type="number" step="0.1" min="0" max="28" placeholder="z. B. 14">
+              </label>
 
-    <label>Quote
-      <input id="adminQuote" type="number" step="0.01" min="0" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
-    </label>
+              <label>Quote
+                <input id="adminQuote" type="number" step="0.01" min="0" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+              </label>
 
-    <label>Bagatellgrenze (Monat)
-      <input id="adminGrenze" type="number" step="0.1" min="0" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
-    </label>
-  </div>
+              <label>Bagatellgrenze (Monat)
+                <input id="adminGrenze" type="number" step="0.1" min="0" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+              </label>
+            </div>
 
-  <label style="margin-top: 1rem;">Person auswählen (zum Bearbeiten)
-    <select id="adminPersonSelect" style="width: 100%;">
-      <option value="">Neue Person anlegen...</option>
-    </select>
-  </label>
+            <label style="margin-top: 1rem;">Person auswählen (zum Bearbeiten)
+              <select id="adminPersonSelect" style="width: 100%;">
+                <option value="">Neue Person anlegen...</option>
+              </select>
+            </label>
 
-  <div class="small-actions" style="margin-top:1rem">
-    <button class="button primary" id="adminSavePersonBtn">Speichern</button>
-    <button class="ghost" id="adminClearPersonBtn">Neu anlegen</button>
-    <button class="danger" id="adminDeletePersonBtn">Person löschen</button>
-  </div>
+            <div class="small-actions" style="margin-top:1rem">
+              <button class="button primary" id="adminSavePersonBtn">Speichern</button>
+              <button class="ghost" id="adminClearPersonBtn">Neu anlegen</button>
+              <button class="danger" id="adminDeletePersonBtn">Person löschen</button>
+            </div>
 
-  <div class="footer-note">
-    Tipp: Lege alle Kolleg:innen mit Name, Kürzel und Teilzeitstunden an. Quote und Bagatellgrenze werden automatisch berechnet.
-  </div>
-</section>
+            <div class="footer-note">
+              Tipp: Lege alle Kolleg:innen mit Name, Kürzel und Teilzeitstunden an. Quote und Bagatellgrenze werden automatisch berechnet.
+            </div>
+          </section>
+
+          <!-- EINTRÄGE VERWALTEN (NEU!) -->
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Einträge verwalten</h2>
+                <p>Einträge für beliebige Personen erstellen, bearbeiten oder löschen.</p>
+              </div>
+            </div>
+
+            <label>Person auswählen
+              <select id="adminEntryPersonSelect">
+                <option value="">Bitte Person auswählen...</option>
+              </select>
+            </label>
+
+            <div class="grid two" style="margin-top:var(--space-4)">
+              <label>Datum<input id="adminEntryDatum" type="date" /></label>
+              <label>Stunden<input id="adminEntryStunden" type="number" step="0.5" min="0" /></label>
+              <label style="grid-column:1 / -1">Bemerkung<textarea id="adminEntryBemerkung" placeholder="z. B. Vertretung in Klasse 4b"></textarea></label>
+            </div>
+
+            <div class="small-actions" style="margin-top:1rem">
+              <button class="button primary" id="adminSaveEntryBtn">Eintrag speichern</button>
+              <button class="ghost" id="adminClearEntryBtn">Leeren</button>
+            </div>
+
+            <div class="section-head" style="margin-top:var(--space-6)">
+              <div><h2>Einträge der ausgewählten Person</h2></div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Datum</th><th>Person</th><th>Stunden</th><th>Bemerkung</th><th>Aktionen</th></tr>
+                </thead>
+                <tbody id="adminManageEntriesBody"></tbody>
+              </table>
+            </div>
+          </section>
 
           <div class="import-report panel" id="importReport"><div class="status-card"><div class="k">Neu</div><div class="v" id="reportNew">0</div></div><div class="status-card"><div class="k">Aktualisiert</div><div class="v" id="reportUpdated">0</div></div><div class="status-card"><div class="k">Konflikte</div><div class="v" id="reportConflicts">0</div></div></div>
 
           <section class="panel">
-  <label style="margin-bottom:var(--space-4)">Person filtern
-    <select id="adminPersonFilter">
-      <option value="">Alle Personen</option>
-    </select>
-  </label>
+            <label style="margin-bottom:var(--space-4)">Person filtern
+              <select id="adminPersonFilter">
+                <option value="">Alle Personen</option>
+              </select>
+            </label>
 
-  <div class="section-head">
-    <div>
-      <h2>Monatsübersicht</h2>
-      <p>Automatisch aus allen Einträgen berechnet.</p>
-    </div>
-    <div class="small-actions">
-      <button class="ghost" id="exportMonthSummaryBtn">Monatsübersicht CSV</button>
-      <button class="ghost" id="exportAccountingBtn">Abrechnungsstunden CSV</button>
-    </div>
-  </div>
-
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Monat</th>
-          <th>Stunden</th>
-          <th>Bagatellgrenze</th>
-          <th>Noch offen</th>
-          <th>Vergütbar</th>
-          <th>Hinweis</th>
-        </tr>
-      </thead>
-      <tbody id="summaryBody"></tbody>
-    </table>
-  </div>
-
-                      <div class="footer-note" style="margin-top:var(--space-4);padding:var(--space-4);background:var(--color-primary-highlight);border-radius:var(--radius-lg);border:1px solid var(--color-primary)">
-            💡 <strong>Wichtig für die Abrechnung:</strong><br>
-            Mehrarbeitsstunden werden unterschiedlich vergütet:<br>
-            • <strong>Bis zum vollen Deputat (28 Std.):</strong> Höherer Tarif<br>
-            • <strong>Über das volle Deputat hinaus:</strong> Günstigerer Tarif<br>
-            → Prüfen Sie die Spalte "Hinweis" auf Tarif-Splits! Die CSV-Datei enthält separate Spalten für beide Tarife.
-          </div>
-
-          </section>
-                  <section class="panel">
-          <div class="section-head">
-            <div>
-              <h2>Vertretungsplanung – Hinweise</h2>
-              <p>Wer braucht noch wie viele Stunden, um die Bagatellgrenze zu erreichen?</p>
+            <div class="section-head">
+              <div>
+                <h2>Monatsübersicht</h2>
+                <p>Automatisch aus allen Einträgen berechnet.</p>
+              </div>
+              <div class="small-actions">
+                <button class="ghost" id="exportMonthSummaryBtn">Monatsübersicht CSV</button>
+                <button class="ghost" id="exportAccountingBtn">Abrechnungsstunden CSV</button>
+              </div>
             </div>
-          </div>
-          <div id="vertretungsHinweisBody"></div>
-        </section>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Monat</th>
+                    <th>Stunden</th>
+                    <th>Bagatellgrenze</th>
+                    <th>Noch offen</th>
+                    <th>Vergütbar</th>
+                    <th>Hinweis</th>
+                  </tr>
+                </thead>
+                <tbody id="summaryBody"></tbody>
+              </table>
+            </div>
+
+            <div class="footer-note" style="margin-top:var(--space-4);padding:var(--space-4);background:var(--color-primary-highlight);border-radius:var(--radius-lg);border:1px solid var(--color-primary)">
+              💡 <strong>Wichtig für die Abrechnung:</strong><br>
+              Mehrarbeitsstunden werden unterschiedlich vergütet:<br>
+              • <strong>Bis zum vollen Deputat (28 Std.):</strong> Höherer Tarif<br>
+              • <strong>Über das volle Deputat hinaus:</strong> Günstigerer Tarif<br>
+              → Prüfen Sie die Spalte "Hinweis" auf Tarif-Splits! Die CSV-Datei enthält separate Spalten für beide Tarife.
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Vertretungsplanung – Hinweise</h2>
+                <p>Wer braucht noch wie viele Stunden, um die Bagatellgrenze zu erreichen?</p>
+              </div>
+            </div>
+            <div id="vertretungsHinweisBody"></div>
+          </section>
 
           <section class="panel">
             <div class="section-head"><div><h2>Konflikte beim Import</h2><p>Wenn lokale und importierte Datensätze dieselbe ID, aber unterschiedliche Inhalte haben, wird das hier protokolliert.</p></div></div>
@@ -622,7 +649,8 @@
       <p id="pinSetupError" style="color: var(--color-error); margin-top: 10px; display: none; font-weight: 700;"></p>
     </div>
   </div>
-    <!-- Wer bist du Dialog -->
+
+  <!-- Wer bist du Dialog -->
   <div id="whoAreYouDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center;">
     <div style="background: var(--color-surface); padding: 30px; border-radius: var(--radius-xl); max-width: 500px; width: 90%; border: 1px solid var(--color-border);">
       <h3 style="margin-top:0">👤 Wer bist du?</h3>
@@ -687,13 +715,13 @@
         return sessionStorage.getItem('adminUnlocked') === 'true';
       }
     };
+
     // ========== WER BIST DU DIALOG ==========
     const WhoAreYouDialog = {
       show() {
         const dialog = document.getElementById('whoAreYouDialog');
         const select = document.getElementById('whoAreYouSelect');
         
-        // Liste mit allen Personen füllen
         select.innerHTML = '<option value="">Bitte auswählen...</option>';
         state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
           const opt = document.createElement('option');
@@ -719,7 +747,6 @@
             return;
           }
           
-          // Auswahl speichern
           localStorage.setItem('myPersonId', selectedId);
           state.selectedKollegeId = selectedId;
           
@@ -729,7 +756,6 @@
         });
       }
     };
-
 
     const PINDialog = {
       show() {
@@ -802,8 +828,17 @@
       }
     };
 
-    // ========== BESTEHENDER CODE ==========
-    const state = { kollegen: [], eintraege: [], roleView: 'employee', selectedKollegeId: null, selectedEintragId: null, conflicts: [], importReport: { neu: 0, aktualisiert: 0, konflikte: 0 } };
+    // ========== STATE ==========
+    const state = { 
+      kollegen: [], 
+      eintraege: [], 
+      roleView: 'employee', 
+      selectedKollegeId: null, 
+      selectedEintragId: null, 
+      selectedAdminEntryId: null,
+      conflicts: [], 
+      importReport: { neu: 0, aktualisiert: 0, konflikte: 0 } 
+    };
 
     const el = id => document.getElementById(id);
     const fmt = n => Number(n || 0).toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -834,55 +869,51 @@
         state.importReport = data.importReport || { neu: 0, aktualisiert: 0, konflikte: 0 };
       } catch (e) { console.error(e); }
     }
-const VOLLVZEIT_STUNDEN = 28;
-const BAGATELL_VOLLZEIT = 3;
 
-function updateStammdaten() {
-  const teilzeitInput = document.getElementById('teilzeit');
-  const vollzeitInput = document.getElementById('vollzeit');
-  const quoteInput = document.getElementById('quote');
-  const grenzeInput = document.getElementById('grenze');
-if (!teilzeitInput || !vollzeitInput || !quoteInput || !grenzeInput) return;
-  const teilzeit = Number.parseFloat(teilzeitInput.value);
+    const VOLLVZEIT_STUNDEN = 28;
+    const BAGATELL_VOLLZEIT = 3;
 
-  if (!Number.isNaN(teilzeit) && teilzeit > 0 && teilzeit <= VOLLVZEIT_STUNDEN) {
-    vollzeitInput.value = VOLLVZEIT_STUNDEN;
+    function updateStammdaten() {
+      const teilzeitInput = document.getElementById('teilzeit');
+      const vollzeitInput = document.getElementById('vollzeit');
+      const quoteInput = document.getElementById('quote');
+      const grenzeInput = document.getElementById('grenze');
+      if (!teilzeitInput || !vollzeitInput || !quoteInput || !grenzeInput) return;
+      const teilzeit = Number.parseFloat(teilzeitInput.value);
 
-    const quote = teilzeit / VOLLVZEIT_STUNDEN;
-    quoteInput.value = quote.toFixed(2);
-
-    const grenze = BAGATELL_VOLLZEIT * quote;
-    grenzeInput.value = grenze.toFixed(2);
-
+      if (!Number.isNaN(teilzeit) && teilzeit > 0 && teilzeit <= VOLLVZEIT_STUNDEN) {
+        vollzeitInput.value = VOLLVZEIT_STUNDEN;
+        const quote = teilzeit / VOLLVZEIT_STUNDEN;
+        quoteInput.value = quote.toFixed(2);
+        const grenze = BAGATELL_VOLLZEIT * quote;
+        grenzeInput.value = grenze.toFixed(2);
       } else {
-    quoteInput.value = '';
-    grenzeInput.value = '';
-  }
-}
+        quoteInput.value = '';
+        grenzeInput.value = '';
+      }
+    }
 
     function updateAdminStammdaten() {
-  const teilzeitInput = el('adminTeilzeit');
-  const vollzeitInput = el('adminVollzeit');
-  const quoteInput = el('adminQuote');
-  const grenzeInput = el('adminGrenze');
+      const teilzeitInput = el('adminTeilzeit');
+      const vollzeitInput = el('adminVollzeit');
+      const quoteInput = el('adminQuote');
+      const grenzeInput = el('adminGrenze');
 
-  if (!teilzeitInput || !vollzeitInput || !quoteInput || !grenzeInput) return;
+      if (!teilzeitInput || !vollzeitInput || !quoteInput || !grenzeInput) return;
 
-  const teilzeit = Number.parseFloat(teilzeitInput.value);
-  vollzeitInput.value = VOLLVZEIT_STUNDEN;
+      const teilzeit = Number.parseFloat(teilzeitInput.value);
+      vollzeitInput.value = VOLLVZEIT_STUNDEN;
 
-  if (!Number.isNaN(teilzeit) && teilzeit >= 0 && teilzeit <= VOLLVZEIT_STUNDEN) {
-    const quote = teilzeit / VOLLVZEIT_STUNDEN;
-    const grenze = BAGATELL_VOLLZEIT * quote;
-
-    quoteInput.value = quote.toFixed(2);
-    grenzeInput.value = grenze.toFixed(2);
-  } else {
-    quoteInput.value = '';
-    grenzeInput.value = '';
-  }
-}
-    
+      if (!Number.isNaN(teilzeit) && teilzeit >= 0 && teilzeit <= VOLLVZEIT_STUNDEN) {
+        const quote = teilzeit / VOLLVZEIT_STUNDEN;
+        const grenze = BAGATELL_VOLLZEIT * quote;
+        quoteInput.value = quote.toFixed(2);
+        grenzeInput.value = grenze.toFixed(2);
+      } else {
+        quoteInput.value = '';
+        grenzeInput.value = '';
+      }
+    }
 
     function downloadText(filename, content, type = 'application/json;charset=utf-8') {
       const blob = new Blob([content], { type });
@@ -901,9 +932,9 @@ if (!teilzeitInput || !vollzeitInput || !quoteInput || !grenzeInput) return;
       return state.kollegen.find(k => k.id === state.selectedKollegeId) || null;
     }
     function getMonth() {
-  const monatInput = el('monatInput');
-  return monatInput ? monatInput.value : new Date().toISOString().slice(0,7); // ✅ Fallback
-}
+      const monatInput = el('monatInput');
+      return monatInput ? monatInput.value : new Date().toISOString().slice(0,7);
+    }
 
     function entriesFor(name, month) {
       return state.eintraege.filter(e => e.name === name && e.monat === month).sort(byDate);
@@ -916,7 +947,7 @@ if (!teilzeitInput || !vollzeitInput || !quoteInput || !grenzeInput) return;
       return { sum, rest, payable, hint };
     }
 
-        function fillKollegeForm(k) {
+    function fillKollegeForm(k) {
       el('kollegeKuerzel').value = k?.kuerzel || '';
       el('kollegeName').value = k?.name || '';
       el('vollzeit').value = k?.vollzeit || 28;
@@ -933,19 +964,17 @@ if (!teilzeitInput || !vollzeitInput || !quoteInput || !grenzeInput) return;
         el('grenze').value = k?.grenze ?? '';
       }
       
-      // In Mitarbeiteransicht: Felder sperren
       if (state.roleView === 'employee') {
         el('kollegeKuerzel').readOnly = true;
         el('kollegeName').readOnly = true;
         el('vollzeit').readOnly = true;
-        el('teilzeit').readOnly = false; // NUR Teilzeit editierbar
+        el('teilzeit').readOnly = false;
         el('quote').readOnly = true;
         el('grenze').readOnly = true;
       } else {
-        // In Admin-Ansicht: Alle Felder editierbar
         el('kollegeKuerzel').readOnly = false;
         el('kollegeName').readOnly = false;
-        el('vollzeit').readOnly = true; // Vollzeit immer 28
+        el('vollzeit').readOnly = true;
         el('teilzeit').readOnly = false;
         el('quote').readOnly = true;
         el('grenze').readOnly = true;
@@ -960,145 +989,138 @@ if (!teilzeitInput || !vollzeitInput || !quoteInput || !grenzeInput) return;
     function clearKollegeForm() { state.selectedKollegeId = null; fillKollegeForm(null); }
     function clearEintragForm() { state.selectedEintragId = null; fillEintragForm(null); }
 
-            function refreshPersonSelect() {
-  const activePersonSelect = el('activePersonSelect');
-  if (!activePersonSelect) return;
-  
-  // In Mitarbeiteransicht: Nur eigene Person
-  if (state.roleView === 'employee') {
-    const myPersonId = localStorage.getItem('myPersonId');
-    
-    if (myPersonId) {
-      const myPerson = state.kollegen.find(k => k.id === myPersonId);
-      if (myPerson) {
-        state.selectedKollegeId = myPersonId;
-        activePersonSelect.innerHTML = `<option value="${myPerson.id}">${myPerson.name}</option>`;
+    function refreshPersonSelect() {
+      const activePersonSelect = el('activePersonSelect');
+      if (!activePersonSelect) return;
+      
+      if (state.roleView === 'employee') {
+        const myPersonId = localStorage.getItem('myPersonId');
+        
+        if (myPersonId) {
+          const myPerson = state.kollegen.find(k => k.id === myPersonId);
+          if (myPerson) {
+            state.selectedKollegeId = myPersonId;
+            activePersonSelect.innerHTML = `<option value="${myPerson.id}">${myPerson.name}</option>`;
+            activePersonSelect.disabled = true;
+            return;
+          }
+        }
+        
+        activePersonSelect.innerHTML = '<option value="">Bitte Person auswählen</option>';
         activePersonSelect.disabled = true;
+
+        const dialog = document.getElementById('whoAreYouDialog');
+        if (state.kollegen.length > 0 && dialog && dialog.style.display !== 'flex') {
+          WhoAreYouDialog.show();
+        }
         return;
       }
+      
+      activePersonSelect.disabled = false;
+      activePersonSelect.innerHTML = '';
+      
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = state.kollegen.length ? 'Person auswählen' : 'Noch keine Person angelegt';
+      activePersonSelect.appendChild(placeholder);
+      
+      state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
+        const opt = document.createElement('option');
+        opt.value = k.id;
+        opt.textContent = k.name;
+        if (k.id === state.selectedKollegeId) opt.selected = true;
+        activePersonSelect.appendChild(opt);
+      });
+      
+      if (!state.selectedKollegeId && state.kollegen[0]) {
+        state.selectedKollegeId = state.kollegen[0].id;
+      }
+      activePersonSelect.value = state.selectedKollegeId || '';
     }
-    
-    activePersonSelect.innerHTML = '<option value="">Bitte Person auswählen</option>';
-    activePersonSelect.disabled = true;
 
-    const dialog = document.getElementById('whoAreYouDialog');
-    if (state.kollegen.length > 0 && dialog && dialog.style.display !== 'flex') {
-      WhoAreYouDialog.show();
+    function refreshAdminFilter() {
+      const adminFilter = el('adminPersonFilter');
+      if (!adminFilter) return;
+      
+      const currentFilter = adminFilter.value;
+      adminFilter.innerHTML = '<option value="">Alle Personen</option>';
+      
+      state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
+        const opt = document.createElement('option');
+        opt.value = k.name;
+        opt.textContent = k.name;
+        if (k.name === currentFilter) opt.selected = true;
+        adminFilter.appendChild(opt);
+      });
     }
-    return;
-  }
-  
-  // In Admin-Ansicht: Alle Personen
-  activePersonSelect.disabled = false;
-  activePersonSelect.innerHTML = '';
-  
-  const placeholder = document.createElement('option');
-  placeholder.value = '';
-  placeholder.textContent = state.kollegen.length ? 'Person auswählen' : 'Noch keine Person angelegt';
-  activePersonSelect.appendChild(placeholder);
-  
-  state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
-    const opt = document.createElement('option');
-    opt.value = k.id;
-    opt.textContent = k.name;
-    if (k.id === state.selectedKollegeId) opt.selected = true;
-    activePersonSelect.appendChild(opt);
-  });
-  
-  if (!state.selectedKollegeId && state.kollegen[0]) {
-    state.selectedKollegeId = state.kollegen[0].id;
-  }
-  activePersonSelect.value = state.selectedKollegeId || '';
-  
-}
 
-      function refreshAdminFilter() {
-  const adminFilter = el('adminPersonFilter');
-  if (!adminFilter) return;
-  
-  const currentFilter = adminFilter.value;
-  adminFilter.innerHTML = '<option value="">Alle Personen</option>';
-  
-  state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
-    const opt = document.createElement('option');
-    opt.value = k.name;
-    opt.textContent = k.name;
-    if (k.name === currentFilter) opt.selected = true;
-    adminFilter.appendChild(opt);
-  });
-}
+    function renderEmployeeStats() {
+      const k = getSelectedKollege();
+      fillKollegeForm(k);
 
+      const monatInput = el('monatInput');
+      const monat = monatInput ? monatInput.value : new Date().toISOString().slice(0,7);
+      
+      if (!monat || !k) {
+        [
+          'empMonthHours',
+          'empLimit',
+          'empRemaining',
+          'empPayable',
+          'empMonthHoursDetail',
+          'empLimitDetail',
+          'empRemainingDetail',
+          'empPayableDetail'
+        ].forEach(id => {
+          const node = el(id);
+          if (node) node.textContent = fmt(0);
+        });
 
-        function renderEmployeeStats() {
-  const k = getSelectedKollege();
-  fillKollegeForm(k);
+        const lbl = el('remainingLabel');
+        if (lbl) lbl.textContent = 'Offen';
+        return;
+      }
 
-  const monatInput = el('monatInput');
-  const monat = monatInput ? monatInput.value : new Date().toISOString().slice(0,7);
-  
-  if (!monat || !k) {
-    [
-      'empMonthHours',
-      'empLimit',
-      'empRemaining',
-      'empPayable',
-      'empMonthHoursDetail',
-      'empLimitDetail',
-      'empRemainingDetail',
-      'empPayableDetail'
-    ].forEach(id => {
-      const node = el(id);
-      if (node) node.textContent = fmt(0);
-    });
+      const entries = state.eintraege.filter(e =>
+        e.name === k.name && (e.monat === monat || (e.datum || '').startsWith(monat))
+      );
 
-    const lbl = el('remainingLabel');
-    if (lbl) lbl.textContent = 'Offen';
-    return;
-  }
+      const summe = entries.reduce((acc, e) => acc + Number(e.stunden || 0), 0);
+      const grenze = Number(k.grenze || 0);
+      const remaining = Math.max(grenze - summe, 0);
+      const payable = summe > grenze ? summe : 0;
 
-  const entries = state.eintraege.filter(e =>
-    e.name === k.name && (e.monat === monat || (e.datum || '').startsWith(monat))
-  );
+      const values = {
+        empMonthHours: summe,
+        empLimit: grenze,
+        empRemaining: remaining,
+        empPayable: payable,
+        empMonthHoursDetail: summe,
+        empLimitDetail: grenze,
+        empRemainingDetail: remaining,
+        empPayableDetail: payable
+      };
 
-  const summe = entries.reduce((acc, e) => acc + Number(e.stunden || 0), 0);
-  const grenze = Number(k.grenze || 0);
-  const remaining = Math.max(grenze - summe, 0);
-  const payable = summe > grenze ? summe : 0;
+      Object.entries(values).forEach(([id, value]) => {
+        const node = el(id);
+        if (node) node.textContent = fmt(value);
+      });
 
-  const values = {
-    empMonthHours: summe,
-    empLimit: grenze,
-    empRemaining: remaining,
-    empPayable: payable,
-    empMonthHoursDetail: summe,
-    empLimitDetail: grenze,
-    empRemainingDetail: remaining,
-    empPayableDetail: payable
-  };
+      const lbl = el('remainingLabel');
+      if (lbl) {
+        lbl.textContent = 'Offen';
+      }
 
-  Object.entries(values).forEach(([id, value]) => {
-    const node = el(id);
-    if (node) node.textContent = fmt(value);
-  });
-
-  // Label RICHTIG setzen: "Offen" wenn noch nicht vergütbar, sonst bleibt "Offen"
-  const lbl = el('remainingLabel');
-  if (lbl) {
-    lbl.textContent = 'Offen';  // Bleibt immer "Offen"
-  }
-
-  // Farben setzen
-  const empRemaining = el('empRemaining');
-  const empRemainingDetail = el('empRemainingDetail');
-  const empPayable = el('empPayable');
-  const empPayableDetail = el('empPayableDetail');
-  
-  if (empRemaining) empRemaining.style.color = remaining === 0 ? 'var(--color-success)' : 'inherit';
-  if (empRemainingDetail) empRemainingDetail.style.color = remaining === 0 ? 'var(--color-success)' : 'inherit';
-  if (empPayable) empPayable.style.color = payable > 0 ? 'var(--color-success)' : 'inherit';
-  if (empPayableDetail) empPayableDetail.style.color = payable > 0 ? 'var(--color-success)' : 'inherit';
-}
-
+      const empRemaining = el('empRemaining');
+      const empRemainingDetail = el('empRemainingDetail');
+      const empPayable = el('empPayable');
+      const empPayableDetail = el('empPayableDetail');
+      
+      if (empRemaining) empRemaining.style.color = remaining === 0 ? 'var(--color-success)' : 'inherit';
+      if (empRemainingDetail) empRemainingDetail.style.color = remaining === 0 ? 'var(--color-success)' : 'inherit';
+      if (empPayable) empPayable.style.color = payable > 0 ? 'var(--color-success)' : 'inherit';
+      if (empPayableDetail) empPayableDetail.style.color = payable > 0 ? 'var(--color-success)' : 'inherit';
+    }
 
     function renderEmployeeEntries() {
       const body = el('employeeEntriesBody'); body.innerHTML = '';
@@ -1118,165 +1140,156 @@ if (!teilzeitInput || !vollzeitInput || !quoteInput || !grenzeInput) return;
     }
 
     function renderSummary() {
-  const body = el('summaryBody');
-  if (!body) return; // ← Element existiert nicht (Admin-View ist hidden)
-  
-  body.innerHTML = '';
-  
-  const month = getMonth();
-  const filterName = el('adminPersonFilter') ? el('adminPersonFilter').value : '';
-  const people = state.kollegen
-    .filter(k => !filterName || k.name === filterName)
-    .slice().sort((a,b) => a.name.localeCompare(b.name,'de'));
-  
-  if (!people.length) { 
-    body.innerHTML = '<tr><td colspan="7" class="row-muted">Noch keine Kolleg:innen angelegt.</td></tr>'; 
-    return; 
-  }
-  
-  people.forEach(k => {
-    const st = monthStats(k, month);
-    const cls = st.payable > 0 ? 'positive' : '';
-    
-    // Tarif-Split berechnen (mit Sicherheitsprüfungen)
-    const teilzeit = Number(k.teilzeit || 0);
-    const gesamtStunden = teilzeit + st.sum;
-    const ueberVollzeit = gesamtStunden > 28;
-    
-    let hint = st.hint;
-    
-    if (ueberVollzeit && st.payable > 0) {
-      const stundenBisVollzeit = Math.max(28 - teilzeit, 0);
-      const stundenUeberVollzeit = Math.max(st.sum - stundenBisVollzeit, 0);
+      const body = el('summaryBody');
+      if (!body) return;
       
-      if (stundenBisVollzeit > 0) {
-        hint = `⚠️ Tarif-Split: ${fmt(stundenBisVollzeit)} Std. (bis 28) + ${fmt(stundenUeberVollzeit)} Std. (über 28)`;
-      } else {
-        hint = `⚠️ Alle ${fmt(stundenUeberVollzeit)} Std. über Vollzeit (günstigerer Tarif)`;
+      body.innerHTML = '';
+      
+      const month = getMonth();
+      const filterName = el('adminPersonFilter') ? el('adminPersonFilter').value : '';
+      const people = state.kollegen
+        .filter(k => !filterName || k.name === filterName)
+        .slice().sort((a,b) => a.name.localeCompare(b.name,'de'));
+      
+      if (!people.length) { 
+        body.innerHTML = '<tr><td colspan="7" class="row-muted">Noch keine Kolleg:innen angelegt.</td></tr>'; 
+        return; 
       }
+      
+      people.forEach(k => {
+        const st = monthStats(k, month);
+        const cls = st.payable > 0 ? 'positive' : '';
+        
+        const teilzeit = Number(k.teilzeit || 0);
+        const gesamtStunden = teilzeit + st.sum;
+        const ueberVollzeit = gesamtStunden > 28;
+        
+        let hint = st.hint;
+        
+        if (ueberVollzeit && st.payable > 0) {
+          const stundenBisVollzeit = Math.max(28 - teilzeit, 0);
+          const stundenUeberVollzeit = Math.max(st.sum - stundenBisVollzeit, 0);
+          
+          if (stundenBisVollzeit > 0) {
+            hint = `⚠️ Tarif-Split: ${fmt(stundenBisVollzeit)} Std. (bis 28) + ${fmt(stundenUeberVollzeit)} Std. (über 28)`;
+          } else {
+            hint = `⚠️ Alle ${fmt(stundenUeberVollzeit)} Std. über Vollzeit (günstigerer Tarif)`;
+          }
+        }
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${k.name}</td><td>${month}</td><td>${fmt(st.sum)}</td><td>${fmt(k.grenze)}</td><td>${fmt(st.rest)}</td><td>${fmt(st.payable)}</td><td class="${cls}">${hint}</td>`;
+        body.appendChild(tr);
+      });
     }
-    
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${k.name}</td><td>${month}</td><td>${fmt(st.sum)}</td><td>${fmt(k.grenze)}</td><td>${fmt(st.rest)}</td><td>${fmt(st.payable)}</td><td class="${cls}">${hint}</td>`;
-    body.appendChild(tr);
-  });
-}
-
-
 
     function renderAdminEntries() {
-  const body = el('adminEntriesBody');
-  if (!body) return;
-  
-  body.innerHTML = '';
-  
-  const filterName = el('adminPersonFilter') ? el('adminPersonFilter').value : '';
-  const rows = state.eintraege
-    .filter(e => !filterName || e.name === filterName)
-    .slice().sort((a,b) => (b.datum||'').localeCompare(a.datum||''));
-  
-  if (!rows.length) { 
-    body.innerHTML = '<tr><td colspan="6" class="row-muted">Noch keine Einträge vorhanden.</td></tr>'; 
-    return; 
-  }
-  
-  rows.forEach(r => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${r.datum}</td><td>${r.monat}</td><td>${r.name}</td><td>${fmt(r.stunden)}</td><td>${r.bemerkung || ''}</td><td>${new Date(r.updatedAt).toLocaleString('de-DE')}</td>`;
-    body.appendChild(tr);
-  });
-}
+      const body = el('adminEntriesBody');
+      if (!body) return;
+      
+      body.innerHTML = '';
+      
+      const filterName = el('adminPersonFilter') ? el('adminPersonFilter').value : '';
+      const rows = state.eintraege
+        .filter(e => !filterName || e.name === filterName)
+        .slice().sort((a,b) => (b.datum||'').localeCompare(a.datum||''));
+      
+      if (!rows.length) { 
+        body.innerHTML = '<tr><td colspan="6" class="row-muted">Noch keine Einträge vorhanden.</td></tr>'; 
+        return; 
+      }
+      
+      rows.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${r.datum}</td><td>${r.monat}</td><td>${r.name}</td><td>${fmt(r.stunden)}</td><td>${r.bemerkung || ''}</td><td>${new Date(r.updatedAt).toLocaleString('de-DE')}</td>`;
+        body.appendChild(tr);
+      });
+    }
 
     function renderImportReport() {
-  const reportNew = el('reportNew');
-  const reportUpdated = el('reportUpdated');
-  const reportConflicts = el('reportConflicts');
-  
-  if (reportNew) reportNew.textContent = String(state.importReport.neu || 0);
-  if (reportUpdated) reportUpdated.textContent = String(state.importReport.aktualisiert || 0);
-  if (reportConflicts) reportConflicts.textContent = String(state.importReport.konflikte || 0);
-}
+      const reportNew = el('reportNew');
+      const reportUpdated = el('reportUpdated');
+      const reportConflicts = el('reportConflicts');
+      
+      if (reportNew) reportNew.textContent = String(state.importReport.neu || 0);
+      if (reportUpdated) reportUpdated.textContent = String(state.importReport.aktualisiert || 0);
+      if (reportConflicts) reportConflicts.textContent = String(state.importReport.konflikte || 0);
+    }
 
+    function renderConflicts() {
+      const wrap = el('conflictList');
+      if (!wrap) return;
+      
+      wrap.innerHTML = '';
+      
+      if (!state.conflicts.length) {
+        wrap.innerHTML = '<div class="row-muted">Zurzeit keine Konflikte protokolliert.</div>';
+        return;
+      }
+      
+      state.conflicts.slice().reverse().slice(0, 20).forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'conflict-box';
+        div.innerHTML = `<strong>${c.type}</strong><div>ID: ${c.id}</div><div>${c.name || ''}</div><div>Entscheidung: ${c.resolution}</div><div class="row-muted">${new Date(c.loggedAt).toLocaleString('de-DE')}</div>`;
+        wrap.appendChild(div);
+      });
+    }
 
-   function renderConflicts() {
-  const wrap = el('conflictList');
-  if (!wrap) return;
-  
-  wrap.innerHTML = '';
-  
-  if (!state.conflicts.length) {
-    wrap.innerHTML = '<div class="row-muted">Zurzeit keine Konflikte protokolliert.</div>';
-    return;
-  }
-  
-  state.conflicts.slice().reverse().slice(0, 20).forEach(c => {
-    const div = document.createElement('div');
-    div.className = 'conflict-box';
-    div.innerHTML = `<strong>${c.type}</strong><div>ID: ${c.id}</div><div>${c.name || ''}</div><div>Entscheidung: ${c.resolution}</div><div class="row-muted">${new Date(c.loggedAt).toLocaleString('de-DE')}</div>`;
-    wrap.appendChild(div);
-  });
-}
-
-
-    // ========== ERWEITERTE switchRole MIT PIN-SCHUTZ ==========
     function switchRole(view, alreadyUnlocked = false) {
-      // Wenn Admin-Ansicht gewünscht
       if (view === 'admin') {
-        // Prüfen ob PIN existiert
         if (!PINManager.hasPIN()) {
-          // Erste Nutzung: PIN festlegen
           PINDialog.showSetup();
           return;
         }
         
-        // Prüfen ob Session bereits freigeschaltet (oder gerade entsperrt wurde)
         if (!alreadyUnlocked && !PINManager.isUnlocked()) {
-          // PIN-Dialog anzeigen
           PINDialog.show();
           return;
         }
       }
 
-      // Ansicht wechseln
       state.roleView = view;
       document.querySelectorAll('[data-role-view]').forEach(btn => btn.classList.toggle('active', btn.dataset.roleView === view));
       el('employeeView').classList.toggle('hidden', view !== 'employee');
       el('adminView').classList.toggle('hidden', view !== 'admin');
+      
+      if (view === 'admin') {
+        refreshAdminEntryPersonSelect();
+      }
     }
 
-function renderVertretungsHinweis() {
-  const wrap = el('vertretungsHinweisBody');
-  if (!wrap) return;
-  
-  wrap.innerHTML = '';
-  
-  const month = getMonth();
-  const people = state.kollegen.slice().sort((a, b) => {
-    const ra = monthStats(a, month).rest;
-    const rb = monthStats(b, month).rest;
-    return ra - rb;
-  });
-  
-  if (!people.length) {
-    wrap.innerHTML = '<div class="row-muted">Noch keine Kolleg:innen angelegt.</div>';
-    return;
-  }
-  
-  people.forEach(k => {
-    const st = monthStats(k, month);
-    const div = document.createElement('div');
-    div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:.75rem .9rem;border-bottom:1px solid var(--color-divider)';
-    const istErreicht = st.payable > 0;
-    const hinweis = istErreicht
-      ? `<span class="pill">✅ Alle ${fmt(st.sum)} Std. vergütbar</span>`
-      : `<span style="color:var(--color-warning);font-weight:700">⚠️ Noch ${fmt(st.rest)} Std. bis zur Grenze</span>`;
-    div.innerHTML = `<span><strong>${k.name}</strong> &nbsp;<span class="row-muted">${fmt(st.sum)} / ${fmt(k.grenze)} Std.</span></span>${hinweis}`;
-    wrap.appendChild(div);
-  });
-}
-
+    function renderVertretungsHinweis() {
+      const wrap = el('vertretungsHinweisBody');
+      if (!wrap) return;
       
-        function saveKollege() {
+      wrap.innerHTML = '';
+      
+      const month = getMonth();
+      const people = state.kollegen.slice().sort((a, b) => {
+        const ra = monthStats(a, month).rest;
+        const rb = monthStats(b, month).rest;
+        return ra - rb;
+      });
+      
+      if (!people.length) {
+        wrap.innerHTML = '<div class="row-muted">Noch keine Kolleg:innen angelegt.</div>';
+        return;
+      }
+      
+      people.forEach(k => {
+        const st = monthStats(k, month);
+        const div = document.createElement('div');
+        div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:.75rem .9rem;border-bottom:1px solid var(--color-divider)';
+        const istErreicht = st.payable > 0;
+        const hinweis = istErreicht
+          ? `<span class="pill">✅ Alle ${fmt(st.sum)} Std. vergütbar</span>`
+          : `<span style="color:var(--color-warning);font-weight:700">⚠️ Noch ${fmt(st.rest)} Std. bis zur Grenze</span>`;
+        div.innerHTML = `<span><strong>${k.name}</strong> &nbsp;<span class="row-muted">${fmt(st.sum)} / ${fmt(k.grenze)} Std.</span></span>${hinweis}`;
+        wrap.appendChild(div);
+      });
+    }
+
+    function saveKollege() {
       const name = el('kollegeName').value.trim();
       const kuerzel = el('kollegeKuerzel').value.trim().toUpperCase();
       const vollzeit = Number(el('vollzeit').value || 0);
@@ -1286,7 +1299,6 @@ function renderVertretungsHinweis() {
       
       if (!name) return alert('Bitte Namen eingeben.');
       
-      // In Mitarbeiteransicht: Nur Teilzeitstunden speichern
       if (state.roleView === 'employee') {
         const k = getSelectedKollege();
         if (!k) return alert('Bitte zuerst Person auswählen.');
@@ -1299,7 +1311,6 @@ function renderVertretungsHinweis() {
         return;
       }
       
-      // In Admin-Ansicht: Vollständige Person anlegen/bearbeiten
       if (!state.selectedKollegeId) {
         const ts = nowIso();
         const k = { id: uid(), kuerzel, name, vollzeit, teilzeit, quote, grenze, createdAt: ts, updatedAt: ts };
@@ -1314,7 +1325,6 @@ function renderVertretungsHinweis() {
       }
       refreshAll();
     }
-
 
     function deleteKollege() {
       const k = getSelectedKollege();
@@ -1357,15 +1367,14 @@ function renderVertretungsHinweis() {
     }
 
     function exportBackup() {
-  const adminPIN = localStorage.getItem('adminPIN');
-  const backupData = { 
-    kollegen: state.kollegen, 
-    eintraege: state.eintraege,
-    adminPIN: adminPIN // PIN wird mit exportiert
-  };
-  downloadText(`bagatell-backup-${new Date().toISOString().slice(0,10)}.json`, JSON.stringify(backupData, null, 2));
-}
-
+      const adminPIN = localStorage.getItem('adminPIN');
+      const backupData = { 
+        kollegen: state.kollegen, 
+        eintraege: state.eintraege,
+        adminPIN: adminPIN
+      };
+      downloadText(`bagatell-backup-${new Date().toISOString().slice(0,10)}.json`, JSON.stringify(backupData, null, 2));
+    }
 
     function recordConflict(type, localItem, importedItem, resolution) {
       state.conflicts.push({ type, id: localItem.id || importedItem.id, name: importedItem.name || localItem.name || '', resolution, loggedAt: nowIso() });
@@ -1396,22 +1405,18 @@ function renderVertretungsHinweis() {
       return { items: [...map.values()], added, updated };
     }
 
-        function importBackup(file) {
+    function importBackup(file) {
       const reader = new FileReader();
       reader.onload = () => {
         try {
           const data = JSON.parse(reader.result);
           
-          // PIN aus Backup übernehmen (nur beim ersten Import)
-if (data.adminPIN) {
-  if (!PINManager.hasPIN()) {
-    // Erste Nutzung: Gehashte PIN aus Master-Backup übernehmen
-    localStorage.setItem('adminPIN', data.adminPIN);
-    console.log('✅ PIN aus Master-Backup übernommen');
-  }
-  // Bei bestehender PIN: Ignorieren (keine Überschreibung)
-}
-
+          if (data.adminPIN) {
+            if (!PINManager.hasPIN()) {
+              localStorage.setItem('adminPIN', data.adminPIN);
+              console.log('✅ PIN aus Master-Backup übernommen');
+            }
+          }
           
           if (!Array.isArray(data.kollegen) || !Array.isArray(data.eintraege)) throw new Error('Ungültige Backup-Datei.');
           
@@ -1464,73 +1469,70 @@ if (data.adminPIN) {
       downloadText(`monatsuebersicht-${month}.csv`, toCsv(rows), 'text/csv;charset=utf-8');
     }
 
-   function exportAccounting() {
-  const month = getMonth();
-  const rows = [['Name','Monat','Teilzeit','Erfasste Stunden','Bagatellgrenze','Abrechnungsstunden','Std. bis Vollzeit (höherer Tarif)','Std. über Vollzeit (günstigerer Tarif)','Hinweis']];
-  state.kollegen.slice().sort((a,b)=>a.name.localeCompare(b.name,'de')).forEach(k => {
-    const st = monthStats(k, month);
-    
-    // Tarif-Split berechnen
-    const gesamtStunden = k.teilzeit + st.sum;
-    const ueberVollzeit = gesamtStunden > 28;
-    
-    let stundenBisVollzeit = 0;
-    let stundenUeberVollzeit = 0;
-    let hinweis = '';
-    
-    if (ueberVollzeit && st.payable > 0) {
-      stundenBisVollzeit = Math.max(28 - k.teilzeit, 0);
-      stundenUeberVollzeit = st.sum - stundenBisVollzeit;
-      
-      if (stundenBisVollzeit > 0) {
-        hinweis = 'Tarif-Split beachten';
-      } else {
-        hinweis = 'Alle Stunden über Vollzeit';
-      }
-    } else if (st.payable > 0) {
-      stundenBisVollzeit = st.payable;
-      hinweis = 'Nur höherer Tarif';
-    } else {
-      hinweis = 'Noch nicht abrechenbar';
+    function exportAccounting() {
+      const month = getMonth();
+      const rows = [['Name','Monat','Teilzeit','Erfasste Stunden','Bagatellgrenze','Abrechnungsstunden','Std. bis Vollzeit (höherer Tarif)','Std. über Vollzeit (günstigerer Tarif)','Hinweis']];
+      state.kollegen.slice().sort((a,b)=>a.name.localeCompare(b.name,'de')).forEach(k => {
+        const st = monthStats(k, month);
+        
+        const gesamtStunden = k.teilzeit + st.sum;
+        const ueberVollzeit = gesamtStunden > 28;
+        
+        let stundenBisVollzeit = 0;
+        let stundenUeberVollzeit = 0;
+        let hinweis = '';
+        
+        if (ueberVollzeit && st.payable > 0) {
+          stundenBisVollzeit = Math.max(28 - k.teilzeit, 0);
+          stundenUeberVollzeit = st.sum - stundenBisVollzeit;
+          
+          if (stundenBisVollzeit > 0) {
+            hinweis = 'Tarif-Split beachten';
+          } else {
+            hinweis = 'Alle Stunden über Vollzeit';
+          }
+        } else if (st.payable > 0) {
+          stundenBisVollzeit = st.payable;
+          hinweis = 'Nur höherer Tarif';
+        } else {
+          hinweis = 'Noch nicht abrechenbar';
+        }
+        
+        rows.push([k.name, month, k.teilzeit, st.sum, k.grenze, st.payable, stundenBisVollzeit, stundenUeberVollzeit, hinweis]);
+      });
+      downloadText(`abrechnungsstunden-${month}.csv`, toCsv(rows), 'text/csv;charset=utf-8');
     }
-    
-    rows.push([k.name, month, k.teilzeit, st.sum, k.grenze, st.payable, stundenBisVollzeit, stundenUeberVollzeit, hinweis]);
-  });
-  downloadText(`abrechnungsstunden-${month}.csv`, toCsv(rows), 'text/csv;charset=utf-8');
-}
-
 
     function exportEntries() {
       const rows = [['Datum','Monat','Name','Stunden','Bemerkung','UpdatedAt']];
       state.eintraege.slice().sort((a,b)=>(a.datum||'').localeCompare(b.datum||'')).forEach(e => rows.push([e.datum,e.monat,e.name,e.stunden,e.bemerkung,e.updatedAt]));
       downloadText(`eintraege-${getMonth()}.csv`, toCsv(rows), 'text/csv;charset=utf-8');
     }
-        // Admin: Person zum Bearbeiten auswählen
-   function adminSelectPerson() {
-  const select = el('adminPersonSelect');
-  if (!select) return;
 
-  const personId = select.value;
+    function adminSelectPerson() {
+      const select = el('adminPersonSelect');
+      if (!select) return;
 
-  if (!personId) {
-    adminClearPerson();
-    return;
-  }
+      const personId = select.value;
 
-  const person = state.kollegen.find(k => k.id === personId);
-  if (!person) return;
+      if (!personId) {
+        adminClearPerson();
+        return;
+      }
 
-  state.selectedKollegeId = personId;
+      const person = state.kollegen.find(k => k.id === personId);
+      if (!person) return;
 
-  if (el('adminKuerzel')) el('adminKuerzel').value = person.kuerzel || '';
-  if (el('adminName')) el('adminName').value = person.name || '';
-  if (el('adminVollzeit')) el('adminVollzeit').value = person.vollzeit ?? VOLLVZEIT_STUNDEN;
-  if (el('adminTeilzeit')) el('adminTeilzeit').value = person.teilzeit ?? '';
-  if (el('adminQuote')) el('adminQuote').value = Number(person.quote || 0).toFixed(2);
-  if (el('adminGrenze')) el('adminGrenze').value = Number(person.grenze || 0).toFixed(2);
-} 
-    
-    // Admin: Personen-Dropdown aktualisieren
+      state.selectedKollegeId = personId;
+
+      if (el('adminKuerzel')) el('adminKuerzel').value = person.kuerzel || '';
+      if (el('adminName')) el('adminName').value = person.name || '';
+      if (el('adminVollzeit')) el('adminVollzeit').value = person.vollzeit ?? VOLLVZEIT_STUNDEN;
+      if (el('adminTeilzeit')) el('adminTeilzeit').value = person.teilzeit ?? '';
+      if (el('adminQuote')) el('adminQuote').value = Number(person.quote || 0).toFixed(2);
+      if (el('adminGrenze')) el('adminGrenze').value = Number(person.grenze || 0).toFixed(2);
+    }
+
     function refreshAdminPersonSelect() {
       const select = el('adminPersonSelect');
       if (!select) return;
@@ -1546,88 +1548,88 @@ if (data.adminPIN) {
       });
     }
 
-    // ========== ADMIN: PERSONEN VERWALTEN ==========
     function adminSavePerson() {
-  const kuerzel = el('adminKuerzel').value.trim().toUpperCase();
-  const name = el('adminName').value.trim();
-  const vollzeit = VOLLVZEIT_STUNDEN;
-  const teilzeit = Number(el('adminTeilzeit')?.value || 0);
+      const kuerzel = el('adminKuerzel').value.trim().toUpperCase();
+      const name = el('adminName').value.trim();
+      const vollzeit = VOLLVZEIT_STUNDEN;
+      const teilzeit = Number(el('adminTeilzeit')?.value || 0);
 
-  if (!kuerzel) return alert('Bitte Kürzel eingeben.');
-  if (!name) return alert('Bitte Namen eingeben.');
-  if (Number.isNaN(teilzeit) || teilzeit < 0 || teilzeit > vollzeit) {
-    return alert(`Bitte gültige Teilzeitstunden zwischen 0 und ${vollzeit} eingeben.`);
-  }
+      if (!kuerzel) return alert('Bitte Kürzel eingeben.');
+      if (!name) return alert('Bitte Namen eingeben.');
+      if (Number.isNaN(teilzeit) || teilzeit < 0 || teilzeit > vollzeit) {
+        return alert(`Bitte gültige Teilzeitstunden zwischen 0 und ${vollzeit} eingeben.`);
+      }
 
-  const quote = vollzeit > 0 ? teilzeit / vollzeit : 0;
-  const grenze = BAGATELL_VOLLZEIT * quote;
+      const quote = vollzeit > 0 ? teilzeit / vollzeit : 0;
+      const grenze = BAGATELL_VOLLZEIT * quote;
 
-  const existing = state.kollegen.find(
-    k => k.kuerzel === kuerzel && k.id !== state.selectedKollegeId
-  );
-  if (existing) {
-    return alert(`Kürzel "${kuerzel}" wird bereits von ${existing.name} verwendet.`);
-  }
+      const existing = state.kollegen.find(
+        k => k.kuerzel === kuerzel && k.id !== state.selectedKollegeId
+      );
+      if (existing) {
+        return alert(`Kürzel "${kuerzel}" wird bereits von ${existing.name} verwendet.`);
+      }
 
-  if (!state.selectedKollegeId) {
-    const ts = nowIso();
-    const k = {
-      id: uid(),
-      kuerzel,
-      name,
-      vollzeit,
-      teilzeit,
-      quote,
-      grenze,
-      createdAt: ts,
-      updatedAt: ts
-    };
-    state.kollegen.push(k);
-    state.selectedKollegeId = k.id;
-    alert(`✅ ${name} wurde angelegt!`);
-    refreshAdminPersonSelect();
-  } else {
-    const k = getSelectedKollege();
-    if (!k) return;
+      if (!state.selectedKollegeId) {
+        const ts = nowIso();
+        const k = {
+          id: uid(),
+          kuerzel,
+          name,
+          vollzeit,
+          teilzeit,
+          quote,
+          grenze,
+          createdAt: ts,
+          updatedAt: ts
+        };
+        state.kollegen.push(k);
+        state.selectedKollegeId = k.id;
+        alert(`✅ ${name} wurde angelegt!`);
+        refreshAdminPersonSelect();
+      } else {
+        const k = getSelectedKollege();
+        if (!k) return;
 
-    const oldName = k.name;
-    Object.assign(k, {
-      kuerzel,
-      name,
-      vollzeit,
-      teilzeit,
-      quote,
-      grenze,
-      updatedAt: nowIso()
-    });
+        const oldName = k.name;
+        Object.assign(k, {
+          kuerzel,
+          name,
+          vollzeit,
+          teilzeit,
+          quote,
+          grenze,
+          updatedAt: nowIso()
+        });
 
-    if (oldName !== name) {
-      state.eintraege.forEach(e => {
-        if (e.name === oldName) {
-          e.name = name;
-          e.updatedAt = nowIso();
+        if (oldName !== name) {
+          state.eintraege.forEach(e => {
+            if (e.name === oldName) {
+              e.name = name;
+              e.updatedAt = nowIso();
+            }
+          });
         }
-      });
+
+        alert(`✅ ${name} wurde aktualisiert!`);
+        refreshAdminPersonSelect();
+      }
+
+      refreshAll();
     }
 
-    alert(`✅ ${name} wurde aktualisiert!`);
-    refreshAdminPersonSelect();
-  }
+    function adminClearPerson() {
+      state.selectedKollegeId = null;
 
-  refreshAll();
-}
-       function adminClearPerson() {
-  state.selectedKollegeId = null;
+      if (el('adminKuerzel')) el('adminKuerzel').value = '';
+      if (el('adminName')) el('adminName').value = '';
+      if (el('adminVollzeit')) el('adminVollzeit').value = VOLLVZEIT_STUNDEN;
+      if (el('adminTeilzeit')) el('adminTeilzeit').value = '';
+      if (el('adminQuote')) el('adminQuote').value = '';
+      if (el('adminGrenze')) el('adminGrenze').value = '';
+      if (el('adminPersonSelect')) el('adminPersonSelect').value = '';
+    }
 
-  if (el('adminKuerzel')) el('adminKuerzel').value = '';
-  if (el('adminName')) el('adminName').value = '';
-  if (el('adminVollzeit')) el('adminVollzeit').value = VOLLVZEIT_STUNDEN;
-  if (el('adminTeilzeit')) el('adminTeilzeit').value = '';
-  if (el('adminQuote')) el('adminQuote').value = '';
-  if (el('adminGrenze')) el('adminGrenze').value = '';
-  if (el('adminPersonSelect')) el('adminPersonSelect').value = '';
-}
-    
     function adminDeletePerson() {
       const k = getSelectedKollege();
       if (!k) return alert('Bitte zuerst eine Person auswählen.');
@@ -1642,142 +1644,289 @@ if (data.adminPIN) {
       alert(`✅ ${k.name} wurde gelöscht.`);
     }
 
-
-       function bindEvents() {
-  // Role Tabs
-  document.querySelectorAll('[data-role-view]').forEach(btn => btn.addEventListener('click', () => switchRole(btn.dataset.roleView)));
-  
-  // Quick Add Hours
-  document.querySelectorAll('[data-add-hours]').forEach(btn => btn.addEventListener('click', () => { 
-    const delta = Number(btn.dataset.addHours || 0); 
-    const input = el('eintragStunden'); 
-    if (input) {
-      const current = Number(input.value || 0); 
-      input.value = Math.max(0, current + delta); 
-    }
-  }));
-  
-  // Month Navigation
-  const prevMonthBtn = el('prevMonthBtn');
-  const nextMonthBtn = el('nextMonthBtn');
-  if (prevMonthBtn) prevMonthBtn.addEventListener('click', () => shiftMonth(-1));
-  if (nextMonthBtn) nextMonthBtn.addEventListener('click', () => shiftMonth(1));
-  
-  // Person Select
-  const activePersonSelect = el('activePersonSelect');
-  if (activePersonSelect) activePersonSelect.addEventListener('change', e => { 
-    state.selectedKollegeId = e.target.value || null; 
-    clearEintragForm(); 
-    renderEmployeeStats(); 
-    renderEmployeeEntries(); 
-  });
-  
-  // Month Input
-  const monatInput = el('monatInput');
-  if (monatInput) monatInput.addEventListener('change', refreshAll);
-  
-  // Admin Person Filter
-  const adminPersonFilter = el('adminPersonFilter');
-  if (adminPersonFilter) {
-    adminPersonFilter.addEventListener('change', () => {
-      renderSummary();
-      renderAdminEntries();
-    });
-  }
-  
-  // Teilzeit Input (Mitarbeiteransicht)
-  const teilzeitInput = el('teilzeit');
-  if (teilzeitInput) {
-    teilzeitInput.addEventListener('input', updateStammdaten);
-    teilzeitInput.addEventListener('change', updateStammdaten);
-  }
-
-  // Admin Teilzeit Input
-  const adminTeilzeitInput = el('adminTeilzeit');
-  if (adminTeilzeitInput) {
-    adminTeilzeitInput.addEventListener('input', updateAdminStammdaten);
-    adminTeilzeitInput.addEventListener('change', updateAdminStammdaten);
-  }
-  
-  // Kollege Buttons
-  const saveKollegeBtn = el('saveKollegeBtn');
-  const clearKollegeBtn = el('clearKollegeBtn');
-  const deleteKollegeBtn = el('deleteKollegeBtn');
-  if (saveKollegeBtn) saveKollegeBtn.addEventListener('click', saveKollege);
-  if (clearKollegeBtn) clearKollegeBtn.addEventListener('click', () => { clearKollegeForm(); refreshPersonSelect(); renderEmployeeStats(); });
-  if (deleteKollegeBtn) deleteKollegeBtn.addEventListener('click', deleteKollege);
-  
-  // Eintrag Buttons
-  const saveEintragBtn = el('saveEintragBtn');
-  const clearEintragBtn = el('clearEintragBtn');
-  const deleteEintragBtn = el('deleteEintragBtn');
-  if (saveEintragBtn) saveEintragBtn.addEventListener('click', saveEintrag);
-  if (clearEintragBtn) clearEintragBtn.addEventListener('click', () => { clearEintragForm(); renderEmployeeEntries(); });
-  if (deleteEintragBtn) deleteEintragBtn.addEventListener('click', deleteEintrag);
-  
-  // Export/Import
-  const exportBackupBtn = el('exportBackupBtn');
-  const exportBackupBtnEmployee = el('exportBackupBtnEmployee');
-  const importBackupInput = el('importBackupInput');
-  if (exportBackupBtn) exportBackupBtn.addEventListener('click', exportBackup);
-  if (exportBackupBtnEmployee) exportBackupBtnEmployee.addEventListener('click', exportBackup);
-  if (importBackupInput) importBackupInput.addEventListener('change', e => { 
-    const file = e.target.files[0]; 
-    if (file) importBackup(file); 
-    e.target.value = ''; 
-  });
-  
-  // Admin Exports
-  const exportMonthSummaryBtn = el('exportMonthSummaryBtn');
-  const exportAccountingBtn = el('exportAccountingBtn');
-  const exportEntriesBtn = el('exportEntriesBtn');
-  if (exportMonthSummaryBtn) exportMonthSummaryBtn.addEventListener('click', exportMonthSummary);
-  if (exportAccountingBtn) exportAccountingBtn.addEventListener('click', exportAccounting);
-  if (exportEntriesBtn) exportEntriesBtn.addEventListener('click', exportEntries);
-  
-  // Employee Entries Table
-  const employeeEntriesBody = el('employeeEntriesBody');
-  if (employeeEntriesBody) employeeEntriesBody.addEventListener('click', e => {
-    const id = e.target.dataset.editEntry; 
-    if (!id) return;
-    const entry = state.eintraege.find(x => x.id === id); 
-    if (!entry) return;
-    state.selectedEintragId = id; 
-    fillEintragForm(entry); 
-    renderEmployeeEntries();
-  });
-  
-  // Theme Toggle
-  const themeToggle = el('themeToggle');
-  if (themeToggle) themeToggle.addEventListener('click', () => {
-    const root = document.documentElement;
-    const current = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    const next = current === 'dark' ? 'light' : 'dark';
-    root.setAttribute('data-theme', next); 
-    themeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
-  });
-  
-  // Admin: Personen verwalten
-  const adminSaveBtn = el('adminSavePersonBtn');
-  const adminClearBtn = el('adminClearPersonBtn');
-  const adminDeleteBtn = el('adminDeletePersonBtn');
-  if (adminSaveBtn) adminSaveBtn.addEventListener('click', adminSavePerson);
-  const adminPersonSelect = el('adminPersonSelect');
-  if (adminPersonSelect) adminPersonSelect.addEventListener('change', adminSelectPerson);
-  if (adminClearBtn) adminClearBtn.addEventListener('click', adminClearPerson);
-  if (adminDeleteBtn) adminDeleteBtn.addEventListener('click', adminDeletePerson);
-  
-  // Lock Admin Button
-  const lockAdminBtn = el('lockAdminBtn');
-  if (lockAdminBtn) lockAdminBtn.addEventListener('click', () => {
-    PINManager.lockSession();
-    switchRole('employee');
-    alert('🔒 Verantwortlichenansicht wurde gesperrt.');
-  });
-}
-
+    // ========== ADMIN: EINTRÄGE VERWALTEN (NEU!) ==========
+    function refreshAdminEntryPersonSelect() {
+      const select = el('adminEntryPersonSelect');
+      if (!select) return;
       
-        function shiftMonth(delta) {
+      const currentValue = select.value;
+      select.innerHTML = '<option value="">Bitte Person auswählen...</option>';
+      
+      state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
+        const opt = document.createElement('option');
+        opt.value = k.name;
+        opt.textContent = k.name;
+        if (k.name === currentValue) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+
+    function renderAdminManageEntries() {
+      const body = el('adminManageEntriesBody');
+      if (!body) return;
+      
+      body.innerHTML = '';
+      
+      const selectedName = el('adminEntryPersonSelect')?.value;
+      if (!selectedName) {
+        body.innerHTML = '<tr><td colspan="5" class="row-muted">Bitte Person auswählen.</td></tr>';
+        return;
+      }
+      
+      const month = getMonth();
+      const entries = state.eintraege
+        .filter(e => e.name === selectedName && e.monat === month)
+        .sort(byDate);
+      
+      if (!entries.length) {
+        body.innerHTML = '<tr><td colspan="5" class="row-muted">Noch keine Einträge für diese Person in diesem Monat.</td></tr>';
+        return;
+      }
+      
+      entries.forEach(e => {
+        const tr = document.createElement('tr');
+        if (state.selectedAdminEntryId === e.id) tr.classList.add('selected');
+        tr.innerHTML = `
+          <td>${e.datum}</td>
+          <td>${e.name}</td>
+          <td>${fmt(e.stunden)}</td>
+          <td>${e.bemerkung || ''}</td>
+          <td>
+            <div class="small-actions">
+              <button data-admin-edit-entry="${e.id}">✏️ Bearbeiten</button>
+              <button class="danger" data-admin-delete-entry="${e.id}">🗑️ Löschen</button>
+            </div>
+          </td>
+        `;
+        body.appendChild(tr);
+      });
+    }
+
+    function adminSaveEntry() {
+      const selectedName = el('adminEntryPersonSelect')?.value;
+      if (!selectedName) return alert('Bitte Person auswählen.');
+      
+      const datum = el('adminEntryDatum')?.value;
+      const stunden = Number(el('adminEntryStunden')?.value || 0);
+      const bemerkung = el('adminEntryBemerkung')?.value.trim() || '';
+      
+      if (!datum) return alert('Bitte Datum eingeben.');
+      if (stunden <= 0) return alert('Bitte Stunden größer 0 eingeben.');
+      
+      const monat = monthFromDate(datum);
+      
+      if (!state.selectedAdminEntryId) {
+        // Neuer Eintrag
+        const ts = nowIso();
+        state.eintraege.push({
+          id: uid(),
+          datum,
+          monat,
+          name: selectedName,
+          stunden,
+          bemerkung,
+          createdAt: ts,
+          updatedAt: ts
+        });
+        alert('✅ Eintrag erstellt!');
+      } else {
+        // Bestehenden Eintrag bearbeiten
+        const e = state.eintraege.find(x => x.id === state.selectedAdminEntryId);
+        if (!e) return;
+        
+        Object.assign(e, {
+          datum,
+          monat,
+          name: selectedName,
+          stunden,
+          bemerkung,
+          updatedAt: nowIso()
+        });
+        alert('✅ Eintrag aktualisiert!');
+      }
+      
+      adminClearEntry();
+      refreshAll();
+    }
+
+    function adminClearEntry() {
+      state.selectedAdminEntryId = null;
+      if (el('adminEntryDatum')) el('adminEntryDatum').value = '';
+      if (el('adminEntryStunden')) el('adminEntryStunden').value = '';
+      if (el('adminEntryBemerkung')) el('adminEntryBemerkung').value = '';
+      renderAdminManageEntries();
+    }
+
+    function adminEditEntry(id) {
+      const e = state.eintraege.find(x => x.id === id);
+      if (!e) return;
+      
+      state.selectedAdminEntryId = id;
+      
+      if (el('adminEntryPersonSelect')) el('adminEntryPersonSelect').value = e.name;
+      if (el('adminEntryDatum')) el('adminEntryDatum').value = e.datum;
+      if (el('adminEntryStunden')) el('adminEntryStunden').value = e.stunden;
+      if (el('adminEntryBemerkung')) el('adminEntryBemerkung').value = e.bemerkung || '';
+      
+      renderAdminManageEntries();
+    }
+
+    function adminDeleteEntry(id) {
+      if (!confirm('Diesen Eintrag wirklich löschen?')) return;
+      
+      state.eintraege = state.eintraege.filter(e => e.id !== id);
+      
+      if (state.selectedAdminEntryId === id) {
+        adminClearEntry();
+      }
+      
+      refreshAll();
+      alert('✅ Eintrag gelöscht!');
+    }
+
+    function bindEvents() {
+      document.querySelectorAll('[data-role-view]').forEach(btn => btn.addEventListener('click', () => switchRole(btn.dataset.roleView)));
+      
+      document.querySelectorAll('[data-add-hours]').forEach(btn => btn.addEventListener('click', () => { 
+        const delta = Number(btn.dataset.addHours || 0); 
+        const input = el('eintragStunden'); 
+        if (input) {
+          const current = Number(input.value || 0); 
+          input.value = Math.max(0, current + delta); 
+        }
+      }));
+      
+      const prevMonthBtn = el('prevMonthBtn');
+      const nextMonthBtn = el('nextMonthBtn');
+      if (prevMonthBtn) prevMonthBtn.addEventListener('click', () => shiftMonth(-1));
+      if (nextMonthBtn) nextMonthBtn.addEventListener('click', () => shiftMonth(1));
+      
+      const activePersonSelect = el('activePersonSelect');
+      if (activePersonSelect) activePersonSelect.addEventListener('change', e => { 
+        state.selectedKollegeId = e.target.value || null; 
+        clearEintragForm(); 
+        renderEmployeeStats(); 
+        renderEmployeeEntries(); 
+      });
+      
+      const monatInput = el('monatInput');
+      if (monatInput) monatInput.addEventListener('change', refreshAll);
+      
+      const adminPersonFilter = el('adminPersonFilter');
+      if (adminPersonFilter) {
+        adminPersonFilter.addEventListener('change', () => {
+          renderSummary();
+          renderAdminEntries();
+        });
+      }
+      
+      const teilzeitInput = el('teilzeit');
+      if (teilzeitInput) {
+        teilzeitInput.addEventListener('input', updateStammdaten);
+        teilzeitInput.addEventListener('change', updateStammdaten);
+      }
+
+      const adminTeilzeitInput = el('adminTeilzeit');
+      if (adminTeilzeitInput) {
+        adminTeilzeitInput.addEventListener('input', updateAdminStammdaten);
+        adminTeilzeitInput.addEventListener('change', updateAdminStammdaten);
+      }
+      
+      const saveKollegeBtn = el('saveKollegeBtn');
+      const clearKollegeBtn = el('clearKollegeBtn');
+      const deleteKollegeBtn = el('deleteKollegeBtn');
+      if (saveKollegeBtn) saveKollegeBtn.addEventListener('click', saveKollege);
+      if (clearKollegeBtn) clearKollegeBtn.addEventListener('click', () => { clearKollegeForm(); refreshPersonSelect(); renderEmployeeStats(); });
+      if (deleteKollegeBtn) deleteKollegeBtn.addEventListener('click', deleteKollege);
+      
+      const saveEintragBtn = el('saveEintragBtn');
+      const clearEintragBtn = el('clearEintragBtn');
+      const deleteEintragBtn = el('deleteEintragBtn');
+      if (saveEintragBtn) saveEintragBtn.addEventListener('click', saveEintrag);
+      if (clearEintragBtn) clearEintragBtn.addEventListener('click', () => { clearEintragForm(); renderEmployeeEntries(); });
+      if (deleteEintragBtn) deleteEintragBtn.addEventListener('click', deleteEintrag);
+      
+      const exportBackupBtn = el('exportBackupBtn');
+      const exportBackupBtnEmployee = el('exportBackupBtnEmployee');
+      const importBackupInput = el('importBackupInput');
+      if (exportBackupBtn) exportBackupBtn.addEventListener('click', exportBackup);
+      if (exportBackupBtnEmployee) exportBackupBtnEmployee.addEventListener('click', exportBackup);
+      if (importBackupInput) importBackupInput.addEventListener('change', e => { 
+        const file = e.target.files[0]; 
+        if (file) importBackup(file); 
+        e.target.value = ''; 
+      });
+      
+      const exportMonthSummaryBtn = el('exportMonthSummaryBtn');
+      const exportAccountingBtn = el('exportAccountingBtn');
+      const exportEntriesBtn = el('exportEntriesBtn');
+      if (exportMonthSummaryBtn) exportMonthSummaryBtn.addEventListener('click', exportMonthSummary);
+      if (exportAccountingBtn) exportAccountingBtn.addEventListener('click', exportAccounting);
+      if (exportEntriesBtn) exportEntriesBtn.addEventListener('click', exportEntries);
+      
+      const employeeEntriesBody = el('employeeEntriesBody');
+      if (employeeEntriesBody) employeeEntriesBody.addEventListener('click', e => {
+        const id = e.target.dataset.editEntry; 
+        if (!id) return;
+        const entry = state.eintraege.find(x => x.id === id); 
+        if (!entry) return;
+        state.selectedEintragId = id; 
+        fillEintragForm(entry); 
+        renderEmployeeEntries();
+      });
+      
+      const themeToggle = el('themeToggle');
+      if (themeToggle) themeToggle.addEventListener('click', () => {
+        const root = document.documentElement;
+        const current = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        const next = current === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next); 
+        themeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
+      });
+      
+      const adminSaveBtn = el('adminSavePersonBtn');
+      const adminClearBtn = el('adminClearPersonBtn');
+      const adminDeleteBtn = el('adminDeletePersonBtn');
+      if (adminSaveBtn) adminSaveBtn.addEventListener('click', adminSavePerson);
+      const adminPersonSelect = el('adminPersonSelect');
+      if (adminPersonSelect) adminPersonSelect.addEventListener('change', adminSelectPerson);
+      if (adminClearBtn) adminClearBtn.addEventListener('click', adminClearPerson);
+      if (adminDeleteBtn) adminDeleteBtn.addEventListener('click', adminDeletePerson);
+      
+      const lockAdminBtn = el('lockAdminBtn');
+      if (lockAdminBtn) lockAdminBtn.addEventListener('click', () => {
+        PINManager.lockSession();
+        switchRole('employee');
+        alert('🔒 Verantwortlichenansicht wurde gesperrt.');
+      });
+
+      // Admin Entry Management
+      const adminEntryPersonSelect = el('adminEntryPersonSelect');
+      if (adminEntryPersonSelect) {
+        adminEntryPersonSelect.addEventListener('change', () => {
+          adminClearEntry();
+          renderAdminManageEntries();
+        });
+      }
+
+      const adminSaveEntryBtn = el('adminSaveEntryBtn');
+      const adminClearEntryBtn = el('adminClearEntryBtn');
+      if (adminSaveEntryBtn) adminSaveEntryBtn.addEventListener('click', adminSaveEntry);
+      if (adminClearEntryBtn) adminClearEntryBtn.addEventListener('click', adminClearEntry);
+
+      const adminManageEntriesBody = el('adminManageEntriesBody');
+      if (adminManageEntriesBody) {
+        adminManageEntriesBody.addEventListener('click', e => {
+          const editId = e.target.dataset.adminEditEntry;
+          const deleteId = e.target.dataset.adminDeleteEntry;
+          
+          if (editId) adminEditEntry(editId);
+          if (deleteId) adminDeleteEntry(deleteId);
+        });
+      }
+    }
+
+    function shiftMonth(delta) {
       const raw = getMonth() + '-01';
       const d = new Date(raw);
       d.setMonth(d.getMonth() + delta);
@@ -1786,42 +1935,41 @@ if (data.adminPIN) {
       refreshAll();
     }
 
-
-          function refreshAll() {
+    function refreshAll() {
       saveState();
       refreshPersonSelect();
       refreshAdminPersonSelect();
       refreshAdminFilter();
+      refreshAdminEntryPersonSelect();
       renderEmployeeStats();
       renderEmployeeEntries();
       renderSummary();
       renderAdminEntries();
+      renderAdminManageEntries();
       renderConflicts();
       renderVertretungsHinweis();
       renderImportReport();
     }
 
-          function init() {
-  const prefDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  document.documentElement.setAttribute('data-theme', prefDark ? 'dark' : 'light');
+    function init() {
+      const prefDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.setAttribute('data-theme', prefDark ? 'dark' : 'light');
 
-  const themeToggle = el('themeToggle');
-  if (themeToggle) themeToggle.textContent = prefDark ? '☀️' : '🌙';
+      const themeToggle = el('themeToggle');
+      if (themeToggle) themeToggle.textContent = prefDark ? '☀️' : '🌙';
 
-  const monatInput = el('monatInput');
-  if (monatInput) monatInput.value = new Date().toISOString().slice(0,7);
+      const monatInput = el('monatInput');
+      if (monatInput) monatInput.value = new Date().toISOString().slice(0,7);
 
-  loadState();
-  PINDialog.init();
-  WhoAreYouDialog.init();
-  bindEvents();
-  switchRole('employee');
-  refreshAll();
-}
+      loadState();
+      PINDialog.init();
+      WhoAreYouDialog.init();
+      bindEvents();
+      switchRole('employee');
+      refreshAll();
+    }
     
     document.addEventListener('DOMContentLoaded', init);
-
   </script>
-
 </body>
 </html>
