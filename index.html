@@ -1796,16 +1796,40 @@ function mergeData(imported) {
   imported.personen?.forEach(importedPerson => {
     const existing = personen.find(p => p.id === importedPerson.id);
     if (!existing) {
+      // Neue Person hinzufügen
       personen.push(importedPerson);
       newCount++;
     } else {
+      // Bestehende Person aktualisieren
+      // Ergänze neue Felder, ohne alte zu überschreiben
+      if (!existing.personalnummer && importedPerson.personalnummer) {
+        existing.personalnummer = importedPerson.personalnummer;
+      }
+      if (!existing.geburtsdatum && importedPerson.geburtsdatum) {
+        existing.geburtsdatum = importedPerson.geburtsdatum;
+      }
+      if (!existing.status && importedPerson.status) {
+        existing.status = importedPerson.status;
+      }
+      
+      // Aktualisiere Stammdaten (Name, Kürzel, Teilzeit, etc.)
       const localMod = existing.lastModified || '1970-01-01';
       const importedMod = importedPerson.lastModified || '1970-01-01';
-      if (importedMod > localMod) {
-        conflicts.push({ type: 'person', id: importedPerson.id, local: existing, imported: importedPerson });
+      
+      if (importedMod > localMod || !existing.lastModified) {
+        // Behalte neue Felder, aktualisiere den Rest
+        const personalnummer = existing.personalnummer || importedPerson.personalnummer;
+        const geburtsdatum = existing.geburtsdatum || importedPerson.geburtsdatum;
+        const status = existing.status || importedPerson.status;
+        
         Object.assign(existing, importedPerson);
+        
+        // Stelle sicher, dass neue Felder nicht überschrieben werden
+        if (personalnummer) existing.personalnummer = personalnummer;
+        if (geburtsdatum) existing.geburtsdatum = geburtsdatum;
+        if (status) existing.status = status;
+        
         updatedCount++;
-        conflictCount++;
       }
     }
   });
