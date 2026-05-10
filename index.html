@@ -7,6 +7,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
+  
+  <!-- PDF-LIB Library (offline-fähig, CDN-Fallback) -->
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  
   <style>
   :root, [data-theme="light"] {
     --color-bg:#f7f6f2;
@@ -172,6 +176,10 @@
   .status-error{background:color-mix(in srgb, var(--color-error) 14%, var(--color-surface));color:var(--color-error);border-color:color-mix(in srgb, var(--color-error) 28%, var(--color-border));border-radius:var(--radius-lg);display:inline-block;padding:.25rem .75rem;font-weight:700}
   .conflict-box{padding:var(--space-4);border:1px dashed var(--color-warning);border-radius:var(--radius-lg);background:color-mix(in srgb, var(--color-warning) 10%, var(--color-surface))}
   .footer-note{margin-top:var(--space-4);font-size:var(--text-sm);color:var(--color-text-muted)}
+
+  .radio-group{display:flex;gap:var(--space-4);margin-top:.5rem}
+  .radio-group label{display:flex;align-items:center;gap:.5rem;font-weight:400;cursor:pointer}
+  .radio-group input[type="radio"]{width:auto;margin:0}
 
   @media (max-width: 1100px){
     .shell{grid-template-columns:1fr}
@@ -355,7 +363,7 @@
               <div class="section-head">
                 <div>
                   <h2>Eigene Stammdaten</h2>
-                  <p>Ergänze deine Teilzeitstunden – Name und Kürzel wurden von der Verwaltung angelegt.</p>
+                  <p>Ergänze deine Daten – Name und Kürzel wurden von der Verwaltung angelegt.</p>
                 </div>
               </div>
 
@@ -365,6 +373,27 @@
               
               <label>Name
                 <input id="kollegeName" type="text" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+              </label>
+
+              <label>Personalnummer
+                <input id="kollegePersonalnummer" type="text" placeholder="z. B. 123456">
+              </label>
+
+              <label>Geburtsdatum
+                <input id="kollegeGeburtsdatum" type="date">
+              </label>
+
+              <label>Beschäftigungsstatus
+                <div class="radio-group">
+                  <label>
+                    <input type="radio" name="kollegeStatus" value="beamte" id="kollegeStatusBeamte">
+                    Beamte/r
+                  </label>
+                  <label>
+                    <input type="radio" name="kollegeStatus" value="angestellte" id="kollegeStatusAngestellte">
+                    Angestellte/r
+                  </label>
+                </div>
               </label>
 
               <label>Vollzeitstunden
@@ -384,14 +413,14 @@
               </label>
 
               <div class="small-actions" style="margin-top:1rem">
-                <button class="button primary" id="saveKollegeBtn">Teilzeitstunden speichern</button>
+                <button class="button primary" id="saveKollegeBtn">Daten speichern</button>
                 <button class="ghost" id="clearKollegeBtn">Zurücksetzen</button>
               </div>
 
               <div class="footer-note">
                 💡 <strong>Hinweise:</strong><br>
-                • Nur <strong>Teilzeitstunden</strong> sind änderbar<br>
-                • Quote und Bagatellgrenze werden automatisch berechnet (Quote = Teilzeit ÷ 28 | Grenze = 3 × Quote)<br>
+                • Nur <strong>Teilzeitstunden, Personalnummer, Geburtsdatum und Status</strong> sind änderbar<br>
+                • Quote und Bagatellgrenze werden automatisch berechnet<br>
                 • Name und Kürzel können nur in der Verantwortlichenansicht geändert werden
               </div>
             </section>
@@ -446,6 +475,34 @@
             <button class="danger" id="lockAdminBtn" style="margin-top:var(--space-3)">🔒 Ansicht sperren</button>
           </div>
 
+          <!-- SCHULDATEN VERWALTEN -->
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Schuldaten</h2>
+                <p>Diese Daten werden für das LBV-Formular benötigt.</p>
+              </div>
+            </div>
+
+            <div class="grid two">
+              <label>Schulname
+                <input id="schulname" type="text" value="Katholische Grundschule Voiswinkel">
+              </label>
+
+              <label>Schulnummer
+                <input id="schulnummer" type="text" value="115022">
+              </label>
+
+              <label style="grid-column: 1 / -1">Name Schulleitung
+                <input id="schulleitung" type="text" placeholder="z. B. Frau Direktorin">
+              </label>
+            </div>
+
+            <div class="small-actions" style="margin-top:1rem">
+              <button class="button primary" id="saveSchuldatenBtn">Schuldaten speichern</button>
+            </div>
+          </section>
+
           <!-- Personen verwalten -->
           <section class="panel">
             <div class="section-head">
@@ -462,6 +519,27 @@
 
               <label>Name
                 <input id="adminName" type="text" placeholder="z. B. Frau Muster">
+              </label>
+
+              <label>Personalnummer
+                <input id="adminPersonalnummer" type="text" placeholder="z. B. 123456">
+              </label>
+
+              <label>Geburtsdatum
+                <input id="adminGeburtsdatum" type="date">
+              </label>
+
+              <label style="grid-column: 1 / -1">Beschäftigungsstatus
+                <div class="radio-group">
+                  <label>
+                    <input type="radio" name="adminStatus" value="beamte" id="adminStatusBeamte">
+                    Beamte/r
+                  </label>
+                  <label>
+                    <input type="radio" name="adminStatus" value="angestellte" id="adminStatusAngestellte">
+                    Angestellte/r
+                  </label>
+                </div>
               </label>
 
               <label>Vollzeitstunden
@@ -494,11 +572,11 @@
             </div>
 
             <div class="footer-note">
-              Tipp: Lege alle Kolleg:innen mit Name, Kürzel und Teilzeitstunden an. Quote und Bagatellgrenze werden automatisch berechnet.
+              Tipp: Lege alle Kolleg:innen mit Name, Kürzel, Personalnummer, Geburtsdatum, Status und Teilzeitstunden an. Quote und Bagatellgrenze werden automatisch berechnet
             </div>
           </section>
 
-          <!-- EINTRÄGE VERWALTEN (NEU!) -->
+          <!-- EINTRÄGE VERWALTEN -->
           <section class="panel">
             <div class="section-head">
               <div>
@@ -535,6 +613,49 @@
                 </thead>
                 <tbody id="adminManageEntriesBody"></tbody>
               </table>
+            </div>
+          </section>
+
+          <!-- LBV-FORMULAR GENERIEREN -->
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>LBV-Formular generieren</h2>
+                <p>Automatisch ausgefülltes PDF für die Abrechnung beim LBV.</p>
+              </div>
+            </div>
+
+            <div class="grid three">
+              <label>Schuljahr
+                <select id="lbvSchuljahr">
+                  <option value="">Bitte auswählen...</option>
+                </select>
+              </label>
+
+              <label>Halbjahr
+                <select id="lbvHalbjahr">
+                  <option value="">Bitte auswählen...</option>
+                  <option value="1">1. Halbjahr (August – Januar)</option>
+                  <option value="2">2. Halbjahr (Februar – Juli)</option>
+                </select>
+              </label>
+
+              <label>Person
+                <select id="lbvPerson">
+                  <option value="">Bitte auswählen...</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="small-actions" style="margin-top:1rem">
+              <button class="button primary" id="generateLBVBtn">📄 LBV-Formular generieren</button>
+            </div>
+
+            <div class="footer-note">
+              💡 <strong>Hinweise:</strong><br>
+              • Das PDF wird automatisch mit allen Stammdaten und monatlichen Stunden befüllt<br>
+              • Unterschrift der Schulleitung muss nach dem Ausdrucken ergänzt werden<br>
+              • Bei Tarif-Split (Stunden über Vollzeit) bitte manuell im Formular vermerken
             </div>
           </section>
 
@@ -672,1304 +793,1341 @@
   </div>
 
   <script>
-    // ========== PIN-VERWALTUNG ==========
-    const PINManager = {
-      hashPIN(pin) {
-        let hash = 0;
-        for (let i = 0; i < pin.length; i++) {
-          const char = pin.charCodeAt(i);
-          hash = ((hash << 5) - hash) + char;
-          hash = hash & hash;
-        }
-        return hash.toString();
-      },
-      
-      setPIN(pin) {
-        if (!pin || pin.length < 4) {
-          alert('PIN muss mindestens 4 Zeichen lang sein');
-          return false;
-        }
-        localStorage.setItem('adminPIN', this.hashPIN(pin));
-        return true;
-      },
-      
-      checkPIN(pin) {
-        const storedHash = localStorage.getItem('adminPIN');
-        if (!storedHash) return false;
-        return this.hashPIN(pin) === storedHash;
-      },
-      
-      hasPIN() {
-        return localStorage.getItem('adminPIN') !== null;
-      },
-      
-      unlockSession() {
-        sessionStorage.setItem('adminUnlocked', 'true');
-      },
-      
-      lockSession() {
-        sessionStorage.removeItem('adminUnlocked');
-      },
-      
-      isUnlocked() {
-        return sessionStorage.getItem('adminUnlocked') === 'true';
-      }
-    };
+// ============================================================================
+// DATENSTRUKTUR & STORAGE
+// ============================================================================
 
-    // ========== WER BIST DU DIALOG ==========
-    const WhoAreYouDialog = {
-      show() {
-        const dialog = document.getElementById('whoAreYouDialog');
-        const select = document.getElementById('whoAreYouSelect');
-        
-        select.innerHTML = '<option value="">Bitte auswählen...</option>';
-        state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
-          const opt = document.createElement('option');
-          opt.value = k.id;
-          opt.textContent = `${k.name} (${k.kuerzel})`;
-          select.appendChild(opt);
-        });
-        
-        dialog.style.display = 'flex';
-        document.getElementById('whoAreYouError').style.display = 'none';
-      },
-      
-      hide() {
-        document.getElementById('whoAreYouDialog').style.display = 'none';
-      },
-      
-      init() {
-        document.getElementById('whoAreYouSubmit').addEventListener('click', () => {
-          const selectedId = document.getElementById('whoAreYouSelect').value;
-          
-          if (!selectedId) {
-            document.getElementById('whoAreYouError').style.display = 'block';
-            return;
-          }
-          
-          localStorage.setItem('myPersonId', selectedId);
-          state.selectedKollegeId = selectedId;
-          
-          this.hide();
-          refreshAll();
-          alert('✅ Erfolgreich ausgewählt! Du kannst jetzt deine Teilzeitstunden ergänzen.');
-        });
-      }
-    };
+let personen = [];
+let eintraege = [];
+let conflicts = [];
+let currentEditingEntryId = null;
+let currentEditingPersonId = null;
+let schuldaten = {
+  schulname: 'Katholische Grundschule Voiswinkel',
+  schulnummer: '115022',
+  schulleitung: ''
+};
 
-    const PINDialog = {
-      show() {
-        document.getElementById('pinDialog').style.display = 'flex';
-        document.getElementById('pinInput').value = '';
-        document.getElementById('pinError').style.display = 'none';
-        document.getElementById('pinInput').focus();
-      },
-      
-      hide() {
-        document.getElementById('pinDialog').style.display = 'none';
-      },
-      
-      showSetup() {
-        document.getElementById('pinSetupDialog').style.display = 'flex';
-        document.getElementById('pinSetupInput').value = '';
-        document.getElementById('pinSetupConfirm').value = '';
-        document.getElementById('pinSetupError').style.display = 'none';
-        document.getElementById('pinSetupInput').focus();
-      },
-      
-      hideSetup() {
-        document.getElementById('pinSetupDialog').style.display = 'none';
-      },
-      
-      init() {
-        document.getElementById('pinSubmit').addEventListener('click', () => {
-          const pin = document.getElementById('pinInput').value;
-          if (PINManager.checkPIN(pin)) {
-            PINManager.unlockSession();
-            this.hide();
-            switchRole('admin', true);
-          } else {
-            document.getElementById('pinError').style.display = 'block';
-            document.getElementById('pinInput').value = '';
-            document.getElementById('pinInput').focus();
-          }
-        });
-        
-        document.getElementById('pinCancel').addEventListener('click', () => this.hide());
-        
-        document.getElementById('pinInput').addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') document.getElementById('pinSubmit').click();
-        });
-        
-        document.getElementById('pinSetupSubmit').addEventListener('click', () => {
-          const pin = document.getElementById('pinSetupInput').value;
-          const confirm = document.getElementById('pinSetupConfirm').value;
-          const errorEl = document.getElementById('pinSetupError');
-          
-          if (pin.length < 4) {
-            errorEl.textContent = 'PIN muss mindestens 4 Zeichen lang sein';
-            errorEl.style.display = 'block';
-            return;
-          }
-          
-          if (pin !== confirm) {
-            errorEl.textContent = 'PINs stimmen nicht überein';
-            errorEl.style.display = 'block';
-            return;
-          }
-          
-          if (PINManager.setPIN(pin)) {
-            PINManager.unlockSession();
-            this.hideSetup();
-            alert('✅ PIN erfolgreich festgelegt!');
-            switchRole('admin', true);
-          }
-        });
-      }
-    };
+const STORAGE_KEY_PERSONEN = 'mehrarbeit_personen';
+const STORAGE_KEY_EINTRAEGE = 'mehrarbeit_eintraege';
+const STORAGE_KEY_CONFLICTS = 'mehrarbeit_conflicts';
+const STORAGE_KEY_ACTIVE_PERSON = 'mehrarbeit_active_person';
+const STORAGE_KEY_ADMIN_PIN = 'mehrarbeit_admin_pin';
+const STORAGE_KEY_THEME = 'mehrarbeit_theme';
+const STORAGE_KEY_SCHULDATEN = 'mehrarbeit_schuldaten';
 
-    // ========== STATE ==========
-    const state = { 
-      kollegen: [], 
-      eintraege: [], 
-      roleView: 'employee', 
-      selectedKollegeId: null, 
-      selectedEintragId: null, 
-      selectedAdminEntryId: null,
-      conflicts: [], 
-      importReport: { neu: 0, aktualisiert: 0, konflikte: 0 } 
-    };
+function loadData() {
+  const p = localStorage.getItem(STORAGE_KEY_PERSONEN);
+  const e = localStorage.getItem(STORAGE_KEY_EINTRAEGE);
+  const c = localStorage.getItem(STORAGE_KEY_CONFLICTS);
+  const s = localStorage.getItem(STORAGE_KEY_SCHULDATEN);
+  
+  personen = p ? JSON.parse(p) : [];
+  eintraege = e ? JSON.parse(e) : [];
+  conflicts = c ? JSON.parse(c) : [];
+  
+  if (s) {
+    schuldaten = JSON.parse(s);
+  }
+}
 
-    const el = id => document.getElementById(id);
-    const fmt = n => Number(n || 0).toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-    const uid = () => crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    const monthFromDate = value => value ? value.slice(0, 7) : '';
-    const nowIso = () => new Date().toISOString();
-    const normTs = v => { const d = v ? new Date(v) : new Date(); return Number.isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString(); };
-    const byDate = (a, b) => (a.datum || '').localeCompare(b.datum || '') || (a.updatedAt || '').localeCompare(b.updatedAt || '');
+function saveData() {
+  localStorage.setItem(STORAGE_KEY_PERSONEN, JSON.stringify(personen));
+  localStorage.setItem(STORAGE_KEY_EINTRAEGE, JSON.stringify(eintraege));
+  localStorage.setItem(STORAGE_KEY_CONFLICTS, JSON.stringify(conflicts));
+  localStorage.setItem(STORAGE_KEY_SCHULDATEN, JSON.stringify(schuldaten));
+}
 
-    function enrichKollege(k) {
-      return { id: k.id || uid(), kuerzel: k.kuerzel || '', name: k.name || '', vollzeit: Number(k.vollzeit || 0), teilzeit: Number(k.teilzeit || 0), quote: Number(k.quote || 0), grenze: Number(k.grenze || 0), createdAt: normTs(k.createdAt), updatedAt: normTs(k.updatedAt) };
+function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+}
+
+// ============================================================================
+// BERECHNUNGEN
+// ============================================================================
+
+function berechneQuote(teilzeit, vollzeit = 28) {
+  if (!teilzeit || teilzeit <= 0) return 0;
+  return parseFloat((teilzeit / vollzeit).toFixed(2));
+}
+
+function berechneBagatellgrenze(quote) {
+  return parseFloat((3 * quote).toFixed(1));
+}
+
+function getMonthKey(date) {
+  const d = new Date(date);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function getMonthlyHours(personId, monthKey) {
+  return eintraege
+    .filter(e => e.personId === personId && getMonthKey(e.datum) === monthKey)
+    .reduce((sum, e) => sum + parseFloat(e.stunden || 0), 0);
+}
+
+function formatNumber(num) {
+  return num.toFixed(1).replace('.', ',');
+}
+
+function parseGermanNumber(str) {
+  if (!str) return 0;
+  return parseFloat(String(str).replace(',', '.')) || 0;
+}
+
+// ============================================================================
+// THEME TOGGLE
+// ============================================================================
+
+function initTheme() {
+  const saved = localStorage.getItem(STORAGE_KEY_THEME);
+  const theme = saved || 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+  updateThemeButton(theme);
+}
+
+function updateThemeButton(theme) {
+  const btn = document.getElementById('themeToggle');
+  btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme') || 'light';
+  const next = current === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem(STORAGE_KEY_THEME, next);
+  updateThemeButton(next);
+});
+
+// ============================================================================
+// MONAT NAVIGATION
+// ============================================================================
+
+function setCurrentMonth() {
+  const now = new Date();
+  const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  document.getElementById('monatInput').value = monthStr;
+}
+
+document.getElementById('prevMonthBtn').addEventListener('click', () => {
+  const input = document.getElementById('monatInput');
+  const [year, month] = input.value.split('-').map(Number);
+  const d = new Date(year, month - 1, 1);
+  d.setMonth(d.getMonth() - 1);
+  input.value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  renderAll();
+});
+
+document.getElementById('nextMonthBtn').addEventListener('click', () => {
+  const input = document.getElementById('monatInput');
+  const [year, month] = input.value.split('-').map(Number);
+  const d = new Date(year, month - 1, 1);
+  d.setMonth(d.getMonth() + 1);
+  input.value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  renderAll();
+});
+
+document.getElementById('monatInput').addEventListener('change', renderAll);
+
+// ============================================================================
+// PERSON SELECTION
+// ============================================================================
+
+function updatePersonSelects() {
+  const activeSelect = document.getElementById('activePersonSelect');
+  const adminPersonSelect = document.getElementById('adminPersonSelect');
+  const adminEntryPersonSelect = document.getElementById('adminEntryPersonSelect');
+  const adminPersonFilter = document.getElementById('adminPersonFilter');
+  const whoAreYouSelect = document.getElementById('whoAreYouSelect');
+  const lbvPersonSelect = document.getElementById('lbvPerson');
+
+  const currentActive = activeSelect.value;
+  const currentAdmin = adminPersonSelect.value;
+  const currentAdminEntry = adminEntryPersonSelect.value;
+  const currentFilter = adminPersonFilter.value;
+
+  activeSelect.innerHTML = '<option value="">Person auswählen</option>';
+  adminPersonSelect.innerHTML = '<option value="">Neue Person anlegen...</option>';
+  adminEntryPersonSelect.innerHTML = '<option value="">Bitte Person auswählen...</option>';
+  adminPersonFilter.innerHTML = '<option value="">Alle Personen</option>';
+  whoAreYouSelect.innerHTML = '<option value="">Bitte auswählen...</option>';
+  lbvPersonSelect.innerHTML = '<option value="">Bitte auswählen...</option>';
+
+  personen.forEach(p => {
+    activeSelect.innerHTML += `<option value="${p.id}">${p.name} (${p.kuerzel})</option>`;
+    adminPersonSelect.innerHTML += `<option value="${p.id}">${p.name} (${p.kuerzel})</option>`;
+    adminEntryPersonSelect.innerHTML += `<option value="${p.id}">${p.name} (${p.kuerzel})</option>`;
+    adminPersonFilter.innerHTML += `<option value="${p.id}">${p.name} (${p.kuerzel})</option>`;
+    whoAreYouSelect.innerHTML += `<option value="${p.id}">${p.name} (${p.kuerzel})</option>`;
+    lbvPersonSelect.innerHTML += `<option value="${p.id}">${p.name} (${p.kuerzel})</option>`;
+  });
+
+  if (currentActive) activeSelect.value = currentActive;
+  if (currentAdmin) adminPersonSelect.value = currentAdmin;
+  if (currentAdminEntry) adminEntryPersonSelect.value = currentAdminEntry;
+  if (currentFilter) adminPersonFilter.value = currentFilter;
+}
+
+document.getElementById('activePersonSelect').addEventListener('change', (e) => {
+  localStorage.setItem(STORAGE_KEY_ACTIVE_PERSON, e.target.value);
+  loadPersonDataToForm();
+  renderAll();
+});
+
+// ============================================================================
+// MITARBEITERANSICHT: STAMMDATEN
+// ============================================================================
+
+function loadPersonDataToForm() {
+  const personId = document.getElementById('activePersonSelect').value;
+  const person = personen.find(p => p.id === personId);
+
+  if (!person) {
+    document.getElementById('kollegeKuerzel').value = '';
+    document.getElementById('kollegeName').value = '';
+    document.getElementById('kollegePersonalnummer').value = '';
+    document.getElementById('kollegeGeburtsdatum').value = '';
+    document.getElementById('kollegeStatusBeamte').checked = false;
+    document.getElementById('kollegeStatusAngestellte').checked = false;
+    document.getElementById('teilzeit').value = '';
+    document.getElementById('quote').value = '';
+    document.getElementById('grenze').value = '';
+    return;
+  }
+
+  document.getElementById('kollegeKuerzel').value = person.kuerzel || '';
+  document.getElementById('kollegeName').value = person.name || '';
+  document.getElementById('kollegePersonalnummer').value = person.personalnummer || '';
+  document.getElementById('kollegeGeburtsdatum').value = person.geburtsdatum || '';
+  
+  if (person.status === 'beamte') {
+    document.getElementById('kollegeStatusBeamte').checked = true;
+  } else if (person.status === 'angestellte') {
+    document.getElementById('kollegeStatusAngestellte').checked = true;
+  }
+  
+  document.getElementById('teilzeit').value = person.teilzeit || '';
+  document.getElementById('quote').value = person.quote || '';
+  document.getElementById('grenze').value = person.grenze || '';
+}
+
+document.getElementById('teilzeit').addEventListener('input', () => {
+  const teilzeit = parseFloat(document.getElementById('teilzeit').value) || 0;
+  const vollzeit = parseFloat(document.getElementById('vollzeit').value) || 28;
+  const quote = berechneQuote(teilzeit, vollzeit);
+  const grenze = berechneBagatellgrenze(quote);
+  document.getElementById('quote').value = quote;
+  document.getElementById('grenze').value = grenze;
+});
+
+document.getElementById('saveKollegeBtn').addEventListener('click', () => {
+  const personId = document.getElementById('activePersonSelect').value;
+  if (!personId) {
+    alert('⚠️ Bitte wähle zuerst eine Person aus!');
+    return;
+  }
+
+  const person = personen.find(p => p.id === personId);
+  if (!person) return;
+
+  const teilzeit = parseFloat(document.getElementById('teilzeit').value) || 0;
+  const vollzeit = parseFloat(document.getElementById('vollzeit').value) || 28;
+  const personalnummer = document.getElementById('kollegePersonalnummer').value.trim();
+  const geburtsdatum = document.getElementById('kollegeGeburtsdatum').value;
+  
+  let status = '';
+  if (document.getElementById('kollegeStatusBeamte').checked) {
+    status = 'beamte';
+  } else if (document.getElementById('kollegeStatusAngestellte').checked) {
+    status = 'angestellte';
+  }
+
+  person.teilzeit = teilzeit;
+  person.quote = berechneQuote(teilzeit, vollzeit);
+  person.grenze = berechneBagatellgrenze(person.quote);
+  person.personalnummer = personalnummer;
+  person.geburtsdatum = geburtsdatum;
+  person.status = status;
+
+  saveData();
+  alert('✅ Daten gespeichert!');
+  renderAll();
+});
+
+document.getElementById('clearKollegeBtn').addEventListener('click', () => {
+  loadPersonDataToForm();
+});
+
+// ============================================================================
+// MITARBEITERANSICHT: EINTRAG
+// ============================================================================
+
+document.querySelectorAll('.quick-add button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const add = parseFloat(btn.getAttribute('data-add-hours'));
+    const input = document.getElementById('eintragStunden');
+    const current = parseFloat(input.value) || 0;
+    input.value = Math.max(0, current + add);
+  });
+});
+
+document.getElementById('saveEintragBtn').addEventListener('click', () => {
+  const personId = document.getElementById('activePersonSelect').value;
+  if (!personId) {
+    alert('⚠️ Bitte wähle zuerst eine Person aus!');
+    return;
+  }
+
+  const datum = document.getElementById('eintragDatum').value;
+  const stunden = parseFloat(document.getElementById('eintragStunden').value);
+  const bemerkung = document.getElementById('eintragBemerkung').value.trim();
+
+  if (!datum || !stunden || stunden <= 0) {
+    alert('⚠️ Bitte Datum und Stunden eingeben!');
+    return;
+  }
+
+  if (currentEditingEntryId) {
+    const entry = eintraege.find(e => e.id === currentEditingEntryId);
+    if (entry) {
+      entry.datum = datum;
+      entry.stunden = stunden;
+      entry.bemerkung = bemerkung;
+      entry.lastModified = new Date().toISOString();
     }
-    function enrichEintrag(e) {
-      return { id: e.id || uid(), datum: e.datum || '', monat: e.monat || monthFromDate(e.datum || '') || '', name: e.name || '', stunden: Number(e.stunden || 0), bemerkung: e.bemerkung || '', createdAt: normTs(e.createdAt), updatedAt: normTs(e.updatedAt) };
+    currentEditingEntryId = null;
+  } else {
+    eintraege.push({
+      id: generateId(),
+      personId,
+      datum,
+      stunden,
+      bemerkung,
+      lastModified: new Date().toISOString()
+    });
+  }
+
+  saveData();
+  clearEintragForm();
+  renderAll();
+});
+
+document.getElementById('clearEintragBtn').addEventListener('click', clearEintragForm);
+
+document.getElementById('deleteEintragBtn').addEventListener('click', () => {
+  if (!currentEditingEntryId) {
+    alert('⚠️ Kein Eintrag zum Löschen ausgewählt!');
+    return;
+  }
+
+  if (!confirm('❌ Eintrag wirklich löschen?')) return;
+
+  eintraege = eintraege.filter(e => e.id !== currentEditingEntryId);
+  currentEditingEntryId = null;
+  saveData();
+  clearEintragForm();
+  renderAll();
+});
+
+function clearEintragForm() {
+  document.getElementById('eintragDatum').value = '';
+  document.getElementById('eintragStunden').value = '';
+  document.getElementById('eintragBemerkung').value = '';
+  currentEditingEntryId = null;
+}
+
+function loadEntryToForm(entryId) {
+  const entry = eintraege.find(e => e.id === entryId);
+  if (!entry) return;
+
+  document.getElementById('eintragDatum').value = entry.datum;
+  document.getElementById('eintragStunden').value = entry.stunden;
+  document.getElementById('eintragBemerkung').value = entry.bemerkung || '';
+  currentEditingEntryId = entryId;
+
+  document.getElementById('eintragDatum').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// ============================================================================
+// MITARBEITERANSICHT: RENDERING
+// ============================================================================
+
+function renderEmployeeView() {
+  const personId = document.getElementById('activePersonSelect').value;
+  const monthKey = document.getElementById('monatInput').value;
+
+  if (!personId || !monthKey) {
+    document.getElementById('empMonthHours').textContent = '0,0';
+    document.getElementById('empLimit').textContent = '0,0';
+    document.getElementById('empRemaining').textContent = '0,0';
+    document.getElementById('empPayable').textContent = '0,0';
+    document.getElementById('empMonthHoursDetail').textContent = '0,0';
+    document.getElementById('empLimitDetail').textContent = '0,0';
+    document.getElementById('empRemainingDetail').textContent = '0,0';
+    document.getElementById('empPayableDetail').textContent = '0,0';
+    document.getElementById('employeeEntriesBody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--color-text-muted)">Bitte Person und Monat auswählen</td></tr>';
+    return;
+  }
+
+  const person = personen.find(p => p.id === personId);
+  if (!person) return;
+
+  const hours = getMonthlyHours(personId, monthKey);
+  const limit = person.grenze || 0;
+  const remaining = Math.max(0, limit - hours);
+  const payable = Math.max(0, hours - limit);
+
+  document.getElementById('empMonthHours').textContent = formatNumber(hours);
+  document.getElementById('empLimit').textContent = formatNumber(limit);
+  document.getElementById('empRemaining').textContent = formatNumber(remaining);
+  document.getElementById('empPayable').textContent = formatNumber(payable);
+
+  document.getElementById('empMonthHoursDetail').textContent = formatNumber(hours);
+  document.getElementById('empLimitDetail').textContent = formatNumber(limit);
+  document.getElementById('empRemainingDetail').textContent = formatNumber(remaining);
+  document.getElementById('empPayableDetail').textContent = formatNumber(payable);
+
+  const remainingLabel = document.getElementById('remainingLabel');
+  if (hours >= limit) {
+    remainingLabel.textContent = 'Überschuss';
+  } else {
+    remainingLabel.textContent = 'Offen';
+  }
+
+  const entries = eintraege.filter(e => e.personId === personId && getMonthKey(e.datum) === monthKey);
+  const tbody = document.getElementById('employeeEntriesBody');
+
+  if (entries.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--color-text-muted)">Keine Einträge für diesen Monat</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = entries
+    .sort((a, b) => new Date(b.datum) - new Date(a.datum))
+    .map(e => {
+      const d = new Date(e.datum);
+      const monthName = d.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+      return `
+        <tr>
+          <td>${new Date(e.datum).toLocaleDateString('de-DE')}</td>
+          <td>${monthName}</td>
+          <td>${person.name}</td>
+          <td>${formatNumber(e.stunden)}</td>
+          <td>${e.bemerkung || '-'}</td>
+          <td><button class="ghost" onclick="loadEntryToForm('${e.id}')">Bearbeiten</button></td>
+        </tr>
+      `;
+    })
+    .join('');
+}
+
+// ============================================================================
+// ADMIN: SCHULDATEN
+// ============================================================================
+
+function loadSchuldatenToForm() {
+  document.getElementById('schulname').value = schuldaten.schulname || 'Katholische Grundschule Voiswinkel';
+  document.getElementById('schulnummer').value = schuldaten.schulnummer || '115022';
+  document.getElementById('schulleitung').value = schuldaten.schulleitung || '';
+}
+
+document.getElementById('saveSchuldatenBtn').addEventListener('click', () => {
+  schuldaten.schulname = document.getElementById('schulname').value.trim();
+  schuldaten.schulnummer = document.getElementById('schulnummer').value.trim();
+  schuldaten.schulleitung = document.getElementById('schulleitung').value.trim();
+  
+  saveData();
+  alert('✅ Schuldaten gespeichert!');
+});
+
+// ============================================================================
+// ADMIN: PERSONEN VERWALTEN
+// ============================================================================
+
+document.getElementById('adminTeilzeit').addEventListener('input', () => {
+  const teilzeit = parseFloat(document.getElementById('adminTeilzeit').value) || 0;
+  const vollzeit = parseFloat(document.getElementById('adminVollzeit').value) || 28;
+  const quote = berechneQuote(teilzeit, vollzeit);
+  const grenze = berechneBagatellgrenze(quote);
+  document.getElementById('adminQuote').value = quote;
+  document.getElementById('adminGrenze').value = grenze;
+});
+
+document.getElementById('adminPersonSelect').addEventListener('change', (e) => {
+  const personId = e.target.value;
+  if (!personId) {
+    clearAdminPersonForm();
+    return;
+  }
+
+  const person = personen.find(p => p.id === personId);
+  if (!person) return;
+
+  currentEditingPersonId = personId;
+  document.getElementById('adminKuerzel').value = person.kuerzel || '';
+  document.getElementById('adminName').value = person.name || '';
+  document.getElementById('adminPersonalnummer').value = person.personalnummer || '';
+  document.getElementById('adminGeburtsdatum').value = person.geburtsdatum || '';
+  
+  if (person.status === 'beamte') {
+    document.getElementById('adminStatusBeamte').checked = true;
+  } else if (person.status === 'angestellte') {
+    document.getElementById('adminStatusAngestellte').checked = true;
+  }
+  
+  document.getElementById('adminTeilzeit').value = person.teilzeit || '';
+  document.getElementById('adminQuote').value = person.quote || '';
+  document.getElementById('adminGrenze').value = person.grenze || '';
+});
+
+document.getElementById('adminSavePersonBtn').addEventListener('click', () => {
+  const kuerzel = document.getElementById('adminKuerzel').value.trim().toUpperCase();
+  const name = document.getElementById('adminName').value.trim();
+  const personalnummer = document.getElementById('adminPersonalnummer').value.trim();
+  const geburtsdatum = document.getElementById('adminGeburtsdatum').value;
+  const teilzeit = parseFloat(document.getElementById('adminTeilzeit').value) || 0;
+  const vollzeit = parseFloat(document.getElementById('adminVollzeit').value) || 28;
+
+  let status = '';
+  if (document.getElementById('adminStatusBeamte').checked) {
+    status = 'beamte';
+  } else if (document.getElementById('adminStatusAngestellte').checked) {
+    status = 'angestellte';
+  }
+
+  if (!kuerzel || !name) {
+    alert('⚠️ Bitte Kürzel und Name eingeben!');
+    return;
+  }
+
+  const quote = berechneQuote(teilzeit, vollzeit);
+  const grenze = berechneBagatellgrenze(quote);
+
+  if (currentEditingPersonId) {
+    const person = personen.find(p => p.id === currentEditingPersonId);
+    if (person) {
+      person.kuerzel = kuerzel;
+      person.name = name;
+      person.personalnummer = personalnummer;
+      person.geburtsdatum = geburtsdatum;
+      person.status = status;
+      person.teilzeit = teilzeit;
+      person.quote = quote;
+      person.grenze = grenze;
     }
-
-    function saveState() {
-      localStorage.setItem('bagatellgrenze-webapp', JSON.stringify({ kollegen: state.kollegen, eintraege: state.eintraege, conflicts: state.conflicts, importReport: state.importReport }));
-    }
-    function loadState() {
-      try {
-        const raw = localStorage.getItem('bagatellgrenze-webapp');
-        if (!raw) return;
-        const data = JSON.parse(raw);
-        state.kollegen = Array.isArray(data.kollegen) ? data.kollegen.map(enrichKollege) : [];
-        state.eintraege = Array.isArray(data.eintraege) ? data.eintraege.map(enrichEintrag) : [];
-        state.conflicts = Array.isArray(data.conflicts) ? data.conflicts : [];
-        state.importReport = data.importReport || { neu: 0, aktualisiert: 0, konflikte: 0 };
-      } catch (e) { console.error(e); }
-    }
-
-    const VOLLVZEIT_STUNDEN = 28;
-    const BAGATELL_VOLLZEIT = 3;
-
-    function updateStammdaten() {
-      const teilzeitInput = document.getElementById('teilzeit');
-      const vollzeitInput = document.getElementById('vollzeit');
-      const quoteInput = document.getElementById('quote');
-      const grenzeInput = document.getElementById('grenze');
-      if (!teilzeitInput || !vollzeitInput || !quoteInput || !grenzeInput) return;
-      const teilzeit = Number.parseFloat(teilzeitInput.value);
-
-      if (!Number.isNaN(teilzeit) && teilzeit > 0 && teilzeit <= VOLLVZEIT_STUNDEN) {
-        vollzeitInput.value = VOLLVZEIT_STUNDEN;
-        const quote = teilzeit / VOLLVZEIT_STUNDEN;
-        quoteInput.value = quote.toFixed(2);
-        const grenze = BAGATELL_VOLLZEIT * quote;
-        grenzeInput.value = grenze.toFixed(2);
-      } else {
-        quoteInput.value = '';
-        grenzeInput.value = '';
-      }
-    }
-
-    function updateAdminStammdaten() {
-      const teilzeitInput = el('adminTeilzeit');
-      const vollzeitInput = el('adminVollzeit');
-      const quoteInput = el('adminQuote');
-      const grenzeInput = el('adminGrenze');
-
-      if (!teilzeitInput || !vollzeitInput || !quoteInput || !grenzeInput) return;
-
-      const teilzeit = Number.parseFloat(teilzeitInput.value);
-      vollzeitInput.value = VOLLVZEIT_STUNDEN;
-
-      if (!Number.isNaN(teilzeit) && teilzeit >= 0 && teilzeit <= VOLLVZEIT_STUNDEN) {
-        const quote = teilzeit / VOLLVZEIT_STUNDEN;
-        const grenze = BAGATELL_VOLLZEIT * quote;
-        quoteInput.value = quote.toFixed(2);
-        grenzeInput.value = grenze.toFixed(2);
-      } else {
-        quoteInput.value = '';
-        grenzeInput.value = '';
-      }
-    }
-
-    function downloadText(filename, content, type = 'application/json;charset=utf-8') {
-      const blob = new Blob([content], { type });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-    }
-    function toCsv(rows) {
-      return '\ufeff' + rows.map(row => row.map(val => {
-        const s = String(val ?? '');
-        return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
-      }).join(';')).join('\n');
-    }
-
-    function getSelectedKollege() {
-      return state.kollegen.find(k => k.id === state.selectedKollegeId) || null;
-    }
-    function getMonth() {
-      const monatInput = el('monatInput');
-      return monatInput ? monatInput.value : new Date().toISOString().slice(0,7);
-    }
-
-    function entriesFor(name, month) {
-      return state.eintraege.filter(e => e.name === name && e.monat === month).sort(byDate);
-    }
-    function monthStats(k, month) {
-      const sum = entriesFor(k.name, month).reduce((a, e) => a + Number(e.stunden || 0), 0);
-      const rest = Math.max(Number(k.grenze || 0) - sum, 0);
-      const payable = sum > Number(k.grenze || 0) ? sum : 0;
-      const hint = payable > 0 ? `Abrechnung möglich: ${fmt(payable)} Std` : `Noch nicht abrechenbar`; 
-      return { sum, rest, payable, hint };
-    }
-
-    function fillKollegeForm(k) {
-      el('kollegeKuerzel').value = k?.kuerzel || '';
-      el('kollegeName').value = k?.name || '';
-      el('vollzeit').value = k?.vollzeit || 28;
-      el('teilzeit').value = k?.teilzeit ?? '';
-      
-      const tz = Number(k?.teilzeit || 0);
-      const vz = Number(k?.vollzeit || 28);
-      if (tz > 0 && vz > 0) {
-        const q = tz / vz;
-        el('quote').value = q.toFixed(2);
-        el('grenze').value = (BAGATELL_VOLLZEIT * q).toFixed(2);
-      } else {
-        el('quote').value = k?.quote ?? '';
-        el('grenze').value = k?.grenze ?? '';
-      }
-      
-      if (state.roleView === 'employee') {
-        el('kollegeKuerzel').readOnly = true;
-        el('kollegeName').readOnly = true;
-        el('vollzeit').readOnly = true;
-        el('teilzeit').readOnly = false;
-        el('quote').readOnly = true;
-        el('grenze').readOnly = true;
-      } else {
-        el('kollegeKuerzel').readOnly = false;
-        el('kollegeName').readOnly = false;
-        el('vollzeit').readOnly = true;
-        el('teilzeit').readOnly = false;
-        el('quote').readOnly = true;
-        el('grenze').readOnly = true;
-      }
-    }
-
-    function fillEintragForm(e) {
-      el('eintragDatum').value = e?.datum || '';
-      el('eintragStunden').value = e?.stunden ?? '';
-      el('eintragBemerkung').value = e?.bemerkung || '';
-    }
-    function clearKollegeForm() { state.selectedKollegeId = null; fillKollegeForm(null); }
-    function clearEintragForm() { state.selectedEintragId = null; fillEintragForm(null); }
-
-    function refreshPersonSelect() {
-      const activePersonSelect = el('activePersonSelect');
-      if (!activePersonSelect) return;
-      
-      if (state.roleView === 'employee') {
-        const myPersonId = localStorage.getItem('myPersonId');
-        
-        if (myPersonId) {
-          const myPerson = state.kollegen.find(k => k.id === myPersonId);
-          if (myPerson) {
-            state.selectedKollegeId = myPersonId;
-            activePersonSelect.innerHTML = `<option value="${myPerson.id}">${myPerson.name}</option>`;
-            activePersonSelect.disabled = true;
-            return;
-          }
-        }
-        
-        activePersonSelect.innerHTML = '<option value="">Bitte Person auswählen</option>';
-        activePersonSelect.disabled = true;
-
-        const dialog = document.getElementById('whoAreYouDialog');
-        if (state.kollegen.length > 0 && dialog && dialog.style.display !== 'flex') {
-          WhoAreYouDialog.show();
-        }
-        return;
-      }
-      
-      activePersonSelect.disabled = false;
-      activePersonSelect.innerHTML = '';
-      
-      const placeholder = document.createElement('option');
-      placeholder.value = '';
-      placeholder.textContent = state.kollegen.length ? 'Person auswählen' : 'Noch keine Person angelegt';
-      activePersonSelect.appendChild(placeholder);
-      
-      state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
-        const opt = document.createElement('option');
-        opt.value = k.id;
-        opt.textContent = k.name;
-        if (k.id === state.selectedKollegeId) opt.selected = true;
-        activePersonSelect.appendChild(opt);
-      });
-      
-      if (!state.selectedKollegeId && state.kollegen[0]) {
-        state.selectedKollegeId = state.kollegen[0].id;
-      }
-      activePersonSelect.value = state.selectedKollegeId || '';
-    }
-
-    function refreshAdminFilter() {
-      const adminFilter = el('adminPersonFilter');
-      if (!adminFilter) return;
-      
-      const currentFilter = adminFilter.value;
-      adminFilter.innerHTML = '<option value="">Alle Personen</option>';
-      
-      state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
-        const opt = document.createElement('option');
-        opt.value = k.name;
-        opt.textContent = k.name;
-        if (k.name === currentFilter) opt.selected = true;
-        adminFilter.appendChild(opt);
-      });
-    }
-
-    function renderEmployeeStats() {
-      const k = getSelectedKollege();
-      fillKollegeForm(k);
-
-      const monatInput = el('monatInput');
-      const monat = monatInput ? monatInput.value : new Date().toISOString().slice(0,7);
-      
-      if (!monat || !k) {
-        [
-          'empMonthHours',
-          'empLimit',
-          'empRemaining',
-          'empPayable',
-          'empMonthHoursDetail',
-          'empLimitDetail',
-          'empRemainingDetail',
-          'empPayableDetail'
-        ].forEach(id => {
-          const node = el(id);
-          if (node) node.textContent = fmt(0);
-        });
-
-        const lbl = el('remainingLabel');
-        if (lbl) lbl.textContent = 'Offen';
-        return;
-      }
-
-      const entries = state.eintraege.filter(e =>
-        e.name === k.name && (e.monat === monat || (e.datum || '').startsWith(monat))
-      );
-
-      const summe = entries.reduce((acc, e) => acc + Number(e.stunden || 0), 0);
-      const grenze = Number(k.grenze || 0);
-      const remaining = Math.max(grenze - summe, 0);
-      const payable = summe > grenze ? summe : 0;
-
-      const values = {
-        empMonthHours: summe,
-        empLimit: grenze,
-        empRemaining: remaining,
-        empPayable: payable,
-        empMonthHoursDetail: summe,
-        empLimitDetail: grenze,
-        empRemainingDetail: remaining,
-        empPayableDetail: payable
-      };
-
-      Object.entries(values).forEach(([id, value]) => {
-        const node = el(id);
-        if (node) node.textContent = fmt(value);
-      });
-
-      const lbl = el('remainingLabel');
-      if (lbl) {
-        lbl.textContent = 'Offen';
-      }
-
-      const empRemaining = el('empRemaining');
-      const empRemainingDetail = el('empRemainingDetail');
-      const empPayable = el('empPayable');
-      const empPayableDetail = el('empPayableDetail');
-      
-      if (empRemaining) empRemaining.style.color = remaining === 0 ? 'var(--color-success)' : 'inherit';
-      if (empRemainingDetail) empRemainingDetail.style.color = remaining === 0 ? 'var(--color-success)' : 'inherit';
-      if (empPayable) empPayable.style.color = payable > 0 ? 'var(--color-success)' : 'inherit';
-      if (empPayableDetail) empPayableDetail.style.color = payable > 0 ? 'var(--color-success)' : 'inherit';
-    }
-
-    function renderEmployeeEntries() {
-      const body = el('employeeEntriesBody'); body.innerHTML = '';
-      const k = getSelectedKollege();
-      if (!k) return;
-      const rows = entriesFor(k.name, getMonth());
-      if (!rows.length) {
-        body.innerHTML = '<tr><td colspan="6" class="row-muted">Noch keine Einträge für diese Person in diesem Monat.</td></tr>';
-        return;
-      }
-      rows.forEach(r => {
-        const tr = document.createElement('tr');
-        if (state.selectedEintragId === r.id) tr.classList.add('selected');
-        tr.innerHTML = `<td>${r.datum}</td><td>${r.monat}</td><td>${r.name}</td><td>${fmt(r.stunden)}</td><td>${r.bemerkung || ''}</td><td><div class="small-actions"><button data-edit-entry="${r.id}">Bearbeiten</button></div></td>`;
-        body.appendChild(tr);
-      });
-    }
-
-    function renderSummary() {
-      const body = el('summaryBody');
-      if (!body) return;
-      
-      body.innerHTML = '';
-      
-      const month = getMonth();
-      const filterName = el('adminPersonFilter') ? el('adminPersonFilter').value : '';
-      const people = state.kollegen
-        .filter(k => !filterName || k.name === filterName)
-        .slice().sort((a,b) => a.name.localeCompare(b.name,'de'));
-      
-      if (!people.length) { 
-        body.innerHTML = '<tr><td colspan="7" class="row-muted">Noch keine Kolleg:innen angelegt.</td></tr>'; 
-        return; 
-      }
-      
-      people.forEach(k => {
-        const st = monthStats(k, month);
-        const cls = st.payable > 0 ? 'positive' : '';
-        
-        const teilzeit = Number(k.teilzeit || 0);
-        const gesamtStunden = teilzeit + st.sum;
-        const ueberVollzeit = gesamtStunden > 28;
-        
-        let hint = st.hint;
-        
-        if (ueberVollzeit && st.payable > 0) {
-          const stundenBisVollzeit = Math.max(28 - teilzeit, 0);
-          const stundenUeberVollzeit = Math.max(st.sum - stundenBisVollzeit, 0);
-          
-          if (stundenBisVollzeit > 0) {
-            hint = `⚠️ Tarif-Split: ${fmt(stundenBisVollzeit)} Std. (bis 28) + ${fmt(stundenUeberVollzeit)} Std. (über 28)`;
-          } else {
-            hint = `⚠️ Alle ${fmt(stundenUeberVollzeit)} Std. über Vollzeit (günstigerer Tarif)`;
-          }
-        }
-        
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${k.name}</td><td>${month}</td><td>${fmt(st.sum)}</td><td>${fmt(k.grenze)}</td><td>${fmt(st.rest)}</td><td>${fmt(st.payable)}</td><td class="${cls}">${hint}</td>`;
-        body.appendChild(tr);
-      });
-    }
-
-    function renderAdminEntries() {
-      const body = el('adminEntriesBody');
-      if (!body) return;
-      
-      body.innerHTML = '';
-      
-      const filterName = el('adminPersonFilter') ? el('adminPersonFilter').value : '';
-      const rows = state.eintraege
-        .filter(e => !filterName || e.name === filterName)
-        .slice().sort((a,b) => (b.datum||'').localeCompare(a.datum||''));
-      
-      if (!rows.length) { 
-        body.innerHTML = '<tr><td colspan="6" class="row-muted">Noch keine Einträge vorhanden.</td></tr>'; 
-        return; 
-      }
-      
-      rows.forEach(r => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${r.datum}</td><td>${r.monat}</td><td>${r.name}</td><td>${fmt(r.stunden)}</td><td>${r.bemerkung || ''}</td><td>${new Date(r.updatedAt).toLocaleString('de-DE')}</td>`;
-        body.appendChild(tr);
-      });
-    }
-
-    function renderImportReport() {
-      const reportNew = el('reportNew');
-      const reportUpdated = el('reportUpdated');
-      const reportConflicts = el('reportConflicts');
-      
-      if (reportNew) reportNew.textContent = String(state.importReport.neu || 0);
-      if (reportUpdated) reportUpdated.textContent = String(state.importReport.aktualisiert || 0);
-      if (reportConflicts) reportConflicts.textContent = String(state.importReport.konflikte || 0);
-    }
-
-    function renderConflicts() {
-      const wrap = el('conflictList');
-      if (!wrap) return;
-      
-      wrap.innerHTML = '';
-      
-      if (!state.conflicts.length) {
-        wrap.innerHTML = '<div class="row-muted">Zurzeit keine Konflikte protokolliert.</div>';
-        return;
-      }
-      
-      state.conflicts.slice().reverse().slice(0, 20).forEach(c => {
-        const div = document.createElement('div');
-        div.className = 'conflict-box';
-        div.innerHTML = `<strong>${c.type}</strong><div>ID: ${c.id}</div><div>${c.name || ''}</div><div>Entscheidung: ${c.resolution}</div><div class="row-muted">${new Date(c.loggedAt).toLocaleString('de-DE')}</div>`;
-        wrap.appendChild(div);
-      });
-    }
-
-    function switchRole(view, alreadyUnlocked = false) {
-      if (view === 'admin') {
-        if (!PINManager.hasPIN()) {
-          PINDialog.showSetup();
-          return;
-        }
-        
-        if (!alreadyUnlocked && !PINManager.isUnlocked()) {
-          PINDialog.show();
-          return;
-        }
-      }
-
-      state.roleView = view;
-      document.querySelectorAll('[data-role-view]').forEach(btn => btn.classList.toggle('active', btn.dataset.roleView === view));
-      el('employeeView').classList.toggle('hidden', view !== 'employee');
-      el('adminView').classList.toggle('hidden', view !== 'admin');
-      
-      if (view === 'admin') {
-        refreshAdminEntryPersonSelect();
-      }
-    }
-
-    function renderVertretungsHinweis() {
-      const wrap = el('vertretungsHinweisBody');
-      if (!wrap) return;
-      
-      wrap.innerHTML = '';
-      
-      const month = getMonth();
-      const people = state.kollegen.slice().sort((a, b) => {
-        const ra = monthStats(a, month).rest;
-        const rb = monthStats(b, month).rest;
-        return ra - rb;
-      });
-      
-      if (!people.length) {
-        wrap.innerHTML = '<div class="row-muted">Noch keine Kolleg:innen angelegt.</div>';
-        return;
-      }
-      
-      people.forEach(k => {
-        const st = monthStats(k, month);
-        const div = document.createElement('div');
-        div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:.75rem .9rem;border-bottom:1px solid var(--color-divider)';
-        const istErreicht = st.payable > 0;
-        const hinweis = istErreicht
-          ? `<span class="pill">✅ Alle ${fmt(st.sum)} Std. vergütbar</span>`
-          : `<span style="color:var(--color-warning);font-weight:700">⚠️ Noch ${fmt(st.rest)} Std. bis zur Grenze</span>`;
-        div.innerHTML = `<span><strong>${k.name}</strong> &nbsp;<span class="row-muted">${fmt(st.sum)} / ${fmt(k.grenze)} Std.</span></span>${hinweis}`;
-        wrap.appendChild(div);
-      });
-    }
-
-    function saveKollege() {
-      const name = el('kollegeName').value.trim();
-      const kuerzel = el('kollegeKuerzel').value.trim().toUpperCase();
-      const vollzeit = Number(el('vollzeit').value || 0);
-      const teilzeit = Number(el('teilzeit').value || 0);
-      const quote = vollzeit > 0 ? teilzeit / vollzeit : 0;
-      const grenze = BAGATELL_VOLLZEIT * quote;
-      
-      if (!name) return alert('Bitte Namen eingeben.');
-      
-      if (state.roleView === 'employee') {
-        const k = getSelectedKollege();
-        if (!k) return alert('Bitte zuerst Person auswählen.');
-        
-        if (teilzeit <= 0) return alert('Bitte Teilzeitstunden größer 0 eingeben.');
-        
-        Object.assign(k, { teilzeit, quote, grenze, updatedAt: nowIso() });
-        refreshAll();
-        alert('✅ Teilzeitstunden gespeichert!');
-        return;
-      }
-      
-      if (!state.selectedKollegeId) {
-        const ts = nowIso();
-        const k = { id: uid(), kuerzel, name, vollzeit, teilzeit, quote, grenze, createdAt: ts, updatedAt: ts };
-        state.kollegen.push(k);
-        state.selectedKollegeId = k.id;
-      } else {
-        const k = getSelectedKollege();
-        if (!k) return;
-        const oldName = k.name;
-        Object.assign(k, { kuerzel, name, vollzeit, teilzeit, quote, grenze, updatedAt: nowIso() });
-        if (oldName !== name) state.eintraege.forEach(e => { if (e.name === oldName) { e.name = name; e.updatedAt = nowIso(); } });
-      }
-      refreshAll();
-    }
-
-    function deleteKollege() {
-      const k = getSelectedKollege();
-      if (!k) return;
-      if (!confirm(`Person ${k.name} und zugehörige Einträge löschen?`)) return;
-      state.kollegen = state.kollegen.filter(x => x.id !== k.id);
-      state.eintraege = state.eintraege.filter(e => e.name !== k.name);
-      clearKollegeForm(); clearEintragForm();
-      refreshAll();
-    }
-
-    function saveEintrag() {
-      const k = getSelectedKollege();
-      if (!k) return alert('Bitte zuerst eine Person auswählen.');
-      const datum = el('eintragDatum').value;
-      const stunden = Number(el('eintragStunden').value || 0);
-      const bemerkung = el('eintragBemerkung').value.trim();
-      if (!datum) return alert('Bitte Datum eingeben.');
-      if (stunden <= 0) return alert('Bitte Stunden größer 0 eingeben.');
-      const monat = monthFromDate(datum);
-      if (!state.selectedEintragId) {
-        const ts = nowIso();
-        state.eintraege.push({ id: uid(), datum, monat, name: k.name, stunden, bemerkung, createdAt: ts, updatedAt: ts });
-      } else {
-        const e = state.eintraege.find(x => x.id === state.selectedEintragId);
-        if (!e) return;
-        Object.assign(e, { datum, monat, name: k.name, stunden, bemerkung, updatedAt: nowIso() });
-      }
-      el('monatInput').value = monat;
-      clearEintragForm();
-      refreshAll();
-    }
-
-    function deleteEintrag() {
-      if (!state.selectedEintragId) return alert('Bitte erst einen Eintrag zur Bearbeitung auswählen.');
-      if (!confirm('Diesen Eintrag wirklich löschen?')) return;
-      state.eintraege = state.eintraege.filter(e => e.id !== state.selectedEintragId);
-      clearEintragForm();
-      refreshAll();
-    }
-
-    function exportBackup() {
-      const adminPIN = localStorage.getItem('adminPIN');
-      const backupData = { 
-        kollegen: state.kollegen, 
-        eintraege: state.eintraege,
-        adminPIN: adminPIN
-      };
-      downloadText(`bagatell-backup-${new Date().toISOString().slice(0,10)}.json`, JSON.stringify(backupData, null, 2));
-    }
-
-    function recordConflict(type, localItem, importedItem, resolution) {
-      state.conflicts.push({ type, id: localItem.id || importedItem.id, name: importedItem.name || localItem.name || '', resolution, loggedAt: nowIso() });
-    }
-
-    function sameCore(a, b, type) {
-      if (type === 'Kolleg:in') return a.name === b.name && Number(a.grenze) === Number(b.grenze) && Number(a.quote) === Number(b.quote) && Number(a.vollzeit) === Number(b.vollzeit) && Number(a.teilzeit) === Number(b.teilzeit);
-      return a.datum === b.datum && a.monat === b.monat && a.name === b.name && Number(a.stunden) === Number(b.stunden) && (a.bemerkung || '') === (b.bemerkung || '');
-    }
-
-    function mergeById(localItems, importedItems, type) {
-      const map = new Map(localItems.map(item => [item.id, item]));
-      let added = 0, updated = 0;
-      importedItems.forEach(item => {
-        const existing = map.get(item.id);
-        if (!existing) { map.set(item.id, item); added += 1; return; }
-        if (!sameCore(existing, item, type)) {
-          const localUpdated = new Date(existing.updatedAt || existing.createdAt || 0).getTime();
-          const importedUpdated = new Date(item.updatedAt || item.createdAt || 0).getTime();
-          if (importedUpdated > localUpdated) {
-            recordConflict(type, existing, item, 'Importierte neuere Version übernommen');
-            map.set(item.id, item); updated += 1;
-          } else {
-            recordConflict(type, existing, item, 'Lokale neuere Version behalten');
-          }
-        }
-      });
-      return { items: [...map.values()], added, updated };
-    }
-
-    function importBackup(file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        try {
-          const data = JSON.parse(reader.result);
-          
-          if (data.adminPIN) {
-            if (!PINManager.hasPIN()) {
-              localStorage.setItem('adminPIN', data.adminPIN);
-              console.log('✅ PIN aus Master-Backup übernommen');
-            }
-          }
-          
-          if (!Array.isArray(data.kollegen) || !Array.isArray(data.eintraege)) throw new Error('Ungültige Backup-Datei.');
-          
-          const importedKollegen = data.kollegen.map(enrichKollege);
-          const importedEintraege = data.eintraege.map(enrichEintrag);
-          const mode = prompt('Import-Modus: merge, neu oder ersetzen', 'merge');
-          if (!mode) return;
-          
-          const choice = mode.trim().toLowerCase();
-          state.importReport = { neu: 0, aktualisiert: 0, konflikte: 0 };
-          
-          if (choice === 'ersetzen') {
-            if (!confirm('Lokale Daten wirklich vollständig ersetzen?')) return;
-            state.kollegen = importedKollegen;
-            state.eintraege = importedEintraege;
-            state.conflicts.push({ type:'System', id:uid(), name:'', resolution:'Lokaler Datenbestand komplett ersetzt', loggedAt: nowIso() });
-            state.importReport = { neu: importedKollegen.length + importedEintraege.length, aktualisiert: 0, konflikte: 0 };
-          } else if (choice === 'neu') {
-            const localKIds = new Set(state.kollegen.map(k => k.id));
-            const localEIds = new Set(state.eintraege.map(e => e.id));
-            const neueK = importedKollegen.filter(k => !localKIds.has(k.id));
-            const neueE = importedEintraege.filter(e => !localEIds.has(e.id));
-            state.kollegen = [...state.kollegen, ...neueK];
-            state.eintraege = [...state.eintraege, ...neueE];
-            state.importReport = { neu: neueK.length + neueE.length, aktualisiert: 0, konflikte: 0 };
-          } else {
-            const mk = mergeById(state.kollegen, importedKollegen, 'Kolleg:in');
-            const me = mergeById(state.eintraege, importedEintraege, 'Eintrag');
-            state.kollegen = mk.items;
-            state.eintraege = me.items;
-            state.importReport = { neu: mk.added + me.added, aktualisiert: mk.updated + me.updated, konflikte: state.conflicts.length };
-            alert(`Zusammengeführt: Kolleg:innen +${mk.added}, aktualisiert ${mk.updated}; Einträge +${me.added}, aktualisiert ${me.updated}`);
-          }
-          
-          refreshAll();
-        } catch (err) { 
-          alert(err.message); 
-        }
-      };
-      reader.readAsText(file, 'utf-8');
-    }
-
-    function exportMonthSummary() {
-      const month = getMonth();
-      const rows = [['Name','Monat','Stunden','Bagatellgrenze','Noch offen','Vergütbar','Hinweis']];
-      state.kollegen.slice().sort((a,b)=>a.name.localeCompare(b.name,'de')).forEach(k => {
-        const st = monthStats(k, month);
-        rows.push([k.name, month, st.sum, k.grenze, st.rest, st.payable, st.hint]);
-      });
-      downloadText(`monatsuebersicht-${month}.csv`, toCsv(rows), 'text/csv;charset=utf-8');
-    }
-
-    function exportAccounting() {
-      const month = getMonth();
-      const rows = [['Name','Monat','Teilzeit','Erfasste Stunden','Bagatellgrenze','Abrechnungsstunden','Std. bis Vollzeit (höherer Tarif)','Std. über Vollzeit (günstigerer Tarif)','Hinweis']];
-      state.kollegen.slice().sort((a,b)=>a.name.localeCompare(b.name,'de')).forEach(k => {
-        const st = monthStats(k, month);
-        
-        const gesamtStunden = k.teilzeit + st.sum;
-        const ueberVollzeit = gesamtStunden > 28;
-        
-        let stundenBisVollzeit = 0;
-        let stundenUeberVollzeit = 0;
-        let hinweis = '';
-        
-        if (ueberVollzeit && st.payable > 0) {
-          stundenBisVollzeit = Math.max(28 - k.teilzeit, 0);
-          stundenUeberVollzeit = st.sum - stundenBisVollzeit;
-          
-          if (stundenBisVollzeit > 0) {
-            hinweis = 'Tarif-Split beachten';
-          } else {
-            hinweis = 'Alle Stunden über Vollzeit';
-          }
-        } else if (st.payable > 0) {
-          stundenBisVollzeit = st.payable;
-          hinweis = 'Nur höherer Tarif';
-        } else {
-          hinweis = 'Noch nicht abrechenbar';
-        }
-        
-        rows.push([k.name, month, k.teilzeit, st.sum, k.grenze, st.payable, stundenBisVollzeit, stundenUeberVollzeit, hinweis]);
-      });
-      downloadText(`abrechnungsstunden-${month}.csv`, toCsv(rows), 'text/csv;charset=utf-8');
-    }
-
-    function exportEntries() {
-      const rows = [['Datum','Monat','Name','Stunden','Bemerkung','UpdatedAt']];
-      state.eintraege.slice().sort((a,b)=>(a.datum||'').localeCompare(b.datum||'')).forEach(e => rows.push([e.datum,e.monat,e.name,e.stunden,e.bemerkung,e.updatedAt]));
-      downloadText(`eintraege-${getMonth()}.csv`, toCsv(rows), 'text/csv;charset=utf-8');
-    }
-
-    function adminSelectPerson() {
-      const select = el('adminPersonSelect');
-      if (!select) return;
-
-      const personId = select.value;
-
-      if (!personId) {
-        adminClearPerson();
-        return;
-      }
-
-      const person = state.kollegen.find(k => k.id === personId);
-      if (!person) return;
-
-      state.selectedKollegeId = personId;
-
-      if (el('adminKuerzel')) el('adminKuerzel').value = person.kuerzel || '';
-      if (el('adminName')) el('adminName').value = person.name || '';
-      if (el('adminVollzeit')) el('adminVollzeit').value = person.vollzeit ?? VOLLVZEIT_STUNDEN;
-      if (el('adminTeilzeit')) el('adminTeilzeit').value = person.teilzeit ?? '';
-      if (el('adminQuote')) el('adminQuote').value = Number(person.quote || 0).toFixed(2);
-      if (el('adminGrenze')) el('adminGrenze').value = Number(person.grenze || 0).toFixed(2);
-    }
-
-    function refreshAdminPersonSelect() {
-      const select = el('adminPersonSelect');
-      if (!select) return;
-      
-      select.innerHTML = '<option value="">Neue Person anlegen...</option>';
-      
-      state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
-        const opt = document.createElement('option');
-        opt.value = k.id;
-        opt.textContent = `${k.name} (${k.kuerzel})`;
-        if (k.id === state.selectedKollegeId) opt.selected = true;
-        select.appendChild(opt);
-      });
-    }
-
-    function adminSavePerson() {
-      const kuerzel = el('adminKuerzel').value.trim().toUpperCase();
-      const name = el('adminName').value.trim();
-      const vollzeit = VOLLVZEIT_STUNDEN;
-      const teilzeit = Number(el('adminTeilzeit')?.value || 0);
-
-      if (!kuerzel) return alert('Bitte Kürzel eingeben.');
-      if (!name) return alert('Bitte Namen eingeben.');
-      if (Number.isNaN(teilzeit) || teilzeit < 0 || teilzeit > vollzeit) {
-        return alert(`Bitte gültige Teilzeitstunden zwischen 0 und ${vollzeit} eingeben.`);
-      }
-
-      const quote = vollzeit > 0 ? teilzeit / vollzeit : 0;
-      const grenze = BAGATELL_VOLLZEIT * quote;
-
-      const existing = state.kollegen.find(
-        k => k.kuerzel === kuerzel && k.id !== state.selectedKollegeId
-      );
-      if (existing) {
-        return alert(`Kürzel "${kuerzel}" wird bereits von ${existing.name} verwendet.`);
-      }
-
-      if (!state.selectedKollegeId) {
-        const ts = nowIso();
-        const k = {
-          id: uid(),
-          kuerzel,
-          name,
-          vollzeit,
-          teilzeit,
-          quote,
-          grenze,
-          createdAt: ts,
-          updatedAt: ts
-        };
-        state.kollegen.push(k);
-        state.selectedKollegeId = k.id;
-        alert(`✅ ${name} wurde angelegt!`);
-        refreshAdminPersonSelect();
-      } else {
-        const k = getSelectedKollege();
-        if (!k) return;
-
-        const oldName = k.name;
-        Object.assign(k, {
-          kuerzel,
-          name,
-          vollzeit,
-          teilzeit,
-          quote,
-          grenze,
-          updatedAt: nowIso()
-        });
-
-        if (oldName !== name) {
-          state.eintraege.forEach(e => {
-            if (e.name === oldName) {
-              e.name = name;
-              e.updatedAt = nowIso();
-            }
-          });
-        }
-
-        alert(`✅ ${name} wurde aktualisiert!`);
-        refreshAdminPersonSelect();
-      }
-
-      refreshAll();
-    }
-
-    function adminClearPerson() {
-      state.selectedKollegeId = null;
-
-      if (el('adminKuerzel')) el('adminKuerzel').value = '';
-      if (el('adminName')) el('adminName').value = '';
-      if (el('adminVollzeit')) el('adminVollzeit').value = VOLLVZEIT_STUNDEN;
-      if (el('adminTeilzeit')) el('adminTeilzeit').value = '';
-      if (el('adminQuote')) el('adminQuote').value = '';
-      if (el('adminGrenze')) el('adminGrenze').value = '';
-      if (el('adminPersonSelect')) el('adminPersonSelect').value = '';
-    }
-
-    function adminDeletePerson() {
-      const k = getSelectedKollege();
-      if (!k) return alert('Bitte zuerst eine Person auswählen.');
-      
-      if (!confirm(`${k.name} und alle zugehörigen Einträge wirklich löschen?`)) return;
-      
-      state.kollegen = state.kollegen.filter(x => x.id !== k.id);
-      state.eintraege = state.eintraege.filter(e => e.name !== k.name);
-      
-      adminClearPerson();
-      refreshAll();
-      alert(`✅ ${k.name} wurde gelöscht.`);
-    }
-
-    // ========== ADMIN: EINTRÄGE VERWALTEN (NEU!) ==========
-    function refreshAdminEntryPersonSelect() {
-      const select = el('adminEntryPersonSelect');
-      if (!select) return;
-      
-      const currentValue = select.value;
-      select.innerHTML = '<option value="">Bitte Person auswählen...</option>';
-      
-      state.kollegen.slice().sort((a,b) => a.name.localeCompare(b.name,'de')).forEach(k => {
-        const opt = document.createElement('option');
-        opt.value = k.name;
-        opt.textContent = k.name;
-        if (k.name === currentValue) opt.selected = true;
-        select.appendChild(opt);
-      });
-    }
-
-    function renderAdminManageEntries() {
-      const body = el('adminManageEntriesBody');
-      if (!body) return;
-      
-      body.innerHTML = '';
-      
-      const selectedName = el('adminEntryPersonSelect')?.value;
-      if (!selectedName) {
-        body.innerHTML = '<tr><td colspan="5" class="row-muted">Bitte Person auswählen.</td></tr>';
-        return;
-      }
-      
-      const month = getMonth();
-      const entries = state.eintraege
-        .filter(e => e.name === selectedName && e.monat === month)
-        .sort(byDate);
-      
-      if (!entries.length) {
-        body.innerHTML = '<tr><td colspan="5" class="row-muted">Noch keine Einträge für diese Person in diesem Monat.</td></tr>';
-        return;
-      }
-      
-      entries.forEach(e => {
-        const tr = document.createElement('tr');
-        if (state.selectedAdminEntryId === e.id) tr.classList.add('selected');
-        tr.innerHTML = `
-          <td>${e.datum}</td>
-          <td>${e.name}</td>
-          <td>${fmt(e.stunden)}</td>
-          <td>${e.bemerkung || ''}</td>
+  } else {
+    personen.push({
+      id: generateId(),
+      kuerzel,
+      name,
+      personalnummer,
+      geburtsdatum,
+      status,
+      teilzeit,
+      quote,
+      grenze
+    });
+  }
+
+  saveData();
+  updatePersonSelects();
+  clearAdminPersonForm();
+  alert('✅ Person gespeichert!');
+  renderAll();
+});
+
+document.getElementById('adminClearPersonBtn').addEventListener('click', clearAdminPersonForm);
+
+document.getElementById('adminDeletePersonBtn').addEventListener('click', () => {
+  if (!currentEditingPersonId) {
+    alert('⚠️ Keine Person zum Löschen ausgewählt!');
+    return;
+  }
+
+  if (!confirm('❌ Person wirklich löschen? Alle Einträge dieser Person bleiben erhalten.')) return;
+
+  personen = personen.filter(p => p.id !== currentEditingPersonId);
+  currentEditingPersonId = null;
+  saveData();
+  updatePersonSelects();
+  clearAdminPersonForm();
+  renderAll();
+});
+
+function clearAdminPersonForm() {
+  currentEditingPersonId = null;
+  document.getElementById('adminPersonSelect').value = '';
+  document.getElementById('adminKuerzel').value = '';
+  document.getElementById('adminName').value = '';
+  document.getElementById('adminPersonalnummer').value = '';
+  document.getElementById('adminGeburtsdatum').value = '';
+  document.getElementById('adminStatusBeamte').checked = false;
+  document.getElementById('adminStatusAngestellte').checked = false;
+  document.getElementById('adminTeilzeit').value = '';
+  document.getElementById('adminQuote').value = '';
+  document.getElementById('adminGrenze').value = '';
+}
+
+// ============================================================================
+// ADMIN: EINTRÄGE VERWALTEN
+// ============================================================================
+
+document.getElementById('adminEntryPersonSelect').addEventListener('change', renderAdminManageEntries);
+
+document.getElementById('adminSaveEntryBtn').addEventListener('click', () => {
+  const personId = document.getElementById('adminEntryPersonSelect').value;
+  const datum = document.getElementById('adminEntryDatum').value;
+  const stunden = parseFloat(document.getElementById('adminEntryStunden').value);
+  const bemerkung = document.getElementById('adminEntryBemerkung').value.trim();
+
+  if (!personId || !datum || !stunden || stunden <= 0) {
+    alert('⚠️ Bitte Person, Datum und Stunden eingeben!');
+    return;
+  }
+
+  eintraege.push({
+    id: generateId(),
+    personId,
+    datum,
+    stunden,
+    bemerkung,
+    lastModified: new Date().toISOString()
+  });
+
+  saveData();
+  clearAdminEntryForm();
+  renderAll();
+  alert('✅ Eintrag gespeichert!');
+});
+
+document.getElementById('adminClearEntryBtn').addEventListener('click', clearAdminEntryForm);
+
+function clearAdminEntryForm() {
+  document.getElementById('adminEntryDatum').value = '';
+  document.getElementById('adminEntryStunden').value = '';
+  document.getElementById('adminEntryBemerkung').value = '';
+}
+
+function renderAdminManageEntries() {
+  const personId = document.getElementById('adminEntryPersonSelect').value;
+  const tbody = document.getElementById('adminManageEntriesBody');
+
+  if (!personId) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--color-text-muted)">Bitte Person auswählen</td></tr>';
+    return;
+  }
+
+  const entries = eintraege.filter(e => e.personId === personId);
+
+  if (entries.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--color-text-muted)">Keine Einträge vorhanden</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = entries
+    .sort((a, b) => new Date(b.datum) - new Date(a.datum))
+    .map(e => {
+      const person = personen.find(p => p.id === e.personId);
+      return `
+        <tr>
+          <td>${new Date(e.datum).toLocaleDateString('de-DE')}</td>
+          <td>${person ? person.name : 'Unbekannt'}</td>
+          <td>${formatNumber(e.stunden)}</td>
+          <td>${e.bemerkung || '-'}</td>
           <td>
-            <div class="small-actions">
-              <button data-admin-edit-entry="${e.id}">✏️ Bearbeiten</button>
-              <button class="danger" data-admin-delete-entry="${e.id}">🗑️ Löschen</button>
-            </div>
+            <button class="ghost" onclick="deleteAdminEntry('${e.id}')">Löschen</button>
           </td>
-        `;
-        body.appendChild(tr);
-      });
-    }
+        </tr>
+      `;
+    })
+    .join('');
+}
 
-    function adminSaveEntry() {
-      const selectedName = el('adminEntryPersonSelect')?.value;
-      if (!selectedName) return alert('Bitte Person auswählen.');
-      
-      const datum = el('adminEntryDatum')?.value;
-      const stunden = Number(el('adminEntryStunden')?.value || 0);
-      const bemerkung = el('adminEntryBemerkung')?.value.trim() || '';
-      
-      if (!datum) return alert('Bitte Datum eingeben.');
-      if (stunden <= 0) return alert('Bitte Stunden größer 0 eingeben.');
-      
-      const monat = monthFromDate(datum);
-      
-      if (!state.selectedAdminEntryId) {
-        // Neuer Eintrag
-        const ts = nowIso();
-        state.eintraege.push({
-          id: uid(),
-          datum,
-          monat,
-          name: selectedName,
-          stunden,
-          bemerkung,
-          createdAt: ts,
-          updatedAt: ts
-        });
-        alert('✅ Eintrag erstellt!');
-      } else {
-        // Bestehenden Eintrag bearbeiten
-        const e = state.eintraege.find(x => x.id === state.selectedAdminEntryId);
-        if (!e) return;
-        
-        Object.assign(e, {
-          datum,
-          monat,
-          name: selectedName,
-          stunden,
-          bemerkung,
-          updatedAt: nowIso()
-        });
-        alert('✅ Eintrag aktualisiert!');
-      }
-      
-      adminClearEntry();
-      refreshAll();
-    }
+function deleteAdminEntry(entryId) {
+  if (!confirm('❌ Eintrag wirklich löschen?')) return;
+  eintraege = eintraege.filter(e => e.id !== entryId);
+  saveData();
+  renderAll();
+}
 
-    function adminClearEntry() {
-      state.selectedAdminEntryId = null;
-      if (el('adminEntryDatum')) el('adminEntryDatum').value = '';
-      if (el('adminEntryStunden')) el('adminEntryStunden').value = '';
-      if (el('adminEntryBemerkung')) el('adminEntryBemerkung').value = '';
-      renderAdminManageEntries();
-    }
+// ============================================================================
+// ADMIN: LBV-FORMULAR GENERIEREN
+// ============================================================================
 
-    function adminEditEntry(id) {
-      const e = state.eintraege.find(x => x.id === id);
-      if (!e) return;
-      
-      state.selectedAdminEntryId = id;
-      
-      if (el('adminEntryPersonSelect')) el('adminEntryPersonSelect').value = e.name;
-      if (el('adminEntryDatum')) el('adminEntryDatum').value = e.datum;
-      if (el('adminEntryStunden')) el('adminEntryStunden').value = e.stunden;
-      if (el('adminEntryBemerkung')) el('adminEntryBemerkung').value = e.bemerkung || '';
-      
-      renderAdminManageEntries();
-    }
+function populateLBVSchuljahrSelect() {
+  const select = document.getElementById('lbvSchuljahr');
+  const currentYear = new Date().getFullYear();
+  
+  select.innerHTML = '<option value="">Bitte auswählen...</option>';
+  
+  for (let i = -2; i <= 2; i++) {
+    const startYear = currentYear + i;
+    const endYear = startYear + 1;
+    select.innerHTML += `<option value="${startYear}/${endYear}">${startYear}/${endYear}</option>`;
+  }
+}
 
-    function adminDeleteEntry(id) {
-      if (!confirm('Diesen Eintrag wirklich löschen?')) return;
-      
-      state.eintraege = state.eintraege.filter(e => e.id !== id);
-      
-      if (state.selectedAdminEntryId === id) {
-        adminClearEntry();
-      }
-      
-      refreshAll();
-      alert('✅ Eintrag gelöscht!');
-    }
+document.getElementById('generateLBVBtn').addEventListener('click', async () => {
+  const schuljahr = document.getElementById('lbvSchuljahr').value;
+  const halbjahr = document.getElementById('lbvHalbjahr').value;
+  const personId = document.getElementById('lbvPerson').value;
 
-    function bindEvents() {
-      document.querySelectorAll('[data-role-view]').forEach(btn => btn.addEventListener('click', () => switchRole(btn.dataset.roleView)));
-      
-      document.querySelectorAll('[data-add-hours]').forEach(btn => btn.addEventListener('click', () => { 
-        const delta = Number(btn.dataset.addHours || 0); 
-        const input = el('eintragStunden'); 
-        if (input) {
-          const current = Number(input.value || 0); 
-          input.value = Math.max(0, current + delta); 
-        }
-      }));
-      
-      const prevMonthBtn = el('prevMonthBtn');
-      const nextMonthBtn = el('nextMonthBtn');
-      if (prevMonthBtn) prevMonthBtn.addEventListener('click', () => shiftMonth(-1));
-      if (nextMonthBtn) nextMonthBtn.addEventListener('click', () => shiftMonth(1));
-      
-      const activePersonSelect = el('activePersonSelect');
-      if (activePersonSelect) activePersonSelect.addEventListener('change', e => { 
-        state.selectedKollegeId = e.target.value || null; 
-        clearEintragForm(); 
-        renderEmployeeStats(); 
-        renderEmployeeEntries(); 
-      });
-      
-      const monatInput = el('monatInput');
-      if (monatInput) monatInput.addEventListener('change', refreshAll);
-      
-      const adminPersonFilter = el('adminPersonFilter');
-      if (adminPersonFilter) {
-        adminPersonFilter.addEventListener('change', () => {
-          renderSummary();
-          renderAdminEntries();
-        });
-      }
-      
-      const teilzeitInput = el('teilzeit');
-      if (teilzeitInput) {
-        teilzeitInput.addEventListener('input', updateStammdaten);
-        teilzeitInput.addEventListener('change', updateStammdaten);
-      }
+  if (!schuljahr || !halbjahr || !personId) {
+    alert('⚠️ Bitte Schuljahr, Halbjahr und Person auswählen!');
+    return;
+  }
 
-      const adminTeilzeitInput = el('adminTeilzeit');
-      if (adminTeilzeitInput) {
-        adminTeilzeitInput.addEventListener('input', updateAdminStammdaten);
-        adminTeilzeitInput.addEventListener('change', updateAdminStammdaten);
-      }
-      
-      const saveKollegeBtn = el('saveKollegeBtn');
-      const clearKollegeBtn = el('clearKollegeBtn');
-      const deleteKollegeBtn = el('deleteKollegeBtn');
-      if (saveKollegeBtn) saveKollegeBtn.addEventListener('click', saveKollege);
-      if (clearKollegeBtn) clearKollegeBtn.addEventListener('click', () => { clearKollegeForm(); refreshPersonSelect(); renderEmployeeStats(); });
-      if (deleteKollegeBtn) deleteKollegeBtn.addEventListener('click', deleteKollege);
-      
-      const saveEintragBtn = el('saveEintragBtn');
-      const clearEintragBtn = el('clearEintragBtn');
-      const deleteEintragBtn = el('deleteEintragBtn');
-      if (saveEintragBtn) saveEintragBtn.addEventListener('click', saveEintrag);
-      if (clearEintragBtn) clearEintragBtn.addEventListener('click', () => { clearEintragForm(); renderEmployeeEntries(); });
-      if (deleteEintragBtn) deleteEintragBtn.addEventListener('click', deleteEintrag);
-      
-      const exportBackupBtn = el('exportBackupBtn');
-      const exportBackupBtnEmployee = el('exportBackupBtnEmployee');
-      const importBackupInput = el('importBackupInput');
-      if (exportBackupBtn) exportBackupBtn.addEventListener('click', exportBackup);
-      if (exportBackupBtnEmployee) exportBackupBtnEmployee.addEventListener('click', exportBackup);
-      if (importBackupInput) importBackupInput.addEventListener('change', e => { 
-        const file = e.target.files[0]; 
-        if (file) importBackup(file); 
-        e.target.value = ''; 
-      });
-      
-      const exportMonthSummaryBtn = el('exportMonthSummaryBtn');
-      const exportAccountingBtn = el('exportAccountingBtn');
-      const exportEntriesBtn = el('exportEntriesBtn');
-      if (exportMonthSummaryBtn) exportMonthSummaryBtn.addEventListener('click', exportMonthSummary);
-      if (exportAccountingBtn) exportAccountingBtn.addEventListener('click', exportAccounting);
-      if (exportEntriesBtn) exportEntriesBtn.addEventListener('click', exportEntries);
-      
-      const employeeEntriesBody = el('employeeEntriesBody');
-      if (employeeEntriesBody) employeeEntriesBody.addEventListener('click', e => {
-        const id = e.target.dataset.editEntry; 
-        if (!id) return;
-        const entry = state.eintraege.find(x => x.id === id); 
-        if (!entry) return;
-        state.selectedEintragId = id; 
-        fillEintragForm(entry); 
-        renderEmployeeEntries();
-      });
-      
-      const themeToggle = el('themeToggle');
-      if (themeToggle) themeToggle.addEventListener('click', () => {
-        const root = document.documentElement;
-        const current = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        const next = current === 'dark' ? 'light' : 'dark';
-        root.setAttribute('data-theme', next); 
-        themeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
-      });
-      
-      const adminSaveBtn = el('adminSavePersonBtn');
-      const adminClearBtn = el('adminClearPersonBtn');
-      const adminDeleteBtn = el('adminDeletePersonBtn');
-      if (adminSaveBtn) adminSaveBtn.addEventListener('click', adminSavePerson);
-      const adminPersonSelect = el('adminPersonSelect');
-      if (adminPersonSelect) adminPersonSelect.addEventListener('change', adminSelectPerson);
-      if (adminClearBtn) adminClearBtn.addEventListener('click', adminClearPerson);
-      if (adminDeleteBtn) adminDeleteBtn.addEventListener('click', adminDeletePerson);
-      
-      const lockAdminBtn = el('lockAdminBtn');
-      if (lockAdminBtn) lockAdminBtn.addEventListener('click', () => {
-        PINManager.lockSession();
-        switchRole('employee');
-        alert('🔒 Verantwortlichenansicht wurde gesperrt.');
-      });
+  const person = personen.find(p => p.id === personId);
+  if (!person) {
+    alert('⚠️ Person nicht gefunden!');
+    return;
+  }
 
-      // Admin Entry Management
-      const adminEntryPersonSelect = el('adminEntryPersonSelect');
-      if (adminEntryPersonSelect) {
-        adminEntryPersonSelect.addEventListener('change', () => {
-          adminClearEntry();
-          renderAdminManageEntries();
-        });
-      }
+  // Berechne Monate für das Halbjahr
+  const [startYear, endYear] = schuljahr.split('/').map(Number);
+  let months = [];
+  
+  if (halbjahr === '1') {
+    // 1. Halbjahr: August - Januar
+    months = [
+      `${startYear}-08`,
+      `${startYear}-09`,
+      `${startYear}-10`,
+      `${startYear}-11`,
+      `${startYear}-12`,
+      `${endYear}-01`
+    ];
+  } else {
+    // 2. Halbjahr: Februar - Juli
+    months = [
+      `${endYear}-02`,
+      `${endYear}-03`,
+      `${endYear}-04`,
+      `${endYear}-05`,
+      `${endYear}-06`,
+      `${endYear}-07`
+    ];
+  }
 
-      const adminSaveEntryBtn = el('adminSaveEntryBtn');
-      const adminClearEntryBtn = el('adminClearEntryBtn');
-      if (adminSaveEntryBtn) adminSaveEntryBtn.addEventListener('click', adminSaveEntry);
-      if (adminClearEntryBtn) adminClearEntryBtn.addEventListener('click', adminClearEntry);
+  // Berechne Stunden pro Monat
+  const monthlyHours = months.map(monthKey => {
+    return getMonthlyHours(personId, monthKey);
+  });
 
-      const adminManageEntriesBody = el('adminManageEntriesBody');
-      if (adminManageEntriesBody) {
-        adminManageEntriesBody.addEventListener('click', e => {
-          const editId = e.target.dataset.adminEditEntry;
-          const deleteId = e.target.dataset.adminDeleteEntry;
-          
-          if (editId) adminEditEntry(editId);
-          if (deleteId) adminDeleteEntry(deleteId);
-        });
-      }
-    }
+  const totalHours = monthlyHours.reduce((sum, h) => sum + h, 0);
 
-    function shiftMonth(delta) {
-      const raw = getMonth() + '-01';
-      const d = new Date(raw);
-      d.setMonth(d.getMonth() + delta);
-      const monatInput = el('monatInput');
-      if (monatInput) monatInput.value = d.toISOString().slice(0,7);
-      refreshAll();
-    }
+  // Generiere PDF
+  try {
+    await generateLBVPDF(person, schuljahr, halbjahr, months, monthlyHours, totalHours);
+  } catch (error) {
+    console.error('Fehler beim Generieren des PDFs:', error);
+    alert('❌ Fehler beim Generieren des PDFs. Bitte prüfen Sie die Konsole für Details.');
+  }
+});
 
-    function refreshAll() {
-      saveState();
-      refreshPersonSelect();
-      refreshAdminPersonSelect();
-      refreshAdminFilter();
-      refreshAdminEntryPersonSelect();
-      renderEmployeeStats();
-      renderEmployeeEntries();
-      renderSummary();
-      renderAdminEntries();
-      renderAdminManageEntries();
-      renderConflicts();
-      renderVertretungsHinweis();
-      renderImportReport();
-    }
+async function generateLBVPDF(person, schuljahr, halbjahr, months, monthlyHours, totalHours) {
+  // Lade das offizielle LBV-Formular
+  const formUrl = 'https://schulverwaltungsprogramme.msb.nrw.de/download/LBV(ABes)23_2019_02_release.pdf';
+  
+  try {
+    const existingPdfBytes = await fetch(formUrl).then(res => res.arrayBuffer());
+    const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
+    const form = pdfDoc.getForm();
 
-    function init() {
-      const prefDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      document.documentElement.setAttribute('data-theme', prefDark ? 'dark' : 'light');
-
-      const themeToggle = el('themeToggle');
-      if (themeToggle) themeToggle.textContent = prefDark ? '☀️' : '🌙';
-
-      const monatInput = el('monatInput');
-      if (monatInput) monatInput.value = new Date().toISOString().slice(0,7);
-
-      loadState();
-      PINDialog.init();
-      WhoAreYouDialog.init();
-      bindEvents();
-      switchRole('employee');
-      refreshAll();
-    }
+    // Fülle Formularfelder aus
+    // HINWEIS: Die genauen Feldnamen müssen aus dem PDF extrahiert werden
+    // Dies ist ein Beispiel - die tatsächlichen Feldnamen können abweichen
     
-    document.addEventListener('DOMContentLoaded', init);
+    try {
+      // Persönliche Daten
+      if (form.getTextField('Name')) form.getTextField('Name').setText(person.name || '');
+      if (form.getTextField('Vorname')) form.getTextField('Vorname').setText('');
+      if (form.getTextField('Geburtsdatum')) form.getTextField('Geburtsdatum').setText(person.geburtsdatum ? new Date(person.geburtsdatum).toLocaleDateString('de-DE') : '');
+      if (form.getTextField('Personalnummer')) form.getTextField('Personalnummer').setText(person.personalnummer || '');
+      
+      // Schuldaten
+      if (form.getTextField('Dienststelle')) form.getTextField('Dienststelle').setText(schuldaten.schulname || '');
+      if (form.getTextField('Schulnummer')) form.getTextField('Schulnummer').setText(schuldaten.schulnummer || '');
+      
+      // Zeitraum
+      const zeitraum = halbjahr === '1' ? 'August - Januar' : 'Februar - Juli';
+      if (form.getTextField('Zeitraum')) form.getTextField('Zeitraum').setText(`${zeitraum} ${schuljahr}`);
+      
+      // Monatliche Stunden
+      const monthNames = ['August', 'September', 'Oktober', 'November', 'Dezember', 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli'];
+      monthlyHours.forEach((hours, index) => {
+        const monthName = monthNames[halbjahr === '1' ? index : index + 6];
+        const fieldName = `Stunden_${monthName}`;
+        if (form.getTextField(fieldName)) {
+          form.getTextField(fieldName).setText(formatNumber(hours));
+        }
+      });
+      
+      // Gesamtstunden
+      if (form.getTextField('Gesamtstunden')) form.getTextField('Gesamtstunden').setText(formatNumber(totalHours));
+      
+      // Beschäftigungsstatus (Checkbox oder Radio)
+      if (person.status === 'beamte') {
+        if (form.getCheckBox('Beamte')) form.getCheckBox('Beamte').check();
+      } else if (person.status === 'angestellte') {
+        if (form.getCheckBox('Angestellte')) form.getCheckBox('Angestellte').check();
+      }
+      
+    } catch (fieldError) {
+      console.warn('Einige Formularfelder konnten nicht befüllt werden:', fieldError);
+      // Fahre fort, auch wenn einige Felder fehlen
+    }
+
+    // Speichere das PDF
+    const pdfBytes = await pdfDoc.save();
+    
+    // Download
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `LBV_Mehrarbeit_${person.name.replace(/\s+/g, '_')}_${schuljahr.replace('/', '-')}_${halbjahr}HJ.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    alert('✅ LBV-Formular wurde generiert und heruntergeladen!');
+    
+  } catch (error) {
+    console.error('Fehler beim Laden oder Befüllen des PDFs:', error);
+    alert('❌ Das offizielle LBV-Formular konnte nicht geladen werden. Bitte prüfen Sie Ihre Internetverbindung oder kontaktieren Sie den Support.');
+  }
+}
+
+// ============================================================================
+// ADMIN: MONATSÜBERSICHT
+// ============================================================================
+
+document.getElementById('adminPersonFilter').addEventListener('change', renderAdminSummary);
+
+function renderAdminSummary() {
+  const monthKey = document.getElementById('monatInput').value;
+  const filterPersonId = document.getElementById('adminPersonFilter').value;
+
+  if (!monthKey) {
+    document.getElementById('summaryBody').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--color-text-muted)">Bitte Monat auswählen</td></tr>';
+    return;
+  }
+
+  let filteredPersons = personen;
+  if (filterPersonId) {
+    filteredPersons = personen.filter(p => p.id === filterPersonId);
+  }
+
+  const tbody = document.getElementById('summaryBody');
+  const rows = filteredPersons.map(person => {
+    const hours = getMonthlyHours(person.id, monthKey);
+    const limit = person.grenze || 0;
+    const remaining = Math.max(0, limit - hours);
+    const payable = Math.max(0, hours - limit);
+
+    const teilzeit = person.teilzeit || 0;
+    const vollzeit = 28;
+    const totalHours = teilzeit + hours;
+
+    let hinweis = '';
+    if (totalHours > vollzeit) {
+      const hoherTarif = vollzeit - teilzeit;
+      const niedrigerTarif = hours - hoherTarif;
+      hinweis = `⚠️ Tarif-Split: ${formatNumber(hoherTarif)} Std. (höher) + ${formatNumber(niedrigerTarif)} Std. (niedriger)`;
+    }
+
+    const monthName = new Date(monthKey + '-01').toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+
+    return `
+      <tr>
+        <td>${person.name}</td>
+        <td>${monthName}</td>
+        <td>${formatNumber(hours)}</td>
+        <td>${formatNumber(limit)}</td>
+        <td class="${remaining > 0 ? '' : 'row-muted'}">${formatNumber(remaining)}</td>
+        <td class="${payable > 0 ? 'positive' : 'row-muted'}">${formatNumber(payable)}</td>
+        <td class="${hinweis ? 'warn' : ''}">${hinweis || '-'}</td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = rows.join('') || '<tr><td colspan="7" style="text-align:center;color:var(--color-text-muted)">Keine Daten vorhanden</td></tr>';
+}
+
+// ============================================================================
+// ADMIN: VERTRETUNGSPLANUNG
+// ============================================================================
+
+function renderVertretungsHinweise() {
+  const monthKey = document.getElementById('monatInput').value;
+  if (!monthKey) {
+    document.getElementById('vertretungsHinweisBody').innerHTML = '<p style="color:var(--color-text-muted)">Bitte Monat auswählen</p>';
+    return;
+  }
+
+  const hinweise = personen
+    .map(person => {
+      const hours = getMonthlyHours(person.id, monthKey);
+      const limit = person.grenze || 0;
+      const remaining = limit - hours;
+      return { person, hours, limit, remaining };
+    })
+    .filter(h => h.remaining > 0)
+    .sort((a, b) => b.remaining - a.remaining);
+
+  if (hinweise.length === 0) {
+    document.getElementById('vertretungsHinweisBody').innerHTML = '<div class="status-card status-go">✅ Alle Personen haben die Bagatellgrenze erreicht oder überschritten!</div>';
+    return;
+  }
+
+  const html = hinweise.map(h => `
+    <div class="status-card">
+      <strong>${h.person.name}</strong> braucht noch <strong>${formatNumber(h.remaining)} Stunden</strong> 
+      (aktuell: ${formatNumber(h.hours)} / ${formatNumber(h.limit)})
+    </div>
+  `).join('');
+
+  document.getElementById('vertretungsHinweisBody').innerHTML = html;
+}
+
+// ============================================================================
+// ADMIN: ALLE EINTRÄGE
+// ============================================================================
+
+function renderAdminAllEntries() {
+  const tbody = document.getElementById('adminEntriesBody');
+
+  if (eintraege.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--color-text-muted)">Keine Einträge vorhanden</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = eintraege
+    .sort((a, b) => new Date(b.datum) - new Date(a.datum))
+    .map(e => {
+      const person = personen.find(p => p.id === e.personId);
+      const d = new Date(e.datum);
+      const monthName = d.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+      const lastMod = new Date(e.lastModified).toLocaleString('de-DE');
+      return `
+        <tr>
+          <td>${d.toLocaleDateString('de-DE')}</td>
+          <td>${monthName}</td>
+          <td>${person ? person.name : 'Unbekannt'}</td>
+          <td>${formatNumber(e.stunden)}</td>
+          <td>${e.bemerkung || '-'}</td>
+          <td class="row-muted">${lastMod}</td>
+        </tr>
+      `;
+    })
+    .join('');
+}
+
+// ============================================================================
+// ADMIN: KONFLIKTE
+// ============================================================================
+
+function renderConflicts() {
+  const container = document.getElementById('conflictList');
+
+  if (conflicts.length === 0) {
+    container.innerHTML = '<div class="status-card status-go">✅ Keine Konflikte</div>';
+    return;
+  }
+
+  container.innerHTML = conflicts.map(c => `
+    <div class="conflict-box">
+      <strong>Konflikt:</strong> ${c.type === 'person' ? 'Person' : 'Eintrag'} (ID: ${c.id})<br>
+      <strong>Lokal:</strong> ${JSON.stringify(c.local)}<br>
+      <strong>Importiert:</strong> ${JSON.stringify(c.imported)}<br>
+      <em>Importierte Version wurde übernommen.</em>
+    </div>
+  `).join('');
+}
+
+// ============================================================================
+// BACKUP EXPORT/IMPORT
+// ============================================================================
+
+document.getElementById('exportBackupBtn').addEventListener('click', exportBackup);
+document.getElementById('exportBackupBtnEmployee').addEventListener('click', exportBackup);
+
+function exportBackup() {
+  const data = {
+    version: '2.0',
+    exported: new Date().toISOString(),
+    personen,
+    eintraege,
+    schuldaten
+  };
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `mehrarbeit_backup_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('importBackupInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    try {
+      const imported = JSON.parse(event.target.result);
+      mergeData(imported);
+      e.target.value = '';
+    } catch (error) {
+      alert('❌ Fehler beim Importieren: Ungültige Datei!');
+    }
+  };
+  reader.readAsText(file);
+});
+
+function mergeData(imported) {
+  let newCount = 0;
+  let updatedCount = 0;
+  let conflictCount = 0;
+
+  // Merge Personen
+  imported.personen?.forEach(importedPerson => {
+    const existing = personen.find(p => p.id === importedPerson.id);
+    if (!existing) {
+      personen.push(importedPerson);
+      newCount++;
+    } else {
+      const localMod = existing.lastModified || '1970-01-01';
+      const importedMod = importedPerson.lastModified || '1970-01-01';
+      if (importedMod > localMod) {
+        conflicts.push({ type: 'person', id: importedPerson.id, local: existing, imported: importedPerson });
+        Object.assign(existing, importedPerson);
+        updatedCount++;
+        conflictCount++;
+      }
+    }
+  });
+
+  // Merge Einträge
+  imported.eintraege?.forEach(importedEntry => {
+    const existing = eintraege.find(e => e.id === importedEntry.id);
+    if (!existing) {
+      eintraege.push(importedEntry);
+      newCount++;
+    } else {
+      const localMod = existing.lastModified || '1970-01-01';
+      const importedMod = importedEntry.lastModified || '1970-01-01';
+      if (importedMod > localMod) {
+        conflicts.push({ type: 'entry', id: importedEntry.id, local: existing, imported: importedEntry });
+        Object.assign(existing, importedEntry);
+        updatedCount++;
+        conflictCount++;
+      }
+    }
+  });
+
+  // Merge Schuldaten
+  if (imported.schuldaten) {
+    schuldaten = { ...schuldaten, ...imported.schuldaten };
+  }
+
+  saveData();
+  updatePersonSelects();
+  renderAll();
+
+  document.getElementById('reportNew').textContent = newCount;
+  document.getElementById('reportUpdated').textContent = updatedCount;
+  document.getElementById('reportConflicts').textContent = conflictCount;
+
+  alert(`✅ Import abgeschlossen!\n\n📊 Neu: ${newCount}\n🔄 Aktualisiert: ${updatedCount}\n⚠️ Konflikte: ${conflictCount}`);
+}
+
+// ============================================================================
+// CSV EXPORTS
+// ============================================================================
+
+document.getElementById('exportEntriesBtn').addEventListener('click', () => {
+  const csv = [
+    ['Datum', 'Monat', 'Name', 'Kürzel', 'Stunden', 'Bemerkung', 'Zuletzt geändert'].join(';'),
+    ...eintraege.map(e => {
+      const person = personen.find(p => p.id === e.personId);
+      const d = new Date(e.datum);
+      const monthName = d.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+      return [
+        d.toLocaleDateString('de-DE'),
+        monthName,
+        person ? person.name : 'Unbekannt',
+        person ? person.kuerzel : '',
+        formatNumber(e.stunden),
+        e.bemerkung || '',
+        new Date(e.lastModified).toLocaleString('de-DE')
+      ].join(';');
+    })
+  ].join('\n');
+
+  downloadCSV(csv, 'eintraege.csv');
+});
+
+document.getElementById('exportMonthSummaryBtn').addEventListener('click', () => {
+  const monthKey = document.getElementById('monatInput').value;
+  if (!monthKey) {
+    alert('⚠️ Bitte Monat auswählen!');
+    return;
+  }
+
+  const monthName = new Date(monthKey + '-01').toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+
+  const csv = [
+    ['Name', 'Kürzel', 'Monat', 'Stunden', 'Bagatellgrenze', 'Noch offen', 'Vergütbar'].join(';'),
+    ...personen.map(person => {
+      const hours = getMonthlyHours(person.id, monthKey);
+      const limit = person.grenze || 0;
+      const remaining = Math.max(0, limit - hours);
+      const payable = Math.max(0, hours - limit);
+      return [
+        person.name,
+        person.kuerzel,
+        monthName,
+        formatNumber(hours),
+        formatNumber(limit),
+        formatNumber(remaining),
+        formatNumber(payable)
+      ].join(';');
+    })
+  ].join('\n');
+
+  downloadCSV(csv, `monatsuebersicht_${monthKey}.csv`);
+});
+
+document.getElementById('exportAccountingBtn').addEventListener('click', () => {
+  const monthKey = document.getElementById('monatInput').value;
+  if (!monthKey) {
+    alert('⚠️ Bitte Monat auswählen!');
+    return;
+  }
+
+  const monthName = new Date(monthKey + '-01').toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+
+  const csv = [
+    ['Name', 'Kürzel', 'Monat', 'Teilzeit', 'Mehrarbeit gesamt', 'Vergütbar gesamt', 'Davon höherer Tarif (bis 28h)', 'Davon niedrigerer Tarif (über 28h)'].join(';'),
+    ...personen.map(person => {
+      const hours = getMonthlyHours(person.id, monthKey);
+      const limit = person.grenze || 0;
+      const payable = Math.max(0, hours - limit);
+      const teilzeit = person.teilzeit || 0;
+      const vollzeit = 28;
+      const totalHours = teilzeit + hours;
+
+      let hoherTarif = 0;
+      let niedrigerTarif = 0;
+
+      if (payable > 0) {
+        if (totalHours <= vollzeit) {
+          hoherTarif = payable;
+        } else {
+          const bisVollzeit = vollzeit - teilzeit;
+          hoherTarif = Math.min(payable, bisVollzeit);
+          niedrigerTarif = Math.max(0, payable - hoherTarif);
+        }
+      }
+
+      return [
+        person.name,
+        person.kuerzel,
+        monthName,
+        formatNumber(teilzeit),
+        formatNumber(hours),
+        formatNumber(payable),
+        formatNumber(hoherTarif),
+        formatNumber(niedrigerTarif)
+      ].join(';');
+    })
+  ].join('\n');
+
+  downloadCSV(csv, `abrechnungsstunden_${monthKey}.csv`);
+});
+
+function downloadCSV(content, filename) {
+  const BOM = '\uFEFF';
+  const blob = new Blob([BOM + content], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ============================================================================
+// ROLE SWITCHING & PIN
+// ============================================================================
+
+document.querySelectorAll('[data-role-view]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const role = btn.getAttribute('data-role-view');
+    
+    if (role === 'admin') {
+      const pin = localStorage.getItem(STORAGE_KEY_ADMIN_PIN);
+      if (!pin) {
+        showPinSetupDialog();
+      } else {
+        showPinDialog();
+      }
+    } else {
+      switchToRole('employee');
+    }
+  });
+});
+
+function switchToRole(role) {
+  document.querySelectorAll('[data-role-view]').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-role-view') === role);
+  });
+
+  if (role === 'employee') {
+    document.getElementById('employeeView').classList.remove('hidden');
+    document.getElementById('adminView').classList.add('hidden');
+  } else {
+    document.getElementById('employeeView').classList.add('hidden');
+    document.getElementById('adminView').classList.remove('hidden');
+  }
+
+  renderAll();
+}
+
+function showPinSetupDialog() {
+  document.getElementById('pinSetupDialog').style.display = 'flex';
+  document.getElementById('pinSetupInput').value = '';
+  document.getElementById('pinSetupConfirm').value = '';
+  document.getElementById('pinSetupError').style.display = 'none';
+  document.getElementById('pinSetupInput').focus();
+}
+
+document.getElementById('pinSetupSubmit').addEventListener('click', () => {
+  const pin = document.getElementById('pinSetupInput').value;
+  const confirm = document.getElementById('pinSetupConfirm').value;
+  const errorEl = document.getElementById('pinSetupError');
+
+  if (pin.length < 4) {
+    errorEl.textContent = '❌ PIN muss mindestens 4 Zeichen lang sein!';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  if (pin !== confirm) {
+    errorEl.textContent = '❌ PINs stimmen nicht überein!';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  localStorage.setItem(STORAGE_KEY_ADMIN_PIN, pin);
+  document.getElementById('pinSetupDialog').style.display = 'none';
+  switchToRole('admin');
+});
+
+function showPinDialog() {
+  document.getElementById('pinDialog').style.display = 'flex';
+  document.getElementById('pinInput').value = '';
+  document.getElementById('pinError').style.display = 'none';
+  document.getElementById('pinInput').focus();
+}
+
+document.getElementById('pinSubmit').addEventListener('click', () => {
+  const input = document.getElementById('pinInput').value;
+  const stored = localStorage.getItem(STORAGE_KEY_ADMIN_PIN);
+
+  if (input === stored) {
+    document.getElementById('pinDialog').style.display = 'none';
+    switchToRole('admin');
+  } else {
+    document.getElementById('pinError').style.display = 'block';
+  }
+});
+
+document.getElementById('pinCancel').addEventListener('click', () => {
+  document.getElementById('pinDialog').style.display = 'none';
+});
+
+document.getElementById('lockAdminBtn').addEventListener('click', () => {
+  switchToRole('employee');
+});
+
+// ============================================================================
+// "WER BIST DU?" DIALOG
+// ============================================================================
+
+function checkFirstRun() {
+  const activePerson = localStorage.getItem(STORAGE_KEY_ACTIVE_PERSON);
+  if (!activePerson && personen.length > 0) {
+    showWhoAreYouDialog();
+  }
+}
+
+function showWhoAreYouDialog() {
+  document.getElementById('whoAreYouDialog').style.display = 'flex';
+  document.getElementById('whoAreYouError').style.display = 'none';
+  
+  const select = document.getElementById('whoAreYouSelect');
+  select.innerHTML = '<option value="">Bitte auswählen...</option>';
+  personen.forEach(p => {
+    select.innerHTML += `<option value="${p.id}">${p.name} (${p.kuerzel})</option>`;
+  });
+}
+
+document.getElementById('whoAreYouSubmit').addEventListener('click', () => {
+  const personId = document.getElementById('whoAreYouSelect').value;
+  
+  if (!personId) {
+    document.getElementById('whoAreYouError').style.display = 'block';
+    return;
+  }
+
+  localStorage.setItem(STORAGE_KEY_ACTIVE_PERSON, personId);
+  document.getElementById('activePersonSelect').value = personId;
+  document.getElementById('whoAreYouDialog').style.display = 'none';
+  
+  loadPersonDataToForm();
+  renderAll();
+});
+
+// ============================================================================
+// RENDER ALL
+// ============================================================================
+
+function renderAll() {
+  renderEmployeeView();
+  renderAdminSummary();
+  renderVertretungsHinweise();
+  renderAdminAllEntries();
+  renderConflicts();
+  renderAdminManageEntries();
+}
+
+// ============================================================================
+// INIT
+// ============================================================================
+
+function init() {
+  loadData();
+  initTheme();
+  setCurrentMonth();
+  updatePersonSelects();
+  loadSchuldatenToForm();
+  populateLBVSchuljahrSelect();
+
+  const savedPerson = localStorage.getItem(STORAGE_KEY_ACTIVE_PERSON);
+  if (savedPerson) {
+    document.getElementById('activePersonSelect').value = savedPerson;
+    loadPersonDataToForm();
+  }
+
+  renderAll();
+  checkFirstRun();
+}
+
+init();
   </script>
 </body>
 </html>
