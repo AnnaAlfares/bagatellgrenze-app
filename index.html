@@ -503,6 +503,39 @@
             </div>
           </section>
 
+                    <!-- PIN ÄNDERN -->
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Admin-PIN ändern</h2>
+                <p>Ändere die PIN für die Verantwortlichenansicht.</p>
+              </div>
+            </div>
+
+            <div class="grid two">
+              <label>Alte PIN
+                <input id="oldPIN" type="password" placeholder="Alte PIN eingeben">
+              </label>
+
+              <label>Neue PIN
+                <input id="newPIN" type="password" placeholder="Neue PIN (mind. 4 Zeichen)">
+              </label>
+
+              <label style="grid-column: 1 / -1">Neue PIN wiederholen
+                <input id="confirmNewPIN" type="password" placeholder="Neue PIN wiederholen">
+              </label>
+            </div>
+
+            <div class="small-actions" style="margin-top:1rem">
+              <button class="button primary" id="changePINBtn">PIN ändern</button>
+              <button class="ghost" id="clearPINFormBtn">Abbrechen</button>
+            </div>
+
+            <div class="footer-note">
+              💡 <strong>Hinweis:</strong> Die PIN wird gehasht gespeichert und kann nicht wiederhergestellt werden. Bitte merke dir die neue PIN!
+            </div>
+          </section>
+
           <!-- Personen verwalten -->
           <section class="panel">
             <div class="section-head">
@@ -840,6 +873,16 @@ function saveData() {
 
 function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+}
+
+    // Hash-Funktion für PIN (SHA-256)
+async function hashPIN(pin) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(pin);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashHex;
 }
 
 // ============================================================================
@@ -1240,6 +1283,58 @@ document.getElementById('saveSchuldatenBtn').addEventListener('click', () => {
   alert('✅ Schuldaten gespeichert!');
 });
 
+ 
+// ============================================================================
+// ADMIN: PIN ÄNDERN
+// ============================================================================
+
+document.getElementById('changePINBtn').addEventListener('click', async () => {
+  const oldPIN = document.getElementById('oldPIN').value;
+  const newPIN = document.getElementById('newPIN').value;
+  const confirmNewPIN = document.getElementById('confirmNewPIN').value;
+
+  if (!oldPIN || !newPIN || !confirmNewPIN) {
+    alert('⚠️ Bitte alle Felder ausfüllen!');
+    return;
+  }
+
+  if (newPIN.length < 4) {
+    alert('⚠️ Neue PIN muss mindestens 4 Zeichen lang sein!');
+    return;
+  }
+
+  if (newPIN !== confirmNewPIN) {
+    alert('⚠️ Neue PINs stimmen nicht überein!');
+    return;
+  }
+
+  // Prüfe alte PIN
+  const storedPIN = localStorage.getItem(STORAGE_KEY_ADMIN_PIN);
+  const hashedOldPIN = await hashPIN(oldPIN);
+
+  if (hashedOldPIN !== storedPIN) {
+    alert('❌ Alte PIN ist falsch!');
+    return;
+  }
+
+  // Speichere neue PIN (gehasht)
+  const hashedNewPIN = await hashPIN(newPIN);
+  localStorage.setItem(STORAGE_KEY_ADMIN_PIN, hashedNewPIN);
+
+  // Formular leeren
+  document.getElementById('oldPIN').value = '';
+  document.getElementById('newPIN').value = '';
+  document.getElementById('confirmNewPIN').value = '';
+
+  alert('✅ PIN erfolgreich geändert!');
+});
+
+document.getElementById('clearPINFormBtn').addEventListener('click', () => {
+  document.getElementById('oldPIN').value = '';
+  document.getElementById('newPIN').value = '';
+  document.getElementById('confirmNewPIN').value = '';
+});
+   
 // ============================================================================
 // ADMIN: PERSONEN VERWALTEN
 // ============================================================================
@@ -1753,12 +1848,15 @@ document.getElementById('exportBackupBtn').addEventListener('click', exportBacku
 document.getElementById('exportBackupBtnEmployee').addEventListener('click', exportBackup);
 
 function exportBackup() {
+  const adminPIN = localStorage.getItem(STORAGE_KEY_ADMIN_PIN);
+  
   const data = {
     version: '2.0',
     exported: new Date().toISOString(),
     personen,
     eintraege,
-    schuldaten
+    schuldaten,
+    adminPIN: adminPIN || null  // Gehasht!
   };
 
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -1855,6 +1953,11 @@ function mergeData(imported) {
   // Merge Schuldaten
   if (imported.schuldaten) {
     schuldaten = { ...schuldaten, ...imported.schuldaten };
+  }
+
+    // Merge Admin-PIN (gehasht) - nur wenn lokal keine PIN gesetzt ist
+  if (imported.adminPIN && !localStorage.getItem(STORAGE_KEY_ADMIN_PIN)) {
+    localStorage.setItem(STORAGE_KEY_ADMIN_PIN, imported.adminPIN);
   }
 
   saveData();
@@ -2029,7 +2132,7 @@ function showPinSetupDialog() {
   document.getElementById('pinSetupInput').focus();
 }
 
-document.getElementById('pinSetupSubmit').addEventListener('click', () => {
+document.getElementById('pinSetupSubmit').addEventListener('click', async () => {
   const pin = document.getElementById('pinSetupInput').value;
   const confirm = document.getElementById('pinSetupConfirm').value;
   const errorEl = document.getElementById('pinSetupError');
@@ -2046,7 +2149,8 @@ document.getElementById('pinSetupSubmit').addEventListener('click', () => {
     return;
   }
 
-  localStorage.setItem(STORAGE_KEY_ADMIN_PIN, pin);
+  const hashedPIN = await hashPIN(pin);
+  localStorage.setItem(STORAGE_KEY_ADMIN_PIN, hashedPIN);
   document.getElementById('pinSetupDialog').style.display = 'none';
   switchToRole('admin');
 });
@@ -2058,17 +2162,22 @@ function showPinDialog() {
   document.getElementById('pinInput').focus();
 }
 
-document.getElementById('pinSubmit').addEventListener('click', () => {
+document.getElementById('pinSubmit').addEventListener('click', async () => {
   const input = document.getElementById('pinInput').value;
   const stored = localStorage.getItem(STORAGE_KEY_ADMIN_PIN);
+  
+  // Hash die Eingabe
+  const hashedInput = await hashPIN(input);
 
-  if (input === stored) {
+  // Vergleiche: gehasht mit gehasht
+  if (hashedInput === stored) {
     document.getElementById('pinDialog').style.display = 'none';
     switchToRole('admin');
   } else {
     document.getElementById('pinError').style.display = 'block';
   }
 });
+
 
 document.getElementById('pinCancel').addEventListener('click', () => {
   document.getElementById('pinDialog').style.display = 'none';
