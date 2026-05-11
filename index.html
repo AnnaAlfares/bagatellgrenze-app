@@ -2274,11 +2274,38 @@ document.getElementById('importBackupInput').addEventListener('change', function
     try {
       const imported = JSON.parse(event.target.result);
       
+         // Abwärtskompatibilität: Altes Format konvertieren
+      if (imported.kollegen && !imported.personen) {
+        console.log('⚠️ Altes Backup-Format erkannt, konvertiere...');
+        imported.personen = imported.kollegen;
+        imported.version = imported.version || "1.0";
+        delete imported.kollegen;
+      }
+      
       // Validierung
-      if (!imported.version || !imported.personen || !imported.eintraege) {
-        alert('❌ Ungültiges Backup-Format!');
+      if (!imported.version) {
+        alert('❌ Ungültiges Backup-Format! Version fehlt.');
         return;
       }
+      
+      if (!imported.personen) {
+        alert('❌ Ungültiges Backup-Format! Personen fehlen.');
+        return;
+      }
+      
+      // Einträge-Array sicherstellen
+      if (!imported.eintraege) {
+        imported.eintraege = [];
+      }
+      
+      // Debug-Info in Konsole
+      console.log('📥 Import gestartet:', {
+        version: imported.version,
+        personen: imported.personen?.length || 0,
+        eintraege: imported.eintraege?.length || 0,
+        schuldaten: !!imported.schuldaten,
+        adminPIN: !!imported.adminPIN
+      });
 
       // Merge durchführen
       mergeData(imported);
@@ -2287,8 +2314,8 @@ document.getElementById('importBackupInput').addEventListener('change', function
       e.target.value = '';
       
     } catch (err) {
-      console.error('Import-Fehler:', err);
-      alert('❌ Fehler beim Importieren: ' + err.message);
+      console.error('❌ Import-Fehler:', err);
+      alert('❌ Fehler beim Importieren:\n\n' + err.message + '\n\nPrüfe die Konsole für Details.');
     }
   };
   
