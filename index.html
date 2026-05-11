@@ -2261,6 +2261,40 @@ function init() {
 }
 
 init();
+    // ============================================================================
+// BACKUP IMPORT EVENT LISTENER
+// ============================================================================
+
+document.getElementById('importBackupInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    try {
+      const imported = JSON.parse(event.target.result);
+      
+      // Validierung
+      if (!imported.version || !imported.personen || !imported.eintraege) {
+        alert('❌ Ungültiges Backup-Format!');
+        return;
+      }
+
+      // Merge durchführen
+      mergeData(imported);
+
+      // Input zurücksetzen
+      e.target.value = '';
+      
+    } catch (err) {
+      console.error('Import-Fehler:', err);
+      alert('❌ Fehler beim Importieren: ' + err.message);
+    }
+  };
+  
+  reader.readAsText(file);
+});
+
   </script>
 </body>
 </html>
