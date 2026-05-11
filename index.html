@@ -474,6 +474,7 @@
             🔒 Verantwortlichenansicht: Backups aus Kollegien zusammenführen, Konflikte prüfen und Monatsdaten für die Abrechnung exportieren.
             <button class="danger" id="lockAdminBtn" style="margin-top:var(--space-3)">🔒 Ansicht sperren</button>
           </div>
+            <button class="ghost" id="resetPersonBtn" style="margin-top:var(--space-2)">🔄 Person zurücksetzen</button>
 
           <!-- SCHULDATEN VERWALTEN -->
           <section class="panel">
@@ -1012,10 +1013,17 @@ function updatePersonSelects() {
 }
 
 document.getElementById('activePersonSelect').addEventListener('change', (e) => {
-  localStorage.setItem(STORAGE_KEY_ACTIVE_PERSON, e.target.value);
-  loadPersonDataToForm();
-  renderAll();
+  const newValue = e.target.value;
+  
+  if (newValue) {
+    // Person wurde ausgewählt → speichern und sperren
+    localStorage.setItem(STORAGE_KEY_ACTIVE_PERSON, newValue);
+    e.target.disabled = true; // Dropdown sperren
+    loadPersonDataToForm();
+    renderAll();
+  }
 });
+
 
 // ============================================================================
 // MITARBEITERANSICHT: STAMMDATEN
@@ -2114,12 +2122,25 @@ function switchToRole(role) {
   });
 
   if (role === 'employee') {
-    // Session-Login löschen beim Wechsel zu Lehrkraft
-    sessionStorage.removeItem('admin_logged_in');
-    
-    document.getElementById('employeeView').classList.remove('hidden');
-    document.getElementById('adminView').classList.add('hidden');
+  // Session-Login löschen beim Wechsel zu Lehrkraft
+  sessionStorage.removeItem('admin_logged_in');
+  
+  // Prüfe ob Person ausgewählt ist
+  const activePerson = localStorage.getItem(STORAGE_KEY_ACTIVE_PERSON);
+  const dropdown = document.getElementById('activePersonSelect');
+  
+  if (!activePerson) {
+    // Keine Person ausgewählt → Dropdown aktivieren
+    dropdown.disabled = false;
+    dropdown.focus(); // Fokus auf Dropdown
   } else {
+    // Person bereits ausgewählt → Dropdown sperren
+    dropdown.disabled = true;
+  }
+  
+  document.getElementById('employeeView').classList.remove('hidden');
+  document.getElementById('adminView').classList.add('hidden');
+} else {
     // Prüfe ob bereits eingeloggt in dieser Session
     const isLoggedIn = sessionStorage.getItem('admin_logged_in');
     
@@ -2135,7 +2156,18 @@ function switchToRole(role) {
 
   renderAll();
 }
-
+    
+// VA-Funktion: Person zurücksetzen
+function resetActivePerson() {
+  if (confirm('Möchtest du die ausgewählte Person wirklich zurücksetzen?\n\nDies sollte nur bei Gerätewechsel gemacht werden!')) {
+    localStorage.removeItem(STORAGE_KEY_ACTIVE_PERSON);
+    const dropdown = document.getElementById('activePersonSelect');
+    dropdown.value = '';
+    dropdown.disabled = false;
+    alert('Person wurde zurückgesetzt. Bitte wähle eine neue Person aus.');
+    switchToRole('employee');
+  }
+}
 
 function showPinSetupDialog() {
   document.getElementById('pinSetupDialog').style.display = 'flex';
@@ -2202,6 +2234,9 @@ document.getElementById('pinCancel').addEventListener('click', () => {
 
 document.getElementById('lockAdminBtn').addEventListener('click', () => {
   switchToRole('employee');
+});
+document.getElementById('resetPersonBtn').addEventListener('click', () => {
+  resetActivePerson();
 });
 
 // ============================================================================
