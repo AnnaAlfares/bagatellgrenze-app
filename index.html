@@ -2100,7 +2100,7 @@ document.querySelectorAll('[data-role-view]').forEach(btn => {
       if (!pin) {
         showPinSetupDialog();
       } else {
-        showPinDialog();
+        switchToRole('admin');
       }
     } else {
       switchToRole('employee');
