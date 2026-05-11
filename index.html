@@ -2322,21 +2322,20 @@ function init() {
   loadData();
   initTheme();
   setCurrentMonth();
-  updatePersonSelects();
   loadSchuldatenToForm();
   populateLBVSchuljahrSelect();
 
-    const savedPerson = localStorage.getItem(STORAGE_KEY_ACTIVE_PERSON);
+  const savedPerson = localStorage.getItem(STORAGE_KEY_ACTIVE_PERSON);
   if (savedPerson) {
     document.getElementById('activePersonSelect').value = savedPerson;
-    document.getElementById('activePersonSelect').disabled = true; // Dropdown sperren
     loadPersonDataToForm();
   }
 
-
+  updatePersonSelects();
   renderAll();
   checkFirstRun();
 }
+
 
 init();
     // ============================================================================
