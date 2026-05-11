@@ -2114,15 +2114,28 @@ function switchToRole(role) {
   });
 
   if (role === 'employee') {
+    // Session-Login löschen beim Wechsel zu Lehrkraft
+    sessionStorage.removeItem('admin_logged_in');
+    
     document.getElementById('employeeView').classList.remove('hidden');
     document.getElementById('adminView').classList.add('hidden');
   } else {
+    // Prüfe ob bereits eingeloggt in dieser Session
+    const isLoggedIn = sessionStorage.getItem('admin_logged_in');
+    
+    if (!isLoggedIn) {
+      // PIN-Dialog anzeigen
+      showPinDialog();
+      return; // Abbrechen, bis PIN korrekt
+    }
+    
     document.getElementById('employeeView').classList.add('hidden');
     document.getElementById('adminView').classList.remove('hidden');
   }
 
   renderAll();
 }
+
 
 function showPinSetupDialog() {
   document.getElementById('pinSetupDialog').style.display = 'flex';
@@ -2170,10 +2183,14 @@ document.getElementById('pinSubmit').addEventListener('click', async () => {
   const hashedInput = await hashPIN(input);
 
   // Vergleiche: gehasht mit gehasht
-  if (hashedInput === stored) {
+    if (hashedInput === stored) {
+    // Session-Login speichern
+    sessionStorage.setItem('admin_logged_in', 'true');
+    
     document.getElementById('pinDialog').style.display = 'none';
     switchToRole('admin');
   } else {
+
     document.getElementById('pinError').style.display = 'block';
   }
 });
