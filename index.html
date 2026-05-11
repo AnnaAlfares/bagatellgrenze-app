@@ -1874,9 +1874,19 @@ document.getElementById('importBackupInput').addEventListener('change', (e) => {
   if (!file) return;
 
   const reader = new FileReader();
-  reader.onload = (event) => {
+  reader.onload = async (event) => {
     try {
       const imported = JSON.parse(event.target.result);
+      
+      // PIN-Handling: Wenn keine PIN im Backup, setze Standard-PIN
+      if (!imported.admin_pin) {
+        console.log('⚠️ Keine PIN im Backup, setze Standard-PIN...');
+        const defaultPIN = '1544939';
+        const hash = await hashPIN(defaultPIN);
+        imported.admin_pin = hash;
+        console.log('✅ Standard-PIN (1544939) gesetzt');
+      }
+      
       mergeData(imported);
       e.target.value = '';
     } catch (error) {
@@ -1885,6 +1895,7 @@ document.getElementById('importBackupInput').addEventListener('change', (e) => {
   };
   reader.readAsText(file);
 });
+
 
 function mergeData(imported) {
   let newCount = 0;
