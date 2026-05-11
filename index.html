@@ -2244,6 +2244,13 @@ sessionStorage.setItem('admin_session_expires', expiresAt);
   }
 });
 
+// Enter-Taste im PIN-Input
+document.getElementById('pinInput').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    document.getElementById('pinSubmit').click();
+  }
+});
 
 document.getElementById('pinCancel').addEventListener('click', () => {
   document.getElementById('pinDialog').style.display = 'none';
@@ -2319,11 +2326,13 @@ function init() {
   loadSchuldatenToForm();
   populateLBVSchuljahrSelect();
 
-  const savedPerson = localStorage.getItem(STORAGE_KEY_ACTIVE_PERSON);
+    const savedPerson = localStorage.getItem(STORAGE_KEY_ACTIVE_PERSON);
   if (savedPerson) {
     document.getElementById('activePersonSelect').value = savedPerson;
+    document.getElementById('activePersonSelect').disabled = true; // Dropdown sperren
     loadPersonDataToForm();
   }
+
 
   renderAll();
   checkFirstRun();
