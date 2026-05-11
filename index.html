@@ -2121,9 +2121,9 @@ function switchToRole(role) {
     btn.classList.toggle('active', btn.getAttribute('data-role-view') === role);
   });
 
-  if (role === 'employee') {
-  // Session-Login löschen beim Wechsel zu Lehrkraft
-  sessionStorage.removeItem('admin_logged_in');
+   if (role === 'employee') {
+    // Session bleibt erhalten (mit Timeout)
+    // sessionStorage.removeItem('admin_logged_in');
   
   // Prüfe ob Person ausgewählt ist
   const activePerson = localStorage.getItem(STORAGE_KEY_ACTIVE_PERSON);
@@ -2140,15 +2140,24 @@ function switchToRole(role) {
   
   document.getElementById('employeeView').classList.remove('hidden');
   document.getElementById('adminView').classList.add('hidden');
-} else {
+  } else {
     // Prüfe ob bereits eingeloggt in dieser Session
     const isLoggedIn = sessionStorage.getItem('admin_logged_in');
+    const expiresAt = sessionStorage.getItem('admin_session_expires');
+    const now = Date.now();
     
-    if (!isLoggedIn) {
-      // PIN-Dialog anzeigen
+    // Prüfe ob Session abgelaufen ist
+    if (!isLoggedIn || !expiresAt || now > parseInt(expiresAt)) {
+      // Session abgelaufen oder nicht vorhanden → PIN-Dialog
+      sessionStorage.removeItem('admin_logged_in');
+      sessionStorage.removeItem('admin_session_expires');
       showPinDialog();
-      return; // Abbrechen, bis PIN korrekt
+      return;
     }
+    
+    // Session noch gültig → Timeout verlängern
+    const newExpiresAt = now + (30 * 60 * 1000);
+    sessionStorage.setItem('admin_session_expires', newExpiresAt);
     
     document.getElementById('employeeView').classList.add('hidden');
     document.getElementById('adminView').classList.remove('hidden');
@@ -2217,7 +2226,11 @@ document.getElementById('pinSubmit').addEventListener('click', async () => {
   // Vergleiche: gehasht mit gehasht
     if (hashedInput === stored) {
     // Session-Login speichern
-    sessionStorage.setItem('admin_logged_in', 'true');
+   // Session mit 30 Minuten Timeout
+const now = Date.now();
+const expiresAt = now + (30 * 60 * 1000); // 30 Minuten
+sessionStorage.setItem('admin_logged_in', 'true');
+sessionStorage.setItem('admin_session_expires', expiresAt);
     
     document.getElementById('pinDialog').style.display = 'none';
     switchToRole('admin');
