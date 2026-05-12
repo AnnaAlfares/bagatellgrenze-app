@@ -1885,13 +1885,23 @@ document.getElementById('importBackupInput').addEventListener('change', (e) => {
       const imported = JSON.parse(event.target.result);
       
       // PIN-Handling: Wenn keine PIN im Backup, setze Standard-PIN
-      if (!imported.admin_pin) {
-        console.log('⚠️ Keine PIN im Backup, setze Standard-PIN...');
-        const defaultPIN = '1544939';
-        const hash = await hashPIN(defaultPIN);
-        imported.admin_pin = hash;
-        console.log('✅ Standard-PIN (1544939) gesetzt');
-      }
+if (!imported.admin_pin && !imported.adminPIN) {
+  console.log('⚠️ Keine PIN im Backup, setze Standard-PIN...');
+  const defaultPIN = '1544939';
+  const hash = await hashPIN(defaultPIN);
+  imported.admin_pin = hash;
+  imported.adminPIN = hash;
+  console.log('✅ Standard-PIN (1544939) gesetzt');
+}
+
+// Abwärtskompatibilität: admin_pin → adminPIN
+if (imported.admin_pin && !imported.adminPIN) {
+  imported.adminPIN = imported.admin_pin;
+}
+if (imported.adminPIN && !imported.admin_pin) {
+  imported.admin_pin = imported.adminPIN;
+}
+
       
       mergeData(imported);
       e.target.value = '';
@@ -1903,11 +1913,74 @@ document.getElementById('importBackupInput').addEventListener('change', (e) => {
 });
 
 
-function mergeData(imported) {
+function mergeData(imported, mode = 'merge') {
   let newCount = 0;
   let updatedCount = 0;
   let conflictCount = 0;
 
+  // MODUS: ERSETZEN
+  if (mode === 'ersetzen') {
+    if (!confirm('⚠️ ACHTUNG!\n\nAlle lokalen Daten werden gelöscht und durch das Backup ersetzt!\n\nFortfahren?')) {
+      return;
+    }
+    
+    personen = imported.personen || [];
+    eintraege = imported.eintraege || [];
+    schuldaten = imported.schuldaten || {};
+    conflicts = [];
+    
+    if (imported.adminPIN) {
+      localStorage.setItem(STORAGE_KEY_ADMIN_PIN, imported.adminPIN);
+    }
+    
+    saveData();
+    updatePersonSelects();
+    renderAll();
+    
+    alert(`✅ Daten komplett ersetzt!\n\n📊 Personen: ${personen.length}\n📝 Einträge: ${eintraege.length}`);
+    return;
+  }
+
+  // MODUS: NEU
+  if (mode === 'neu') {
+    const localPersonIds = new Set(personen.map(p => p.id));
+    const localEntryIds = new Set(eintraege.map(e => e.id));
+    
+    imported.personen?.forEach(p => {
+      if (!localPersonIds.has(p.id)) {
+        personen.push(p);
+        newCount++;
+      }
+    });
+    
+    imported.eintraege?.forEach(e => {
+      if (!localEntryIds.has(e.id)) {
+        eintraege.push(e);
+        newCount++;
+      }
+    });
+    
+    if (imported.schuldaten && Object.keys(schuldaten).length === 0) {
+      schuldaten = imported.schuldaten;
+    }
+    
+    if (imported.adminPIN && !localStorage.getItem(STORAGE_KEY_ADMIN_PIN)) {
+      localStorage.setItem(STORAGE_KEY_ADMIN_PIN, imported.adminPIN);
+    }
+    
+    saveData();
+    updatePersonSelects();
+    renderAll();
+    
+    document.getElementById('reportNew').textContent = newCount;
+    document.getElementById('reportUpdated').textContent = 0;
+    document.getElementById('reportConflicts').textContent = 0;
+    
+    alert(`✅ Neue Daten hinzugefügt!\n\n📊 Neu: ${newCount}`);
+    return;
+  }
+
+  // MODUS: MERGE (Standard)
   // Merge Personen
   imported.personen?.forEach(importedPerson => {
     const existing = personen.find(p => p.id === importedPerson.id);
@@ -1973,9 +2046,30 @@ function mergeData(imported) {
     schuldaten = { ...schuldaten, ...imported.schuldaten };
   }
 
-    // Merge Admin-PIN (gehasht) - nur wenn lokal keine PIN gesetzt ist
-  if (imported.adminPIN && !localStorage.getItem(STORAGE_KEY_ADMIN_PIN)) {
-    localStorage.setItem(STORAGE_KEY_ADMIN_PIN, imported.adminPIN);
+  // Merge Admin-PIN (gehasht)
+  if (imported.adminPIN) {
+    const localPIN = localStorage.getItem(STORAGE_KEY_ADMIN_PIN);
+    
+    if (!localPIN) {
+      // Keine lokale PIN → importierte PIN übernehmen
+      localStorage.setItem(STORAGE_KEY_ADMIN_PIN, imported.adminPIN);
+      console.log('✅ PIN aus Backup übernommen');
+    } else if (localPIN !== imported.adminPIN) {
+      // Unterschiedliche PINs → Nutzer fragen
+      const overwrite = confirm(
+        '⚠️ Das Backup enthält eine andere PIN als lokal gespeichert.\n\n' +
+        'Möchtest du die PIN aus dem Backup übernehmen?\n\n' +
+        'JA = PIN aus Backup verwenden\n' +
+        'NEIN = Lokale PIN behalten'
+      );
+      
+      if (overwrite) {
+        localStorage.setItem(STORAGE_KEY_ADMIN_PIN, imported.adminPIN);
+        console.log('✅ PIN aus Backup übernommen');
+      } else {
+        console.log('ℹ️ Lokale PIN beibehalten');
+      }
+    }
   }
 
   saveData();
@@ -1988,6 +2082,7 @@ function mergeData(imported) {
 
   alert(`✅ Import abgeschlossen!\n\n📊 Neu: ${newCount}\n🔄 Aktualisiert: ${updatedCount}\n⚠️ Konflikte: ${conflictCount}`);
 }
+
 
 // ============================================================================
 // CSV EXPORTS
@@ -2357,7 +2452,7 @@ document.getElementById('importBackupInput').addEventListener('change', function
     try {
       const imported = JSON.parse(event.target.result);
       
-         // Abwärtskompatibilität: Altes Format konvertieren
+      // Abwärtskompatibilität: Altes Format konvertieren
       if (imported.kollegen && !imported.personen) {
         console.log('⚠️ Altes Backup-Format erkannt, konvertiere...');
         imported.personen = imported.kollegen;
@@ -2390,8 +2485,24 @@ document.getElementById('importBackupInput').addEventListener('change', function
         adminPIN: !!imported.adminPIN
       });
 
+      // Import-Modus abfragen
+      const mode = prompt(
+        '📥 Import-Modus wählen:\n\n' +
+        '• "merge" = Daten zusammenführen (Konflikte werden erkannt)\n' +
+        '• "neu" = Nur neue Einträge hinzufügen\n' +
+        '• "ersetzen" = Alle lokalen Daten löschen und ersetzen\n\n' +
+        'Bitte eingeben:',
+        'merge'
+      );
+      
+      if (!mode) {
+        console.log('ℹ️ Import abgebrochen');
+        e.target.value = '';
+        return;
+      }
+
       // Merge durchführen
-      mergeData(imported);
+      mergeData(imported, mode.trim().toLowerCase());
 
       // Input zurücksetzen
       e.target.value = '';
@@ -2404,6 +2515,7 @@ document.getElementById('importBackupInput').addEventListener('change', function
   
   reader.readAsText(file);
 });
+
 
   </script>
 </body>
