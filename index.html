@@ -1006,17 +1006,23 @@ function updatePersonSelects() {
     lbvPersonSelect.innerHTML += `<option value="${p.id}">${p.name} (${p.kuerzel})</option>`;
   });
 
-  if (currentActive) activeSelect.value = currentActive;
+  // Wert wiederherstellen (erst currentActive, dann savedPerson als Fallback)
+  const savedPerson = localStorage.getItem(STORAGE_KEY_ACTIVE_PERSON);
+  if (currentActive) {
+    activeSelect.value = currentActive;
+  } else if (savedPerson) {
+    activeSelect.value = savedPerson;
+  }
+
   if (currentAdmin) adminPersonSelect.value = currentAdmin;
   if (currentAdminEntry) adminEntryPersonSelect.value = currentAdminEntry;
   if (currentFilter) adminPersonFilter.value = currentFilter;
-  
+
   // Sperre das Dropdown, wenn eine Person ausgewählt ist
-  if (currentActive) {
+  if (activeSelect.value) {
     activeSelect.disabled = true;
   }
 }
-
 
 // ============================================================================
 // MITARBEITERANSICHT: STAMMDATEN
