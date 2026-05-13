@@ -1628,92 +1628,40 @@ document.getElementById('generateLBVBtn').addEventListener('click', async () => 
 });
 
 async function generateLBVPDF(person, schuljahr, halbjahr, months, monthlyHours, totalHours) {
-  // Lade das offizielle LBV-Formular
   const formUrl = './LBV_ABes_23.pdf';
-
-try {
-  const existingPdfBytes = await fetch(formUrl).then(res => {
-    if (!res.ok) {
-      throw new Error(`PDF nicht gefunden: ${res.status} ${res.statusText}`);
-    }
-    return res.arrayBuffer();
-  });
-  const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
-  const form = pdfDoc.getForm();
-
-  // DEBUG: Alle Feldnamen ausgeben
-  const fields = form.getFields();
-  console.log('📋 Verfügbare Formularfelder:');
-  fields.forEach(field => {
-    const type = field.constructor.name;
-    const name = field.getName();
-    console.log(`  - ${name} (${type})`);
-  });
-
-  // Fülle Formularfelder aus
-
-    // HINWEIS: Die genauen Feldnamen müssen aus dem PDF extrahiert werden
-    // Dies ist ein Beispiel - die tatsächlichen Feldnamen können abweichen
-    
-    try {
-      // Persönliche Daten
-      if (form.getTextField('Name')) form.getTextField('Name').setText(person.name || '');
-      if (form.getTextField('Vorname')) form.getTextField('Vorname').setText('');
-      if (form.getTextField('Geburtsdatum')) form.getTextField('Geburtsdatum').setText(person.geburtsdatum ? new Date(person.geburtsdatum).toLocaleDateString('de-DE') : '');
-      if (form.getTextField('Personalnummer')) form.getTextField('Personalnummer').setText(person.personalnummer || '');
-      
-      // Schuldaten
-      if (form.getTextField('Dienststelle')) form.getTextField('Dienststelle').setText(schuldaten.schulname || '');
-      if (form.getTextField('Schulnummer')) form.getTextField('Schulnummer').setText(schuldaten.schulnummer || '');
-      
-      // Zeitraum
-      const zeitraum = halbjahr === '1' ? 'August - Januar' : 'Februar - Juli';
-      if (form.getTextField('Zeitraum')) form.getTextField('Zeitraum').setText(`${zeitraum} ${schuljahr}`);
-      
-      // Monatliche Stunden
-      const monthNames = ['August', 'September', 'Oktober', 'November', 'Dezember', 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli'];
-      monthlyHours.forEach((hours, index) => {
-        const monthName = monthNames[halbjahr === '1' ? index : index + 6];
-        const fieldName = `Stunden_${monthName}`;
-        if (form.getTextField(fieldName)) {
-          form.getTextField(fieldName).setText(formatNumber(hours));
-        }
-      });
-      
-      // Gesamtstunden
-      if (form.getTextField('Gesamtstunden')) form.getTextField('Gesamtstunden').setText(formatNumber(totalHours));
-      
-      // Beschäftigungsstatus (Checkbox oder Radio)
-      if (person.status === 'beamte') {
-        if (form.getCheckBox('Beamte')) form.getCheckBox('Beamte').check();
-      } else if (person.status === 'angestellte') {
-        if (form.getCheckBox('Angestellte')) form.getCheckBox('Angestellte').check();
+  
+  try {
+    console.log('🔍 Lade PDF...');
+    const existingPdfBytes = await fetch(formUrl).then(res => {
+      if (!res.ok) {
+        throw new Error(`PDF nicht gefunden: ${res.status} ${res.statusText}`);
       }
-      
-    } catch (fieldError) {
-      console.warn('Einige Formularfelder konnten nicht befüllt werden:', fieldError);
-      // Fahre fort, auch wenn einige Felder fehlen
-    }
+      return res.arrayBuffer();
+    });
+    
+    console.log('✅ PDF geladen, parse Formular...');
+    const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
+    const form = pdfDoc.getForm();
 
-    // Speichere das PDF
-    const pdfBytes = await pdfDoc.save();
-    
-    // Download
-    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `LBV_Mehrarbeit_${person.name.replace(/\s+/g, '_')}_${schuljahr.replace('/', '-')}_${halbjahr}HJ.pdf`;
-    a.click();
-    URL.revokeObjectURL(url);
-    
-    alert('✅ LBV-Formular wurde generiert und heruntergeladen!');
+    // DEBUG: Alle Feldnamen ausgeben
+    const fields = form.getFields();
+    console.log('📋 Verfügbare Formularfelder (' + fields.length + ' Felder):');
+    fields.forEach(field => {
+      const type = field.constructor.name;
+      const name = field.getName();
+      console.log(`  - "${name}" (${type})`);
+    });
+
+    // STOPP HIER - Befülle NICHTS, nur Debug-Ausgabe
+    console.log('⚠️ Befüllen übersprungen (Debug-Modus)');
+    alert('✅ PDF geladen! Prüfe die Konsole für Feldnamen.');
     
   } catch (error) {
-    console.error('Fehler beim Laden oder Befüllen des PDFs:', error);
-    alert('❌ Das offizielle LBV-Formular konnte nicht geladen werden. Bitte prüfen Sie Ihre Internetverbindung oder kontaktieren Sie den Support.');
+    console.error('❌ Fehler beim Laden des PDFs:', error);
+    alert('❌ Fehler beim Laden des PDFs:\n\n' + error.message);
   }
 }
+
 
 // ============================================================================
 // ADMIN: MONATSÜBERSICHT
