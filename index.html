@@ -1629,10 +1629,16 @@ document.getElementById('generateLBVBtn').addEventListener('click', async () => 
 
 async function generateLBVPDF(person, schuljahr, halbjahr, months, monthlyHours, totalHours) {
   // Lade das offizielle LBV-Formular
-  const formUrl = 'https://schulverwaltungsprogramme.msb.nrw.de/download/LBV(ABes)23_2019_02_release.pdf';
-  
-  try {
-    const existingPdfBytes = await fetch(formUrl).then(res => res.arrayBuffer());
+  const formUrl = './LBV_ABes_23.pdf';
+
+try {
+  const existingPdfBytes = await fetch(formUrl).then(res => {
+    if (!res.ok) {
+      throw new Error(`PDF nicht gefunden: ${res.status} ${res.statusText}`);
+    }
+    return res.arrayBuffer();
+  });
+
     const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
     const form = pdfDoc.getForm();
 
