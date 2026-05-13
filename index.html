@@ -1639,26 +1639,74 @@ async function generateLBVPDF(person, schuljahr, halbjahr, months, monthlyHours,
       return res.arrayBuffer();
     });
     
-    console.log('✅ PDF geladen, parse Formular...');
+    console.log('✅ PDF geladen, befülle Formular...');
     const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
     const form = pdfDoc.getForm();
 
-    // DEBUG: Alle Feldnamen ausgeben
-    const fields = form.getFields();
-    console.log('📋 Verfügbare Formularfelder (' + fields.length + ' Felder):');
-    fields.forEach(field => {
-      const type = field.constructor.name;
-      const name = field.getName();
-      console.log(`  - "${name}" (${type})`);
+    // Hilfsfunktion: Sicher Textfeld setzen
+    function setTextField(fieldName, value) {
+      try {
+        const field = form.getTextField(fieldName);
+        field.setText(String(value || ''));
+        console.log(`✅ ${fieldName} = "${value}"`);
+      } catch (e) {
+        console.warn(`⚠️ Feld "${fieldName}" nicht gefunden`);
+      }
+    }
+
+    // Persönliche Daten
+    const nameParts = person.name.split(' ');
+    const vorname = nameParts.slice(0, -1).join(' ') || '';
+    const nachname = nameParts.slice(-1)[0] || person.name;
+    
+    setTextField('LBV_Nachname', nachname);
+    setTextField('LBV_Vorname', vorname);
+    setTextField('LBV_Geburtsdatum', person.geburtsdatum ? new Date(person.geburtsdatum).toLocaleDateString('de-DE') : '');
+    setTextField('LBV_Personalnummer', person.personalnummer || '');
+
+    // Schuldaten
+    setTextField('LBV_Schulnummer', schuldaten.schulnummer || '115022');
+    setTextField('Dienststelle', schuldaten.schulname || 'Katholische Grundschule Voiswinkel');
+
+    // Monatliche Stunden (FeldA_Input1.1 bis FeldA_Input6.1)
+    // .1 = Stunden vor Komma, .2 = Nachkommastellen?
+    monthlyHours.forEach((hours, index) => {
+      const fieldIndex = index + 1;
+      const hoursStr = formatNumber(hours); // z.B. "2,5"
+      const [vorKomma, nachKomma] = hoursStr.split(',');
+      
+      setTextField(`FeldA_Input${fieldIndex}.1`, vorKomma || '0');
+      setTextField(`FeldA_Input${fieldIndex}.2`, nachKomma || '0');
     });
 
-    // STOPP HIER - Befülle NICHTS, nur Debug-Ausgabe
-    console.log('⚠️ Befüllen übersprungen (Debug-Modus)');
-    alert('✅ PDF geladen! Prüfe die Konsole für Feldnamen.');
+    // Gesamtstunden
+    const totalStr = formatNumber(totalHours);
+    const [totalVor, totalNach] = totalStr.split(',');
+    setTextField('FeldB_Input1.1', totalVor || '0');
+    // Wenn es FeldB_Input1.2 gibt, setze Nachkommastellen
+
+    // Beschäftigungsstatus (optional)
+    // Checkbox nur wenn nötig
+    
+    console.log('✅ Formular befüllt, speichere PDF...');
+
+    // Speichere das PDF
+    const pdfBytes = await pdfDoc.save();
+    
+    // Download
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `LBV_Mehrarbeit_${person.name.replace(/\s+/g, '_')}_${schuljahr.replace('/', '-')}_${halbjahr}HJ.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    alert('✅ LBV-Formular wurde generiert und heruntergeladen!');
     
   } catch (error) {
-    console.error('❌ Fehler beim Laden des PDFs:', error);
-    alert('❌ Fehler beim Laden des PDFs:\n\n' + error.message);
+    console.error('❌ Fehler beim Generieren des PDFs:', error);
+    alert('❌ Fehler beim Generieren des PDFs:\n\n' + error.message);
   }
 }
 
