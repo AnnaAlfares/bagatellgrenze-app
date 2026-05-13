@@ -371,9 +371,14 @@
                 <input id="kollegeKuerzel" type="text" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
               </label>         
               
-              <label>Name
-                <input id="kollegeName" type="text" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
-              </label>
+            <label>Vorname
+              <input id="kollegeVorname" type="text" placeholder="z. B. Anna">
+            </label>
+
+            <label>Nachname
+              <input id="kollegeNachname" type="text" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+            </label>
+
 
               <label>Personalnummer
                 <input id="kollegePersonalnummer" type="text" placeholder="z. B. 123456">
@@ -551,9 +556,14 @@
                 <input id="adminKuerzel" type="text" placeholder="z. B. MU" maxlength="3" style="text-transform: uppercase;">
               </label>
 
-              <label>Name
-                <input id="adminName" type="text" placeholder="z. B. Frau Muster">
+              <label>Vorname
+                <input id="adminVorname" type="text" placeholder="z. B. Anna">
               </label>
+
+              <label>Nachname
+                <input id="adminNachname" type="text" placeholder="z. B. Muster">
+              </label>
+
 
               <label>Personalnummer
                 <input id="adminPersonalnummer" type="text" placeholder="z. B. 123456">
@@ -1046,7 +1056,8 @@ function loadPersonDataToForm() {
   }
 
   document.getElementById('kollegeKuerzel').value = person.kuerzel || '';
-  document.getElementById('kollegeName').value = person.name || '';
+  document.getElementById('kollegeVorname').value = person.vorname || '';
+  document.getElementById('kollegeNachname').value = person.nachname || person.name || '';
   document.getElementById('kollegePersonalnummer').value = person.personalnummer || '';
   document.getElementById('kollegeGeburtsdatum').value = person.geburtsdatum || '';
   
@@ -1082,6 +1093,8 @@ document.getElementById('saveKollegeBtn').addEventListener('click', () => {
 
   const teilzeit = parseFloat(document.getElementById('teilzeit').value) || 0;
   const vollzeit = parseFloat(document.getElementById('vollzeit').value) || 28;
+  const vorname = document.getElementById('kollegeVorname').value.trim();
+  person.vorname = vorname;
   const personalnummer = document.getElementById('kollegePersonalnummer').value.trim();
   const geburtsdatum = document.getElementById('kollegeGeburtsdatum').value;
   
@@ -1367,7 +1380,8 @@ document.getElementById('adminPersonSelect').addEventListener('change', (e) => {
 
   currentEditingPersonId = personId;
   document.getElementById('adminKuerzel').value = person.kuerzel || '';
-  document.getElementById('adminName').value = person.name || '';
+  document.getElementById('adminVorname').value = person.vorname || '';
+  document.getElementById('adminNachname').value = person.nachname || person.name || '';
   document.getElementById('adminPersonalnummer').value = person.personalnummer || '';
   document.getElementById('adminGeburtsdatum').value = person.geburtsdatum || '';
   
@@ -1384,7 +1398,9 @@ document.getElementById('adminPersonSelect').addEventListener('change', (e) => {
 
 document.getElementById('adminSavePersonBtn').addEventListener('click', () => {
   const kuerzel = document.getElementById('adminKuerzel').value.trim().toUpperCase();
-  const name = document.getElementById('adminName').value.trim();
+  const vorname = document.getElementById('adminVorname').value.trim();
+  const nachname = document.getElementById('adminNachname').value.trim();
+  const name = `${vorname} ${nachname}`.trim(); // Für Kompatibilität
   const personalnummer = document.getElementById('adminPersonalnummer').value.trim();
   const geburtsdatum = document.getElementById('adminGeburtsdatum').value;
   const teilzeit = parseFloat(document.getElementById('adminTeilzeit').value) || 0;
@@ -1409,6 +1425,8 @@ document.getElementById('adminSavePersonBtn').addEventListener('click', () => {
     const person = personen.find(p => p.id === currentEditingPersonId);
     if (person) {
       person.kuerzel = kuerzel;
+      person.vorname = vorname;  
+      person.nachname = nachname; 
       person.name = name;
       person.personalnummer = personalnummer;
       person.geburtsdatum = geburtsdatum;
@@ -1421,6 +1439,8 @@ document.getElementById('adminSavePersonBtn').addEventListener('click', () => {
     personen.push({
       id: generateId(),
       kuerzel,
+      vorname,  
+      nachname, 
       name,
       personalnummer,
       geburtsdatum,
@@ -1655,12 +1675,9 @@ async function generateLBVPDF(person, schuljahr, halbjahr, months, monthlyHours,
     }
 
     // Persönliche Daten
-    const nameParts = person.name.split(' ');
-    const vorname = nameParts.slice(0, -1).join(' ') || '';
-    const nachname = nameParts.slice(-1)[0] || person.name;
-    
-    setTextField('LBV_Nachname', nachname);
-    setTextField('LBV_Vorname', vorname);
+    // Persönliche Daten
+    setTextField('LBV_Nachname', person.nachname || person.name || '');
+    setTextField('LBV_Vorname', person.vorname || '');
     setTextField('LBV_Geburtsdatum', person.geburtsdatum ? new Date(person.geburtsdatum).toLocaleDateString('de-DE') : '');
     setTextField('LBV_Personalnummer', person.personalnummer || '');
 
