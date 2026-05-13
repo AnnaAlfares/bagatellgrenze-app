@@ -1638,11 +1638,20 @@ try {
     }
     return res.arrayBuffer();
   });
+  const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
+  const form = pdfDoc.getForm();
 
-    const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
-    const form = pdfDoc.getForm();
+  // DEBUG: Alle Feldnamen ausgeben
+  const fields = form.getFields();
+  console.log('📋 Verfügbare Formularfelder:');
+  fields.forEach(field => {
+    const type = field.constructor.name;
+    const name = field.getName();
+    console.log(`  - ${name} (${type})`);
+  });
 
-    // Fülle Formularfelder aus
+  // Fülle Formularfelder aus
+
     // HINWEIS: Die genauen Feldnamen müssen aus dem PDF extrahiert werden
     // Dies ist ein Beispiel - die tatsächlichen Feldnamen können abweichen
     
