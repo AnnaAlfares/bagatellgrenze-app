@@ -1685,16 +1685,27 @@ async function generateLBVPDF(person, schuljahr, halbjahr, months, monthlyHours,
     setTextField('LBV_Schulnummer', schuldaten.schulnummer || '115022');
     setTextField('Dienststelle', schuldaten.schulname || 'Katholische Grundschule Voiswinkel');
 
-    // Monatliche Stunden (FeldA_Input1.1 bis FeldA_Input6.1)
-    // .1 = Stunden vor Komma, .2 = Nachkommastellen?
-    monthlyHours.forEach((hours, index) => {
-      const fieldIndex = index + 1;
-      const hoursStr = formatNumber(hours); // z.B. "2,5"
-      const [vorKomma, nachKomma] = hoursStr.split(',');
-      
-      setTextField(`FeldA_Input${fieldIndex}.1`, vorKomma || '0');
-      setTextField(`FeldA_Input${fieldIndex}.2`, nachKomma || '0');
-    });
+    // Monatliche Stunden
+monthlyHours.forEach((hours, index) => {
+  const fieldIndex = index + 1;
+  
+  // Monat/Jahr im Format MMJJ (z.B. "0526" für Mai 2026)
+  const monthDate = new Date(months[index] + '-01');
+  const monat = String(monthDate.getMonth() + 1).padStart(2, '0');
+  const jahr = String(monthDate.getFullYear()).slice(-2);
+  const monatJahr = monat + jahr;
+  
+  // Stunden dreistellig mit führenden Nullen (z.B. "006")
+  // Nur ganze Stunden, Nachkommastellen werden abgeschnitten
+  const stundenGesamt = Math.floor(hours);
+  const stundenStr = String(stundenGesamt).padStart(3, '0');
+  
+  setTextField(`FeldA_Input${fieldIndex}.1`, monatJahr);
+  setTextField(`FeldA_Input${fieldIndex}.2`, stundenStr);
+  
+  console.log(`📅 Monat ${fieldIndex}: ${monatJahr} # ${stundenStr} Std.`);
+});
+
 
     // Gesamtstunden
     const totalStr = formatNumber(totalHours);
