@@ -1235,10 +1235,22 @@ function renderEmployeeView() {
   const person = personen.find(p => p.id === personId);
   if (!person) return;
 
-  const hours = getMonthlyHours(personId, monthKey);
-  const limit = person.grenze || 0;
-  const remaining = Math.max(0, limit - hours);
-  const payable = Math.max(0, hours - limit);
+ const hours = getMonthlyHours(personId, monthKey);
+ const limit = person.grenze || 0;
+
+// Neue Logik: Wenn Grenze erreicht → ALLE Stunden vergütbar
+let remaining = 0;
+let payable = 0;
+
+if (hours >= limit && limit > 0) {
+  // Grenze erreicht oder überschritten
+  payable = hours;
+  remaining = 0;
+} else {
+  // Grenze noch nicht erreicht
+  payable = 0;
+  remaining = limit - hours;
+}
 
   document.getElementById('empMonthHours').textContent = formatNumber(hours);
   document.getElementById('empLimit').textContent = formatNumber(limit);
@@ -1765,10 +1777,21 @@ function renderAdminSummary() {
 
   const tbody = document.getElementById('summaryBody');
   const rows = filteredPersons.map(person => {
-    const hours = getMonthlyHours(person.id, monthKey);
-    const limit = person.grenze || 0;
-    const remaining = Math.max(0, limit - hours);
-    const payable = Math.max(0, hours - limit);
+  const hours = getMonthlyHours(person.id, monthKey);
+  const limit = person.grenze || 0;
+  
+  // Neue Logik: Wenn Grenze erreicht → ALLE Stunden vergütbar
+  let remaining = 0;
+  let payable = 0;
+  
+  if (hours >= limit && limit > 0) {
+    payable = hours;
+    remaining = 0;
+  } else {
+    payable = 0;
+    remaining = limit - hours;
+  }
+
 
     const teilzeit = person.teilzeit || 0;
     const vollzeit = 28;
@@ -2165,10 +2188,20 @@ document.getElementById('exportMonthSummaryBtn').addEventListener('click', () =>
   const csv = [
     ['Name', 'Kürzel', 'Monat', 'Stunden', 'Bagatellgrenze', 'Noch offen', 'Vergütbar'].join(';'),
     ...personen.map(person => {
-      const hours = getMonthlyHours(person.id, monthKey);
-      const limit = person.grenze || 0;
-      const remaining = Math.max(0, limit - hours);
-      const payable = Math.max(0, hours - limit);
+  const hours = getMonthlyHours(person.id, monthKey);
+  const limit = person.grenze || 0;
+  
+  let remaining = 0;
+  let payable = 0;
+  
+  if (hours >= limit && limit > 0) {
+    payable = hours;
+    remaining = 0;
+  } else {
+    payable = 0;
+    remaining = limit - hours;
+  }
+
       return [
         person.name,
         person.kuerzel,
@@ -2196,9 +2229,14 @@ document.getElementById('exportAccountingBtn').addEventListener('click', () => {
   const csv = [
     ['Name', 'Kürzel', 'Monat', 'Teilzeit', 'Mehrarbeit gesamt', 'Vergütbar gesamt', 'Davon höherer Tarif (bis 28h)', 'Davon niedrigerer Tarif (über 28h)'].join(';'),
     ...personen.map(person => {
-      const hours = getMonthlyHours(person.id, monthKey);
-      const limit = person.grenze || 0;
-      const payable = Math.max(0, hours - limit);
+  const hours = getMonthlyHours(person.id, monthKey);
+  const limit = person.grenze || 0;
+  
+  let payable = 0;
+  if (hours >= limit && limit > 0) {
+    payable = hours;
+  }
+
       const teilzeit = person.teilzeit || 0;
       const vollzeit = 28;
       const totalHours = teilzeit + hours;
