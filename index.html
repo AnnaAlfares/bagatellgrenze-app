@@ -1829,31 +1829,42 @@ console.log(`🏫 Dienststelle:\n${dienststelleKomplett}`);
 monthlyHours.forEach((hours, index) => {
   const fieldIndex = index + 1;
   
-  // NUR befüllen wenn Stunden vorhanden
-  if (hours > 0) {
-    // Monat/Jahr im Format MMJJ
-    const monthDate = new Date(months[index] + '-01');
-    const monat = String(monthDate.getMonth() + 1).padStart(2, '0');
-    const jahr = String(monthDate.getFullYear()).slice(-2);
-    
-    // Stunden dreistellig
-    const stundenGesamt = Math.floor(hours);
-    const stundenStr = String(stundenGesamt).padStart(3, '0');
-    
-    // Schlüssel (aus Stammdaten, Standard: 2)
-    const schluessel = person.schluessel || '2';
-    
-    // Durchgehender String: MMJJXXXS (z.B. "05260062")
-    const komplettString = monat + jahr + stundenStr + schluessel;
-    
-    console.log(`📅 Monat ${fieldIndex}: ${komplettString} (${monat}/${jahr} = ${stundenStr} Std, Schlüssel ${schluessel})`);
-    
-    // Versuche beide Varianten
-    setTextField(`FeldA_Input${fieldIndex}.1`, komplettString);
-    setTextField(`FeldA_Input${fieldIndex}`, komplettString); // Falls ohne .1
-  } else {
-    console.log(`📅 Monat ${fieldIndex}: Übersprungen (keine Stunden)`);
+ // NUR befüllen wenn WIRKLICH Stunden vorhanden (> 0)
+if (hours && hours > 0) {
+  // Monat/Jahr im Format MMJJ
+  const monthDate = new Date(months[index] + '-01');
+  const monat = String(monthDate.getMonth() + 1).padStart(2, '0');
+  const jahr = String(monthDate.getFullYear()).slice(-2);
+  
+  // Stunden dreistellig
+  const stundenGesamt = Math.floor(hours);
+  const stundenStr = String(stundenGesamt).padStart(3, '0');
+  
+  // Schlüssel (aus Stammdaten, Standard: 2)
+  const schluessel = person.schluessel || '2';
+  
+  // Format: MMJJ#XXX#S (z.B. "0526#003#2")
+  const komplettString = `${monat}${jahr}#${stundenStr}#${schluessel}`;
+  
+  console.log(`✅ Monat ${fieldIndex}: ${komplettString} (${monat}/${jahr} = ${stundenStr} Std, Schlüssel ${schluessel})`);
+  
+  // Setze das Feld
+  try {
+    const field = form.getTextField(`FeldA_Input${fieldIndex}.1`);
+    field.setText(komplettString);
+    console.log(`   → FeldA_Input${fieldIndex}.1 gesetzt`);
+  } catch (e) {
+    try {
+      const field = form.getTextField(`FeldA_Input${fieldIndex}`);
+      field.setText(komplettString);
+      console.log(`   → FeldA_Input${fieldIndex} gesetzt`);
+    } catch (e2) {
+      console.warn(`   ⚠️ Feld FeldA_Input${fieldIndex} nicht gefunden`);
+    }
   }
+} else {
+  console.log(`⏭️ Monat ${fieldIndex}: Übersprungen (keine Stunden, # bleibt erhalten)`);
+}
 });
 
     // Gesamtstunden NICHT befüllen (Block B bleibt leer)
