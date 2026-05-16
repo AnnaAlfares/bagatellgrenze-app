@@ -874,7 +874,64 @@ function loadData() {
   if (s) {
     schuldaten = JSON.parse(s);
   }
+  
+  // MIGRATION: Alte Datenstruktur konvertieren
+  migrateData();
 }
+
+function migrateData() {
+  let changed = false;
+  
+  personen.forEach(person => {
+    // Migration 1: teilzeit → deputat
+    if (person.teilzeit && !person.deputat) {
+      person.deputat = person.teilzeit;
+      changed = true;
+      console.log(`✅ Migration: ${person.name} - teilzeit → deputat`);
+    }
+    
+    // Migration 2: status → beschaeftigungsstatus
+    if (person.status && !person.beschaeftigungsstatus) {
+      person.beschaeftigungsstatus = person.status;
+      changed = true;
+      console.log(`✅ Migration: ${person.name} - status → beschaeftigungsstatus`);
+    }
+    
+    // Migration 3: name → vorname/nachname
+    if (person.name && !person.vorname && !person.nachname) {
+      const parts = person.name.split(' ');
+      if (parts.length >= 2) {
+        person.vorname = parts[0];
+        person.nachname = parts.slice(1).join(' ');
+      } else {
+        person.nachname = person.name;
+      }
+      changed = true;
+      console.log(`✅ Migration: ${person.name} - name → vorname/nachname`);
+    }
+    
+    // Migration 4: Schlüssel hinzufügen
+    if (!person.schluessel) {
+      person.schluessel = '2';
+      changed = true;
+      console.log(`✅ Migration: ${person.name} - Schlüssel hinzugefügt`);
+    }
+    
+    // Migration 5: istVollzeit/istTeilzeit
+    if (person.deputat && person.istVollzeit === undefined) {
+      person.istVollzeit = person.deputat >= 28;
+      person.istTeilzeit = person.deputat < 28;
+      changed = true;
+      console.log(`✅ Migration: ${person.name} - istVollzeit/istTeilzeit berechnet`);
+    }
+  });
+  
+  if (changed) {
+    console.log('💾 Migrierte Daten werden gespeichert...');
+    saveData();
+  }
+}
+
 
 function saveData() {
   localStorage.setItem(STORAGE_KEY_PERSONEN, JSON.stringify(personen));
@@ -2019,6 +2076,35 @@ if (imported.adminPIN && !imported.admin_pin) {
 
 
 function mergeData(imported, mode = 'merge') {
+  // MIGRATION: Importierte Daten konvertieren
+  if (imported.personen) {
+    imported.personen.forEach(person => {
+      // Alte Struktur konvertieren
+      if (person.teilzeit && !person.deputat) {
+        person.deputat = person.teilzeit;
+      }
+      if (person.status && !person.beschaeftigungsstatus) {
+        person.beschaeftigungsstatus = person.status;
+      }
+      if (person.name && !person.vorname && !person.nachname) {
+        const parts = person.name.split(' ');
+        if (parts.length >= 2) {
+          person.vorname = parts[0];
+          person.nachname = parts.slice(1).join(' ');
+        } else {
+          person.nachname = person.name;
+        }
+      }
+      if (!person.schluessel) {
+        person.schluessel = '2';
+      }
+      if (person.deputat && person.istVollzeit === undefined) {
+        person.istVollzeit = person.deputat >= 28;
+        person.istTeilzeit = person.deputat < 28;
+      }
+    });
+  }
+  
   let newCount = 0;
   let updatedCount = 0;
   let conflictCount = 0;
@@ -2541,10 +2627,28 @@ function renderAll() {
 
 function init() {
   loadData();
+  
+  // Debug-Info
+  console.log('📊 Geladene Daten:', {
+    personen: personen.length,
+    eintraege: eintraege.length,
+    conflicts: conflicts.length
+  });
+  
+  if (personen.length > 0) {
+    console.log('👥 Personen:', personen.map(p => ({
+      name: p.name,
+      deputat: p.deputat,
+      beschaeftigungsstatus: p.beschaeftigungsstatus,
+      schluessel: p.schluessel
+    })));
+  }
+  
   initTheme();
   setCurrentMonth();
   loadSchuldatenToForm();
   populateLBVSchuljahrSelect();
+
 
   const savedPerson = localStorage.getItem(STORAGE_KEY_ACTIVE_PERSON);
   if (savedPerson) {
