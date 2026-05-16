@@ -508,9 +508,18 @@
   <input id="schulplzort" type="text" value="42327 Wuppertal">
 </label>
 
-<label style="grid-column: 1 / -1">Name Schulleitung
-  <input id="schulleitung" type="text" placeholder="z. B. Frau Direktorin">
+<label>Telefon
+  <input id="schultelefon" type="tel" placeholder="z. B. 0202 563-1234">
 </label>
+
+<label style="grid-column: 1 / -1">Name Schulleitung
+  <input id="schulleitung" type="text" placeholder="z. B. Frau Müller">
+</label>
+
+<label style="grid-column: 1 / -1">Bearbeiter (für LBV-Formular)
+  <input id="schulbearbeiter" type="text" placeholder="z. B. Anna Muster (Sekretariat)">
+</label>
+
 
             </div>
 
@@ -861,9 +870,10 @@ let schuldaten = {
   schulnummer: '115022',
   schulleitung: '',
   strasse: 'Voiswinkeler Str. 73',
-  plzOrt: '42327 Wuppertal'
+  plzOrt: '42327 Wuppertal',
+  telefon: '',
+  bearbeiter: ''
 };
-;
 
 const STORAGE_KEY_PERSONEN = 'mehrarbeit_personen';
 const STORAGE_KEY_EINTRAEGE = 'mehrarbeit_eintraege';
@@ -1395,7 +1405,9 @@ function loadSchuldatenToForm() {
   document.getElementById('schulnummer').value = schuldaten.schulnummer || '115022';
   document.getElementById('schulstrasse').value = schuldaten.strasse || 'Voiswinkeler Str. 73';
   document.getElementById('schulplzort').value = schuldaten.plzOrt || '42327 Wuppertal';
+  document.getElementById('schultelefon').value = schuldaten.telefon || '';
   document.getElementById('schulleitung').value = schuldaten.schulleitung || '';
+  document.getElementById('schulbearbeiter').value = schuldaten.bearbeiter || '';
 }
 
 document.getElementById('saveSchuldatenBtn').addEventListener('click', () => {
@@ -1403,7 +1415,9 @@ document.getElementById('saveSchuldatenBtn').addEventListener('click', () => {
   schuldaten.schulnummer = document.getElementById('schulnummer').value.trim();
   schuldaten.strasse = document.getElementById('schulstrasse').value.trim();
   schuldaten.plzOrt = document.getElementById('schulplzort').value.trim();
+  schuldaten.telefon = document.getElementById('schultelefon').value.trim();
   schuldaten.schulleitung = document.getElementById('schulleitung').value.trim();
+  schuldaten.bearbeiter = document.getElementById('schulbearbeiter').value.trim();
   
   saveData();
   alert('✅ Schuldaten gespeichert!');
@@ -1823,6 +1837,22 @@ const dienststelleKomplett = `${schulname}\n${strasse}\n${plzOrt}`;
 
 setTextField('Dienststelle', dienststelleKomplett);
 console.log(`🏫 Dienststelle:\n${dienststelleKomplett}`);
+// Telefon
+setTextField('LBV_Telefon', schuldaten.telefon || '');
+setTextField('Telefon', schuldaten.telefon || '');
+
+// Bearbeiter
+setTextField('LBV_Bearbeiter', schuldaten.bearbeiter || '');
+setTextField('Bearbeiter', schuldaten.bearbeiter || '');
+
+// Datum (aktuelles Datum)
+const heute = new Date().toLocaleDateString('de-DE');
+setTextField('LBV_Datum', heute);
+setTextField('Datum', heute);
+
+console.log(`📞 Telefon: ${schuldaten.telefon || '(leer)'}`);
+console.log(`👤 Bearbeiter: ${schuldaten.bearbeiter || '(leer)'}`);
+console.log(`📅 Datum: ${heute}`);
 
 
    // Monatliche Stunden - NUR wenn Stunden > 0 (sonst # nicht überschreiben)
