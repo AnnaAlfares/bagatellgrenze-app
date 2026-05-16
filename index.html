@@ -1850,10 +1850,19 @@ const heute = new Date().toLocaleDateString('de-DE');
 setTextField('LBV_Datum', heute);
 setTextField('Datum', heute);
 
+    // Merkmal: "A" für Teilzeitkräfte
+if (person.istTeilzeit || person.deputat < 28) {
+  setTextField('LBV_Merkmal', 'A');
+  setTextField('Merkmal', 'A');
+  console.log(`📌 Merkmal: A (Teilzeitkraft)`);
+} else {
+  console.log(`📌 Merkmal: (leer, Vollzeitkraft)`);
+}
+
 console.log(`📞 Telefon: ${schuldaten.telefon || '(leer)'}`);
 console.log(`👤 Bearbeiter: ${schuldaten.bearbeiter || '(leer)'}`);
 console.log(`📅 Datum: ${heute}`);
-
+  
 
    // Monatliche Stunden - NUR wenn Stunden > 0 (sonst # nicht überschreiben)
 monthlyHours.forEach((hours, index) => {
