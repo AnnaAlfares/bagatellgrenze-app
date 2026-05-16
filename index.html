@@ -1875,10 +1875,28 @@ console.log(`💰 Gesamtstunden: ${formatNumber(totalHours)} (wird NICHT ins PDF
     // Beschäftigungsstatus (optional)
     // Checkbox nur wenn nötig
     
-    console.log('✅ Formular befüllt, speichere PDF...');
+    console.log('✅ Formular befüllt, entferne Annotationen...');
 
-    // Speichere das PDF
-    const pdfBytes = await pdfDoc.save();
+// Entferne alle Annotationen (gelbe ?-Felder)
+const pages = pdfDoc.getPages();
+pages.forEach((page, pageIndex) => {
+  try {
+    const annotations = page.node.Annots();
+    if (annotations) {
+      // Lösche alle Annotationen
+      page.node.delete('Annots');
+      console.log(`   → Seite ${pageIndex + 1}: Annotationen entfernt`);
+    }
+  } catch (e) {
+    console.warn(`   ⚠️ Seite ${pageIndex + 1}: Keine Annotationen gefunden`);
+  }
+});
+
+console.log('✅ Formular befüllt, speichere PDF...');
+
+// Speichere das PDF
+const pdfBytes = await pdfDoc.save();
+
     
     // Download
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
