@@ -388,34 +388,35 @@
                 <input id="kollegeGeburtsdatum" type="date">
               </label>
 
-              <label>Beschäftigungsstatus
-                <div class="radio-group">
-                  <label>
-                    <input type="radio" name="kollegeStatus" value="beamte" id="kollegeStatusBeamte">
-                    Beamte/r
-                  </label>
-                  <label>
-                    <input type="radio" name="kollegeStatus" value="angestellte" id="kollegeStatusAngestellte">
-                    Angestellte/r
-                  </label>
-                </div>
-              </label>
+              <label>Wochenstunden (Deputat)
+  <input id="kollegeDeputat" type="number" min="1" max="28" step="0.5" placeholder="z. B. 28 oder 20">
+</label>
 
-              <label>Vollzeitstunden
-                <input id="vollzeit" type="number" value="28" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
-              </label>
+<label>Beschäftigungsstatus
+  <div class="radio-group">
+    <label>
+      <input type="radio" name="kollegeStatus" value="beamte" id="kollegeStatusBeamte">
+      Beamte/r
+    </label>
+    <label>
+      <input type="radio" name="kollegeStatus" value="tarifbeschaeftigt" id="kollegeStatusTarifbeschaeftigt">
+      Angestellte/r (Tarifbeschäftigte/r)
+    </label>
+  </div>
+</label>
 
-              <label>Teilzeitstunden
-                <input id="teilzeit" type="number">
-              </label>
+<label>Schlüssel (Mehrarbeitsstundensatz)
+  <input id="kollegeSchluessel" type="text" value="2" placeholder="z. B. 2">
+</label>
 
-              <label>Quote
-                <input id="quote" type="number" step="0.01" min="0" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
-              </label>
+<label>Quote
+  <input id="quote" type="number" step="0.01" min="0" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+</label>
 
-              <label>Bagatellgrenze (Monat)
-                <input id="grenze" type="number" step="0.1" min="0" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
-              </label>
+<label>Bagatellgrenze (Monat)
+  <input id="grenze" type="number" step="0.1" min="0" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+</label>
+
 
               <div class="small-actions" style="margin-top:1rem">
                 <button class="button primary" id="saveKollegeBtn">Daten speichern</button>
@@ -573,35 +574,35 @@
                 <input id="adminGeburtsdatum" type="date">
               </label>
 
-              <label style="grid-column: 1 / -1">Beschäftigungsstatus
-                <div class="radio-group">
-                  <label>
-                    <input type="radio" name="adminStatus" value="beamte" id="adminStatusBeamte">
-                    Beamte/r
-                  </label>
-                  <label>
-                    <input type="radio" name="adminStatus" value="angestellte" id="adminStatusAngestellte">
-                    Angestellte/r
-                  </label>
-                </div>
-              </label>
+              <label>Wochenstunden (Deputat)
+  <input id="adminDeputat" type="number" min="1" max="28" step="0.5" placeholder="z. B. 28 oder 20">
+</label>
 
-              <label>Vollzeitstunden
-                <input id="adminVollzeit" type="number" value="28" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
-              </label>
+<label style="grid-column: 1 / -1">Beschäftigungsstatus
+  <div class="radio-group">
+    <label>
+      <input type="radio" name="adminStatus" value="beamte" id="adminStatusBeamte">
+      Beamte/r
+    </label>
+    <label>
+      <input type="radio" name="adminStatus" value="tarifbeschaeftigt" id="adminStatusTarifbeschaeftigt">
+      Angestellte/r (Tarifbeschäftigte/r)
+    </label>
+  </div>
+</label>
 
-              <label>Teilzeitstunden
-                <input id="adminTeilzeit" type="number" step="0.1" min="0" max="28" placeholder="z. B. 14">
-              </label>
+<label>Schlüssel (Mehrarbeitsstundensatz)
+  <input id="adminSchluessel" type="text" value="2" placeholder="z. B. 2">
+</label>
 
-              <label>Quote
-                <input id="adminQuote" type="number" step="0.01" min="0" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
-              </label>
+<label>Quote
+  <input id="adminQuote" type="number" step="0.01" min="0" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+</label>
 
-              <label>Bagatellgrenze (Monat)
-                <input id="adminGrenze" type="number" step="0.1" min="0" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
-              </label>
-            </div>
+<label>Bagatellgrenze (Monat)
+  <input id="adminGrenze" type="number" step="0.1" min="0" readonly style="background: var(--color-surface-offset); cursor: not-allowed;">
+</label>
+
 
             <label style="margin-top: 1rem;">Person auswählen (zum Bearbeiten)
               <select id="adminPersonSelect" style="width: 100%;">
@@ -1056,30 +1057,38 @@ function loadPersonDataToForm() {
   }
 
   document.getElementById('kollegeKuerzel').value = person.kuerzel || '';
-  document.getElementById('kollegeVorname').value = person.vorname || '';
-  document.getElementById('kollegeNachname').value = person.nachname || person.name || '';
-  document.getElementById('kollegePersonalnummer').value = person.personalnummer || '';
-  document.getElementById('kollegeGeburtsdatum').value = person.geburtsdatum || '';
-  
-  if (person.status === 'beamte') {
-    document.getElementById('kollegeStatusBeamte').checked = true;
-  } else if (person.status === 'angestellte') {
-    document.getElementById('kollegeStatusAngestellte').checked = true;
-  }
-  
-  document.getElementById('teilzeit').value = person.teilzeit || '';
-  document.getElementById('quote').value = person.quote || '';
-  document.getElementById('grenze').value = person.grenze || '';
+document.getElementById('kollegeVorname').value = person.vorname || '';
+document.getElementById('kollegeNachname').value = person.nachname || person.name || '';
+document.getElementById('kollegePersonalnummer').value = person.personalnummer || '';
+document.getElementById('kollegeGeburtsdatum').value = person.geburtsdatum || '';
+
+// Deputat (Abwärtskompatibilität: teilzeit → deputat)
+const deputat = person.deputat || person.teilzeit || '';
+document.getElementById('kollegeDeputat').value = deputat;
+
+// Beschäftigungsstatus
+if (person.beschaeftigungsstatus === 'beamte' || person.status === 'beamte') {
+  document.getElementById('kollegeStatusBeamte').checked = true;
+} else if (person.beschaeftigungsstatus === 'tarifbeschaeftigt' || person.status === 'angestellte') {
+  document.getElementById('kollegeStatusTarifbeschaeftigt').checked = true;
 }
 
-document.getElementById('teilzeit').addEventListener('input', () => {
-  const teilzeit = parseFloat(document.getElementById('teilzeit').value) || 0;
-  const vollzeit = parseFloat(document.getElementById('vollzeit').value) || 28;
-  const quote = berechneQuote(teilzeit, vollzeit);
+// Schlüssel
+document.getElementById('kollegeSchluessel').value = person.schluessel || '2';
+
+// Quote und Grenze
+document.getElementById('quote').value = person.quote || '';
+document.getElementById('grenze').value = person.grenze || '';
+
+document.getElementById('kollegeDeputat').addEventListener('input', () => {
+  const deputat = parseFloat(document.getElementById('kollegeDeputat').value) || 0;
+  const vollzeit = 28;
+  const quote = berechneQuote(deputat, vollzeit);
   const grenze = berechneBagatellgrenze(quote);
   document.getElementById('quote').value = quote;
   document.getElementById('grenze').value = grenze;
 });
+
 
 document.getElementById('saveKollegeBtn').addEventListener('click', () => {
   const personId = document.getElementById('activePersonSelect').value;
@@ -1091,26 +1100,33 @@ document.getElementById('saveKollegeBtn').addEventListener('click', () => {
   const person = personen.find(p => p.id === personId);
   if (!person) return;
 
-  const teilzeit = parseFloat(document.getElementById('teilzeit').value) || 0;
-  const vollzeit = parseFloat(document.getElementById('vollzeit').value) || 28;
-  const vorname = document.getElementById('kollegeVorname').value.trim();
-  person.vorname = vorname;
-  const personalnummer = document.getElementById('kollegePersonalnummer').value.trim();
-  const geburtsdatum = document.getElementById('kollegeGeburtsdatum').value;
-  
-  let status = '';
-  if (document.getElementById('kollegeStatusBeamte').checked) {
-    status = 'beamte';
-  } else if (document.getElementById('kollegeStatusAngestellte').checked) {
-    status = 'angestellte';
-  }
+  const deputat = parseFloat(document.getElementById('kollegeDeputat').value) || 0;
+const vollzeit = 28;
+const vorname = document.getElementById('kollegeVorname').value.trim();
+const personalnummer = document.getElementById('kollegePersonalnummer').value.trim();
+const geburtsdatum = document.getElementById('kollegeGeburtsdatum').value;
+const schluessel = document.getElementById('kollegeSchluessel').value.trim();
 
-  person.teilzeit = teilzeit;
-  person.quote = berechneQuote(teilzeit, vollzeit);
-  person.grenze = berechneBagatellgrenze(person.quote);
-  person.personalnummer = personalnummer;
-  person.geburtsdatum = geburtsdatum;
-  person.status = status;
+let beschaeftigungsstatus = '';
+if (document.getElementById('kollegeStatusBeamte').checked) {
+  beschaeftigungsstatus = 'beamte';
+} else if (document.getElementById('kollegeStatusTarifbeschaeftigt').checked) {
+  beschaeftigungsstatus = 'tarifbeschaeftigt';
+}
+
+person.vorname = vorname;
+person.deputat = deputat;
+person.teilzeit = deputat; // Abwärtskompatibilität
+person.quote = berechneQuote(deputat, vollzeit);
+person.grenze = berechneBagatellgrenze(person.quote);
+person.personalnummer = personalnummer;
+person.geburtsdatum = geburtsdatum;
+person.beschaeftigungsstatus = beschaeftigungsstatus;
+person.status = beschaeftigungsstatus; // Abwärtskompatibilität
+person.schluessel = schluessel || '2';
+person.istVollzeit = deputat >= 28;
+person.istTeilzeit = deputat < 28;
+
 
   saveData();
   alert('✅ Daten gespeichert!');
@@ -1371,10 +1387,10 @@ document.getElementById('clearPINFormBtn').addEventListener('click', () => {
 // ADMIN: PERSONEN VERWALTEN
 // ============================================================================
 
-document.getElementById('adminTeilzeit').addEventListener('input', () => {
-  const teilzeit = parseFloat(document.getElementById('adminTeilzeit').value) || 0;
-  const vollzeit = parseFloat(document.getElementById('adminVollzeit').value) || 28;
-  const quote = berechneQuote(teilzeit, vollzeit);
+document.getElementById('adminDeputat').addEventListener('input', () => {
+  const deputat = parseFloat(document.getElementById('adminDeputat').value) || 0;
+  const vollzeit = 28;
+  const quote = berechneQuote(deputat, vollzeit);
   const grenze = berechneBagatellgrenze(quote);
   document.getElementById('adminQuote').value = quote;
   document.getElementById('adminGrenze').value = grenze;
@@ -1391,38 +1407,47 @@ document.getElementById('adminPersonSelect').addEventListener('change', (e) => {
   if (!person) return;
 
   currentEditingPersonId = personId;
-  document.getElementById('adminKuerzel').value = person.kuerzel || '';
-  document.getElementById('adminVorname').value = person.vorname || '';
-  document.getElementById('adminNachname').value = person.nachname || person.name || '';
-  document.getElementById('adminPersonalnummer').value = person.personalnummer || '';
-  document.getElementById('adminGeburtsdatum').value = person.geburtsdatum || '';
-  
-  if (person.status === 'beamte') {
-    document.getElementById('adminStatusBeamte').checked = true;
-  } else if (person.status === 'angestellte') {
-    document.getElementById('adminStatusAngestellte').checked = true;
-  }
-  
-  document.getElementById('adminTeilzeit').value = person.teilzeit || '';
-  document.getElementById('adminQuote').value = person.quote || '';
-  document.getElementById('adminGrenze').value = person.grenze || '';
+document.getElementById('adminKuerzel').value = person.kuerzel || '';
+document.getElementById('adminVorname').value = person.vorname || '';
+document.getElementById('adminNachname').value = person.nachname || person.name || '';
+document.getElementById('adminPersonalnummer').value = person.personalnummer || '';
+document.getElementById('adminGeburtsdatum').value = person.geburtsdatum || '';
+
+// Deputat (Abwärtskompatibilität)
+const deputat = person.deputat || person.teilzeit || '';
+document.getElementById('adminDeputat').value = deputat;
+
+// Beschäftigungsstatus
+if (person.beschaeftigungsstatus === 'beamte' || person.status === 'beamte') {
+  document.getElementById('adminStatusBeamte').checked = true;
+} else if (person.beschaeftigungsstatus === 'tarifbeschaeftigt' || person.status === 'angestellte') {
+  document.getElementById('adminStatusTarifbeschaeftigt').checked = true;
+}
+
+// Schlüssel
+document.getElementById('adminSchluessel').value = person.schluessel || '2';
+
+// Quote und Grenze
+document.getElementById('adminQuote').value = person.quote || '';
+document.getElementById('adminGrenze').value = person.grenze || '';
 });
 
 document.getElementById('adminSavePersonBtn').addEventListener('click', () => {
   const kuerzel = document.getElementById('adminKuerzel').value.trim().toUpperCase();
   const vorname = document.getElementById('adminVorname').value.trim();
   const nachname = document.getElementById('adminNachname').value.trim();
-  const name = `${vorname} ${nachname}`.trim(); // Für Kompatibilität
+  const name = `${vorname} ${nachname}`.trim();
   const personalnummer = document.getElementById('adminPersonalnummer').value.trim();
   const geburtsdatum = document.getElementById('adminGeburtsdatum').value;
-  const teilzeit = parseFloat(document.getElementById('adminTeilzeit').value) || 0;
-  const vollzeit = parseFloat(document.getElementById('adminVollzeit').value) || 28;
+  const deputat = parseFloat(document.getElementById('adminDeputat').value) || 0;
+  const schluessel = document.getElementById('adminSchluessel').value.trim();
+  const vollzeit = 28;
 
-  let status = '';
+  let beschaeftigungsstatus = '';
   if (document.getElementById('adminStatusBeamte').checked) {
-    status = 'beamte';
-  } else if (document.getElementById('adminStatusAngestellte').checked) {
-    status = 'angestellte';
+    beschaeftigungsstatus = 'beamte';
+  } else if (document.getElementById('adminStatusTarifbeschaeftigt').checked) {
+    beschaeftigungsstatus = 'tarifbeschaeftigt';
   }
 
   if (!kuerzel || !name) {
@@ -1430,38 +1455,49 @@ document.getElementById('adminSavePersonBtn').addEventListener('click', () => {
     return;
   }
 
-  const quote = berechneQuote(teilzeit, vollzeit);
+    const quote = berechneQuote(deputat, vollzeit);
   const grenze = berechneBagatellgrenze(quote);
 
   if (currentEditingPersonId) {
     const person = personen.find(p => p.id === currentEditingPersonId);
     if (person) {
       person.kuerzel = kuerzel;
-      person.vorname = vorname;  
-      person.nachname = nachname; 
+      person.vorname = vorname;
+      person.nachname = nachname;
       person.name = name;
       person.personalnummer = personalnummer;
       person.geburtsdatum = geburtsdatum;
-      person.status = status;
-      person.teilzeit = teilzeit;
+      person.deputat = deputat;
+      person.teilzeit = deputat; // Abwärtskompatibilität
+      person.beschaeftigungsstatus = beschaeftigungsstatus;
+      person.status = beschaeftigungsstatus; // Abwärtskompatibilität
+      person.schluessel = schluessel || '2';
       person.quote = quote;
       person.grenze = grenze;
+      person.istVollzeit = deputat >= 28;
+      person.istTeilzeit = deputat < 28;
     }
   } else {
     personen.push({
       id: generateId(),
       kuerzel,
-      vorname,  
-      nachname, 
+      vorname,
+      nachname,
       name,
       personalnummer,
       geburtsdatum,
-      status,
-      teilzeit,
+      deputat,
+      teilzeit: deputat, // Abwärtskompatibilität
+      beschaeftigungsstatus,
+      status: beschaeftigungsstatus, // Abwärtskompatibilität
+      schluessel: schluessel || '2',
       quote,
-      grenze
+      grenze,
+      istVollzeit: deputat >= 28,
+      istTeilzeit: deputat < 28
     });
   }
+
 
   saveData();
   updatePersonSelects();
@@ -1492,15 +1528,18 @@ function clearAdminPersonForm() {
   currentEditingPersonId = null;
   document.getElementById('adminPersonSelect').value = '';
   document.getElementById('adminKuerzel').value = '';
-  document.getElementById('adminName').value = '';
+  document.getElementById('adminVorname').value = '';
+  document.getElementById('adminNachname').value = '';
   document.getElementById('adminPersonalnummer').value = '';
   document.getElementById('adminGeburtsdatum').value = '';
   document.getElementById('adminStatusBeamte').checked = false;
-  document.getElementById('adminStatusAngestellte').checked = false;
-  document.getElementById('adminTeilzeit').value = '';
+  document.getElementById('adminStatusTarifbeschaeftigt').checked = false;
+  document.getElementById('adminDeputat').value = '';
+  document.getElementById('adminSchluessel').value = '2';
   document.getElementById('adminQuote').value = '';
   document.getElementById('adminGrenze').value = '';
 }
+
 
 // ============================================================================
 // ADMIN: EINTRÄGE VERWALTEN
