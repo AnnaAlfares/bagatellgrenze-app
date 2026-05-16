@@ -1806,7 +1806,7 @@ async function generateLBVPDF(person, schuljahr, halbjahr, months, monthlyHours,
     console.log('✅ PDF geladen, befülle Formular...');
     const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
     const form = pdfDoc.getForm();
-           
+     /*      
     // DEBUG: Alle Formularfelder auflisten
     console.log('📋 ALLE FORMULARFELDER:');
     const allFields = form.getFields();
@@ -1816,7 +1816,7 @@ async function generateLBVPDF(person, schuljahr, halbjahr, months, monthlyHours,
       console.log(`   - ${name} (${type})`);
     });
     console.log('📋 ENDE FELDLISTE\n');
-    
+    */
        // Hilfsfunktion: Sicher Textfeld setzen
     function setTextField(fieldName, value) {
       try {
@@ -1847,17 +1847,14 @@ const dienststelleKomplett = `${schulname}\n${strasse}\n${plzOrt}`;
 
 setTextField('Dienststelle', dienststelleKomplett);
 console.log(`🏫 Dienststelle:\n${dienststelleKomplett}`);
-// Telefon
-setTextField('LBV_Telefon', schuldaten.telefon || '');
+// Telefon (nur "Telefon", NICHT "LBV_Telefon")
 setTextField('Telefon', schuldaten.telefon || '');
 
-// Bearbeiter
-setTextField('LBV_Bearbeiter', schuldaten.bearbeiter || '');
+// Bearbeiter (nur "Bearbeiter", NICHT "LBV_Bearbeiter")
 setTextField('Bearbeiter', schuldaten.bearbeiter || '');
 
-// Datum (aktuelles Datum)
+// Datum (aktuelles Datum, nur "Datum", NICHT "LBV_Datum")
 const heute = new Date().toLocaleDateString('de-DE');
-setTextField('LBV_Datum', heute);
 setTextField('Datum', heute);
 
 console.log(`📞 Telefon: ${schuldaten.telefon || '(leer)'}`);
@@ -1891,20 +1888,15 @@ const komplettString = `${monat}${jahr}#${stundenStr}#${schluessel}#${merkmal}`;
 
   console.log(`✅ Monat ${fieldIndex}: ${komplettString} (${monat}/${jahr} = ${stundenStr} Std, Schlüssel ${schluessel}, Merkmal ${merkmal || '(leer)'})`);
   
-  // Setze das Feld
-  try {
-    const field = form.getTextField(`FeldA_Input${fieldIndex}.1`);
-    field.setText(komplettString);
-    console.log(`   → FeldA_Input${fieldIndex}.1 gesetzt`);
-  } catch (e) {
-    try {
-      const field = form.getTextField(`FeldA_Input${fieldIndex}`);
-      field.setText(komplettString);
-      console.log(`   → FeldA_Input${fieldIndex} gesetzt`);
-    } catch (e2) {
-      console.warn(`   ⚠️ Feld FeldA_Input${fieldIndex} nicht gefunden`);
-    }
-  }
+      // Setze das Feld (immer mit .1)
+try {
+  const field = form.getTextField(`FeldA_Input${fieldIndex}.1`);
+  field.setText(komplettString);
+  console.log(`   → FeldA_Input${fieldIndex}.1 gesetzt`);
+} catch (e) {
+  console.warn(`   ⚠️ Feld FeldA_Input${fieldIndex}.1 nicht gefunden:`, e.message);
+}
+
 } else {
   console.log(`⏭️ Monat ${fieldIndex}: Übersprungen (keine Stunden, # bleibt erhalten)`);
 }
