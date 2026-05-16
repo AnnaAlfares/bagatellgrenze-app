@@ -1806,8 +1806,18 @@ async function generateLBVPDF(person, schuljahr, halbjahr, months, monthlyHours,
     console.log('✅ PDF geladen, befülle Formular...');
     const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
     const form = pdfDoc.getForm();
-
-    // Hilfsfunktion: Sicher Textfeld setzen
+           
+    // DEBUG: Alle Formularfelder auflisten
+    console.log('📋 ALLE FORMULARFELDER:');
+    const allFields = form.getFields();
+    allFields.forEach(field => {
+      const name = field.getName();
+      const type = field.constructor.name;
+      console.log(`   - ${name} (${type})`);
+    });
+    console.log('📋 ENDE FELDLISTE\n');
+    
+       // Hilfsfunktion: Sicher Textfeld setzen
     function setTextField(fieldName, value) {
       try {
         const field = form.getTextField(fieldName);
