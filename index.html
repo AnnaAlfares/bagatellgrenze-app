@@ -1102,16 +1102,19 @@ function loadPersonDataToForm() {
 
   if (!person) {
     document.getElementById('kollegeKuerzel').value = '';
-    document.getElementById('kollegeName').value = '';
+    document.getElementById('kollegeVorname').value = '';
+    document.getElementById('kollegeNachname').value = '';
     document.getElementById('kollegePersonalnummer').value = '';
     document.getElementById('kollegeGeburtsdatum').value = '';
     document.getElementById('kollegeStatusBeamte').checked = false;
-    document.getElementById('kollegeStatusAngestellte').checked = false;
-    document.getElementById('teilzeit').value = '';
+    document.getElementById('kollegeStatusTarifbeschaeftigt').checked = false;
+    document.getElementById('kollegeDeputat').value = '';
+    document.getElementById('kollegeSchluessel').value = '2';
     document.getElementById('quote').value = '';
     document.getElementById('grenze').value = '';
     return;
   }
+
 
   document.getElementById('kollegeKuerzel').value = person.kuerzel || '';
 document.getElementById('kollegeVorname').value = person.vorname || '';
