@@ -1136,7 +1136,9 @@ document.getElementById('kollegeSchluessel').value = person.schluessel || '2';
 // Quote und Grenze
 document.getElementById('quote').value = person.quote || '';
 document.getElementById('grenze').value = person.grenze || '';
+}
 
+// Event-Listener AUSSERHALB der Funktion (nur einmal registrieren)
 document.getElementById('kollegeDeputat').addEventListener('input', () => {
   const deputat = parseFloat(document.getElementById('kollegeDeputat').value) || 0;
   const vollzeit = 28;
@@ -1146,8 +1148,8 @@ document.getElementById('kollegeDeputat').addEventListener('input', () => {
   document.getElementById('grenze').value = grenze;
 });
 
-
 document.getElementById('saveKollegeBtn').addEventListener('click', () => {
+
   const personId = document.getElementById('activePersonSelect').value;
   if (!personId) {
     alert('⚠️ Bitte wähle zuerst eine Person aus!');
