@@ -1888,14 +1888,29 @@ const komplettString = `${monat}${jahr}#${stundenStr}#${schluessel}#${merkmal}`;
 
   console.log(`✅ Monat ${fieldIndex}: ${komplettString} (${monat}/${jahr} = ${stundenStr} Std, Schlüssel ${schluessel}, Merkmal ${merkmal || '(leer)'})`);
   
-      // Setze das Feld (immer mit .1)
+      // Setze das Feld (aufgeteilt in .1 und .2)
 try {
-  const field = form.getTextField(`FeldA_Input${fieldIndex}.1`);
-  field.setText(komplettString);
-  console.log(`   → FeldA_Input${fieldIndex}.1 gesetzt`);
+  // Teil 1: Erste 10 Zeichen (MMJJ#XXX#S)
+  const teil1 = komplettString.substring(0, 10);
+  const field1 = form.getTextField(`FeldA_Input${fieldIndex}.1`);
+  field1.setText(teil1);
+  console.log(`   → FeldA_Input${fieldIndex}.1 gesetzt: "${teil1}"`);
+  
+  // Teil 2: Rest (#M) - nur wenn vorhanden
+  if (komplettString.length > 10) {
+    const teil2 = komplettString.substring(10);
+    try {
+      const field2 = form.getTextField(`FeldA_Input${fieldIndex}.2`);
+      field2.setText(teil2);
+      console.log(`   → FeldA_Input${fieldIndex}.2 gesetzt: "${teil2}"`);
+    } catch (e2) {
+      console.warn(`   ⚠️ Feld FeldA_Input${fieldIndex}.2 nicht gefunden`);
+    }
+  }
 } catch (e) {
-  console.warn(`   ⚠️ Feld FeldA_Input${fieldIndex}.1 nicht gefunden:`, e.message);
+  console.error(`   ❌ Feld FeldA_Input${fieldIndex}.1 FEHLER:`, e.message);
 }
+
 
 } else {
   console.log(`⏭️ Monat ${fieldIndex}: Übersprungen (keine Stunden, # bleibt erhalten)`);
