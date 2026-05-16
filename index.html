@@ -497,12 +497,21 @@
               </label>
 
               <label>Schulnummer
-                <input id="schulnummer" type="text" value="115022">
-              </label>
+  <input id="schulnummer" type="text" value="115022">
+</label>
 
-              <label style="grid-column: 1 / -1">Name Schulleitung
-                <input id="schulleitung" type="text" placeholder="z. B. Frau Direktorin">
-              </label>
+<label>Straße
+  <input id="schulstrasse" type="text" value="Voiswinkeler Str. 73">
+</label>
+
+<label>PLZ / Ort
+  <input id="schulplzort" type="text" value="42327 Wuppertal">
+</label>
+
+<label style="grid-column: 1 / -1">Name Schulleitung
+  <input id="schulleitung" type="text" placeholder="z. B. Frau Direktorin">
+</label>
+
             </div>
 
             <div class="small-actions" style="margin-top:1rem">
@@ -850,8 +859,11 @@ let currentEditingPersonId = null;
 let schuldaten = {
   schulname: 'Katholische Grundschule Voiswinkel',
   schulnummer: '115022',
-  schulleitung: ''
+  schulleitung: '',
+  strasse: 'Voiswinkeler Str. 73',
+  plzOrt: '42327 Wuppertal'
 };
+;
 
 const STORAGE_KEY_PERSONEN = 'mehrarbeit_personen';
 const STORAGE_KEY_EINTRAEGE = 'mehrarbeit_eintraege';
@@ -1381,17 +1393,22 @@ if (hours >= limit && limit > 0) {
 function loadSchuldatenToForm() {
   document.getElementById('schulname').value = schuldaten.schulname || 'Katholische Grundschule Voiswinkel';
   document.getElementById('schulnummer').value = schuldaten.schulnummer || '115022';
+  document.getElementById('schulstrasse').value = schuldaten.strasse || 'Voiswinkeler Str. 73';
+  document.getElementById('schulplzort').value = schuldaten.plzOrt || '42327 Wuppertal';
   document.getElementById('schulleitung').value = schuldaten.schulleitung || '';
 }
 
 document.getElementById('saveSchuldatenBtn').addEventListener('click', () => {
   schuldaten.schulname = document.getElementById('schulname').value.trim();
   schuldaten.schulnummer = document.getElementById('schulnummer').value.trim();
+  schuldaten.strasse = document.getElementById('schulstrasse').value.trim();
+  schuldaten.plzOrt = document.getElementById('schulplzort').value.trim();
   schuldaten.schulleitung = document.getElementById('schulleitung').value.trim();
   
   saveData();
   alert('✅ Schuldaten gespeichert!');
 });
+
 
  
 // ============================================================================
@@ -1794,41 +1811,55 @@ async function generateLBVPDF(person, schuljahr, halbjahr, months, monthlyHours,
     setTextField('LBV_Geburtsdatum', person.geburtsdatum ? new Date(person.geburtsdatum).toLocaleDateString('de-DE') : '');
     setTextField('LBV_Personalnummer', person.personalnummer || '');
 
-    // Schuldaten
-    setTextField('LBV_Schulnummer', schuldaten.schulnummer || '115022');
-    setTextField('Dienststelle', schuldaten.schulname || 'Katholische Grundschule Voiswinkel');
+   // Schuldaten
+setTextField('LBV_Schulnummer', schuldaten.schulnummer || '115022');
 
-   // Monatliche Stunden - Durchgehendes Feld
+// Dienststelle mit Adresse (3-zeiliges Format)
+const schulname = schuldaten.schulname || 'Katholische Grundschule Voiswinkel';
+const strasse = schuldaten.strasse || 'Voiswinkeler Str. 73';
+const plzOrt = schuldaten.plzOrt || '42327 Wuppertal';
+
+const dienststelleKomplett = `${schulname}\n${strasse}\n${plzOrt}`;
+
+setTextField('Dienststelle', dienststelleKomplett);
+console.log(`🏫 Dienststelle:\n${dienststelleKomplett}`);
+
+
+   // Monatliche Stunden - NUR wenn Stunden > 0 (sonst # nicht überschreiben)
 monthlyHours.forEach((hours, index) => {
   const fieldIndex = index + 1;
   
-  // Monat/Jahr im Format MMJJ
-  const monthDate = new Date(months[index] + '-01');
-  const monat = String(monthDate.getMonth() + 1).padStart(2, '0');
-  const jahr = String(monthDate.getFullYear()).slice(-2);
-  
-  // Stunden dreistellig (auch 000 für leere Monate)
-  const stundenGesamt = Math.floor(hours) || 0;
-  const stundenStr = String(stundenGesamt).padStart(3, '0');
-  
-  // Schlüssel (aus Stammdaten, Standard: 2)
-  const schluessel = person.schluessel || '2';
-  
-  // Durchgehender String: MMJJXXXS (z.B. "05260062")
-  const komplettString = monat + jahr + stundenStr + schluessel;
-  
-  console.log(`📅 Monat ${fieldIndex}: ${komplettString} (${monat}/${jahr} = ${stundenStr} Std, Schlüssel ${schluessel})`);
-  
-  // Versuche beide Varianten
-  setTextField(`FeldA_Input${fieldIndex}.1`, komplettString);
-  setTextField(`FeldA_Input${fieldIndex}`, komplettString); // Falls ohne .1
+  // NUR befüllen wenn Stunden vorhanden
+  if (hours > 0) {
+    // Monat/Jahr im Format MMJJ
+    const monthDate = new Date(months[index] + '-01');
+    const monat = String(monthDate.getMonth() + 1).padStart(2, '0');
+    const jahr = String(monthDate.getFullYear()).slice(-2);
+    
+    // Stunden dreistellig
+    const stundenGesamt = Math.floor(hours);
+    const stundenStr = String(stundenGesamt).padStart(3, '0');
+    
+    // Schlüssel (aus Stammdaten, Standard: 2)
+    const schluessel = person.schluessel || '2';
+    
+    // Durchgehender String: MMJJXXXS (z.B. "05260062")
+    const komplettString = monat + jahr + stundenStr + schluessel;
+    
+    console.log(`📅 Monat ${fieldIndex}: ${komplettString} (${monat}/${jahr} = ${stundenStr} Std, Schlüssel ${schluessel})`);
+    
+    // Versuche beide Varianten
+    setTextField(`FeldA_Input${fieldIndex}.1`, komplettString);
+    setTextField(`FeldA_Input${fieldIndex}`, komplettString); // Falls ohne .1
+  } else {
+    console.log(`📅 Monat ${fieldIndex}: Übersprungen (keine Stunden)`);
+  }
 });
 
-    // Gesamtstunden
-    const totalStr = formatNumber(totalHours);
-    const [totalVor, totalNach] = totalStr.split(',');
-    setTextField('FeldB_Input1.1', totalVor || '0');
-    // Wenn es FeldB_Input1.2 gibt, setze Nachkommastellen
+    // Gesamtstunden NICHT befüllen (Block B bleibt leer)
+// Das LBV berechnet die Summe selbst aus Block A
+console.log(`💰 Gesamtstunden: ${formatNumber(totalHours)} (wird NICHT ins PDF geschrieben)`);
+
 
     // Beschäftigungsstatus (optional)
     // Checkbox nur wenn nötig
