@@ -1844,11 +1844,10 @@ async function generateLBVPDF(person, schuljahr, halbjahr, months, monthlyHours,
     console.log(`👤 Bearbeiter: ${schuldaten.bearbeiter || '(leer)'}`);
     console.log(`📅 Datum: ${heute}`);
 
-    // Monatliche Stunden - NUR wenn Stunden > 0 (sonst # nicht überschreiben)
+    // Monatliche Stunden - NUR wenn Stunden > 0
     monthlyHours.forEach((hours, index) => {
       const fieldIndex = index + 1;
       
-      // NUR befüllen wenn WIRKLICH Stunden vorhanden (> 0)
       if (hours && hours > 0) {
         // Monat/Jahr im Format MMJJ
         const monthDate = new Date(months[index] + '-01');
@@ -1865,42 +1864,37 @@ async function generateLBVPDF(person, schuljahr, halbjahr, months, monthlyHours,
         // Merkmal: "A" für Teilzeitkräfte, sonst leer
         const merkmal = (person.istTeilzeit || person.deputat < 28) ? 'A' : '';
         
-        // Format: MMJJ#XXX#S#M (z.B. "0526#003#2#A" oder "0526#003#2#")
         // Format: MMJJ#SSS#X#M (z.B. "0526#003#2#A")
-// Die # sind VORGEDRUCKT im PDF, wir schreiben sie MIT
-const komplettString = merkmal 
-  ? `${monat}${jahr}#${stundenStr}#${schluessel}#${merkmal}`
-  : `${monat}${jahr}#${stundenStr}#${schluessel}`;
-
+        const komplettString = `${monat}${jahr}#${stundenStr}#${schluessel}${merkmal ? '#' + merkmal : ''}`;
         
         console.log(`✅ Monat ${fieldIndex}: ${komplettString} (${monat}/${jahr} = ${stundenStr} Std, Schlüssel ${schluessel}, Merkmal ${merkmal || '(leer)'})`);
         
-        // Setze das Feld - KOMPLETTEN String in .1
+        // Aufteilen in zwei Felder
+        const teil1 = komplettString.substring(0, 10);  // "0526#003#2"
+        const teil2 = komplettString.substring(10);     // "#A" oder ""
+        
+        // Feld .1 befüllen (erste 10 Zeichen)
         try {
-          const field = form.getTextField(`FeldA_Input${fieldIndex}.1`);
-          
-          // WICHTIG: maxLength entfernen, damit mehr als 10 Zeichen passen
-          field.setMaxLength(undefined);
-          
-          // Kompletten String setzen
-          field.setText(komplettString);
-          
-          console.log(`   → FeldA_Input${fieldIndex}.1 gesetzt: "${komplettString}" (${komplettString.length} Zeichen)`);
-          
+          const field1 = form.getTextField(`FeldA_Input${fieldIndex}.1`);
+          field1.setText(teil1);
+          console.log(`   → FeldA_Input${fieldIndex}.1 = "${teil1}"`);
         } catch (e) {
-          // Fallback: Versuche ohne .1
+          console.warn(`   ⚠️ Feld FeldA_Input${fieldIndex}.1 nicht gefunden`);
+        }
+        
+        // Feld .2 befüllen (Rest, falls vorhanden)
+        if (teil2) {
           try {
-            const field = form.getTextField(`FeldA_Input${fieldIndex}`);
-            field.setMaxLength(undefined);
-            field.setText(komplettString);
-            console.log(`   → FeldA_Input${fieldIndex} gesetzt: "${komplettString}"`);
-          } catch (e2) {
-            console.error(`   ❌ Feld FeldA_Input${fieldIndex} FEHLER:`, e.message);
+            const field2 = form.getTextField(`FeldA_Input${fieldIndex}.2`);
+            field2.setText(teil2);
+            console.log(`   → FeldA_Input${fieldIndex}.2 = "${teil2}"`);
+          } catch (e) {
+            console.warn(`   ⚠️ Feld FeldA_Input${fieldIndex}.2 nicht gefunden`);
           }
         }
         
       } else {
-        console.log(`⏭️ Monat ${fieldIndex}: Übersprungen (keine Stunden, # bleibt erhalten)`);
+        console.log(`⏭️ Monat ${fieldIndex}: Übersprungen (keine Stunden)`);
       }
     });
 
@@ -1944,8 +1938,6 @@ const komplettString = merkmal
     alert('❌ Fehler beim Generieren des PDFs:\n\n' + error.message);
   }
 }
-
-
 
 // ============================================================================
 // ADMIN: MONATSÜBERSICHT
