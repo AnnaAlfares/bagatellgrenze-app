@@ -1882,14 +1882,14 @@ monthlyHours.forEach((hours, index) => {
     
     console.log(`✅ Monat ${fieldIndex}: ${komplettString} (${monat}/${jahr} = ${stundenStr} Std, Schlüssel ${schluessel}, Merkmal ${merkmal || '(leer)'})`);
     
-    // Feld .1 befüllen - MIT maxLength-Override für Merkmal
+    // Feld .1 befüllen - MIT Schriftgröße und Monospace-Font
     try {
       const field1 = form.getTextField(`FeldA_Input${fieldIndex}.1`);
       
-      // WICHTIG: maxLength entfernen, damit mehr als 10 Zeichen passen
-      field1.setMaxLength(undefined);
+      // WICHTIG: Schriftgröße und Schriftart setzen
+      field1.setFontSize(10);  // Kleinere Schrift für bessere Verteilung
       
-      // Kompletten String setzen (inkl. Merkmal)
+      // Kompletten String setzen
       field1.setText(komplettString);
       
       console.log(`   → FeldA_Input${fieldIndex}.1 = "${komplettString}" (${komplettString.length} Zeichen)`);
@@ -1898,10 +1898,22 @@ monthlyHours.forEach((hours, index) => {
       console.warn(`   ⚠️ Feld FeldA_Input${fieldIndex}.1 nicht gefunden:`, e.message);
     }
     
+    // Füller-Feld befüllen (falls vorhanden)
+    if (fieldIndex === 1) {
+      try {
+        const fuellerField = form.getTextField(`LBV_Füller_FeldA_${fieldIndex}.1`);
+        fuellerField.setText('');  // Leer lassen oder mit Leerzeichen füllen
+        console.log(`   → LBV_Füller_FeldA_${fieldIndex}.1 geleert`);
+      } catch (e) {
+        // Füller-Feld optional
+      }
+    }
+    
   } else {
     console.log(`⏭️ Monat ${fieldIndex}: Übersprungen (keine Stunden)`);
   }
 });
+
 
 
     // Gesamtstunden NICHT befüllen (Block B bleibt leer)
