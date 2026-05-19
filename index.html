@@ -1861,60 +1861,57 @@ console.log(`📞 Telefon: ${schuldaten.telefon || '(leer)'}`);
 console.log(`👤 Bearbeiter: ${schuldaten.bearbeiter || '(leer)'}`);
 console.log(`📅 Datum: ${heute}`);
   
-
-   // Monatliche Stunden - NUR wenn Stunden > 0 (sonst # nicht überschreiben)
+// Monatliche Stunden - NUR wenn Stunden > 0 (sonst # nicht überschreiben)
 monthlyHours.forEach((hours, index) => {
   const fieldIndex = index + 1;
   
- // NUR befüllen wenn WIRKLICH Stunden vorhanden (> 0)
-if (hours && hours > 0) {
-  // Monat/Jahr im Format MMJJ
-  const monthDate = new Date(months[index] + '-01');
-  const monat = String(monthDate.getMonth() + 1).padStart(2, '0');
-  const jahr = String(monthDate.getFullYear()).slice(-2);
-  
-  // Stunden dreistellig
-  const stundenGesamt = Math.floor(hours);
-  const stundenStr = String(stundenGesamt).padStart(3, '0');
-  
-  // Schlüssel (aus Stammdaten, Standard: 2)
-  const schluessel = person.schluessel || '2';
-  
-  // Merkmal: "A" für Teilzeitkräfte, sonst leer
-const merkmal = (person.istTeilzeit || person.deputat < 28) ? 'A' : '';
-
-  // Format: MMJJ#XXX#S#M (z.B. "0526#003#2#A" oder "0526#003#2#")
-const komplettString = `${monat}${jahr}#${stundenStr}#${schluessel}#${merkmal}`;
-
-  console.log(`✅ Monat ${fieldIndex}: ${komplettString} (${monat}/${jahr} = ${stundenStr} Std, Schlüssel ${schluessel}, Merkmal ${merkmal || '(leer)'})`);
-  
-      // Setze das Feld (aufgeteilt in .1 und .2)
-try {
-  // Teil 1: Erste 10 Zeichen (MMJJ#XXX#S)
-  const teil1 = komplettString.substring(0, 10);
-  const field1 = form.getTextField(`FeldA_Input${fieldIndex}.1`);
-  field1.setText(teil1);
-  console.log(`   → FeldA_Input${fieldIndex}.1 gesetzt: "${teil1}"`);
-  
-  // Teil 2: Rest (#M) - nur wenn vorhanden
-  if (komplettString.length > 10) {
-    const teil2 = komplettString.substring(10);
+  // NUR befüllen wenn WIRKLICH Stunden vorhanden (> 0)
+  if (hours && hours > 0) {
+    // Monat/Jahr im Format MMJJ
+    const monthDate = new Date(months[index] + '-01');
+    const monat = String(monthDate.getMonth() + 1).padStart(2, '0');
+    const jahr = String(monthDate.getFullYear()).slice(-2);
+    
+    // Stunden dreistellig
+    const stundenGesamt = Math.floor(hours);
+    const stundenStr = String(stundenGesamt).padStart(3, '0');
+    
+    // Schlüssel (aus Stammdaten, Standard: 2)
+    const schluessel = person.schluessel || '2';
+    
+    // Merkmal: "A" für Teilzeitkräfte, sonst leer
+    const merkmal = (person.istTeilzeit || person.deputat < 28) ? 'A' : '';
+    
+    // Format: MMJJ#XXX#S#M (z.B. "0526#003#2#A" oder "0526#003#2#")
+    const komplettString = `${monat}${jahr}#${stundenStr}#${schluessel}#${merkmal}`;
+    
+    console.log(`✅ Monat ${fieldIndex}: ${komplettString} (${monat}/${jahr} = ${stundenStr} Std, Schlüssel ${schluessel}, Merkmal ${merkmal || '(leer)'})`);
+    
+    // Setze das Feld (aufgeteilt in .1 und .2)
     try {
-      const field2 = form.getTextField(`FeldA_Input${fieldIndex}.2`);
-      field2.setText(teil2);
-      console.log(`   → FeldA_Input${fieldIndex}.2 gesetzt: "${teil2}"`);
-    } catch (e2) {
-      console.warn(`   ⚠️ Feld FeldA_Input${fieldIndex}.2 nicht gefunden`);
+      // Teil 1: Erste 10 Zeichen (MMJJ#XXX#S)
+      const teil1 = komplettString.substring(0, 10);
+      const field1 = form.getTextField(`FeldA_Input${fieldIndex}.1`);
+      field1.setText(teil1);
+      console.log(`   → FeldA_Input${fieldIndex}.1 gesetzt: "${teil1}"`);
+      
+      // Teil 2: Rest (#M) - nur wenn vorhanden
+      if (komplettString.length > 10) {
+        const teil2 = komplettString.substring(10);
+        try {
+          const field2 = form.getTextField(`FeldA_Input${fieldIndex}.2`);
+          field2.setText(teil2);
+          console.log(`   → FeldA_Input${fieldIndex}.2 gesetzt: "${teil2}"`);
+        } catch (e2) {
+          console.warn(`   ⚠️ Feld FeldA_Input${fieldIndex}.2 nicht gefunden`);
+        }
+      }
+    } catch (e) {
+      console.error(`   ❌ Feld FeldA_Input${fieldIndex}.1 FEHLER:`, e.message);
     }
+  } else {
+    console.log(`⏭️ Monat ${fieldIndex}: Übersprungen (keine Stunden, # bleibt erhalten)`);
   }
-} catch (e) {
-  console.error(`   ❌ Feld FeldA_Input${fieldIndex}.1 FEHLER:`, e.message);
-}
-
-
-} else {
-  console.log(`⏭️ Monat ${fieldIndex}: Übersprungen (keine Stunden, # bleibt erhalten)`);
-}
 });
 
     // Gesamtstunden NICHT befüllen (Block B bleibt leer)
