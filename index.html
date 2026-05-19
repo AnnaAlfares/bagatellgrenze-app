@@ -1882,31 +1882,33 @@ monthlyHours.forEach((hours, index) => {
     
     console.log(`✅ Monat ${fieldIndex}: ${komplettString} (${monat}/${jahr} = ${stundenStr} Std, Schlüssel ${schluessel}, Merkmal ${merkmal || '(leer)'})`);
     
-    // Feld .1 befüllen - MIT Schriftgröße und Monospace-Font
+    // Aufteilen in 2 Felder
+    const teil1 = komplettString.substring(0, 10);  // Erste 10 Zeichen: "0526#003#2"
+    const teil2 = komplettString.substring(10);     // Rest: "#A" oder ""
+    
+    console.log(`   📋 Teil 1: "${teil1}" (${teil1.length} Zeichen)`);
+    console.log(`   📋 Teil 2: "${teil2}" (${teil2.length} Zeichen)`);
+    
+    // Feld .1 befüllen (erste 10 Zeichen)
     try {
       const field1 = form.getTextField(`FeldA_Input${fieldIndex}.1`);
-      
-      // WICHTIG: Schriftgröße und Schriftart setzen
-      field1.setFontSize(10);  // Kleinere Schrift für bessere Verteilung
-      
-      // Kompletten String setzen
-      field1.setText(komplettString);
-      
-      console.log(`   → FeldA_Input${fieldIndex}.1 = "${komplettString}" (${komplettString.length} Zeichen)`);
-      
+      field1.setText(teil1);
+      console.log(`   ✅ FeldA_Input${fieldIndex}.1 ERFOLGREICH gesetzt`);
     } catch (e) {
-      console.warn(`   ⚠️ Feld FeldA_Input${fieldIndex}.1 nicht gefunden:`, e.message);
+      console.error(`   ❌ FeldA_Input${fieldIndex}.1 FEHLER:`, e);
     }
     
-    // Füller-Feld befüllen (falls vorhanden)
-    if (fieldIndex === 1) {
+    // Feld .2 befüllen (Rest, falls vorhanden)
+    if (teil2) {
       try {
-        const fuellerField = form.getTextField(`LBV_Füller_FeldA_${fieldIndex}.1`);
-        fuellerField.setText('');  // Leer lassen oder mit Leerzeichen füllen
-        console.log(`   → LBV_Füller_FeldA_${fieldIndex}.1 geleert`);
+        const field2 = form.getTextField(`FeldA_Input${fieldIndex}.2`);
+        field2.setText(teil2);
+        console.log(`   ✅ FeldA_Input${fieldIndex}.2 ERFOLGREICH gesetzt`);
       } catch (e) {
-        // Füller-Feld optional
+        console.error(`   ❌ FeldA_Input${fieldIndex}.2 FEHLER:`, e);
       }
+    } else {
+      console.log(`   ℹ️ FeldA_Input${fieldIndex}.2 = (leer, kein Merkmal)`);
     }
     
   } else {
