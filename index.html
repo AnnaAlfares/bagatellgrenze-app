@@ -1806,18 +1806,8 @@ async function generateLBVPDF(person, schuljahr, halbjahr, months, monthlyHours,
     console.log('✅ PDF geladen, befülle Formular...');
     const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
     const form = pdfDoc.getForm();
-     /*      
-    // DEBUG: Alle Formularfelder auflisten
-    console.log('📋 ALLE FORMULARFELDER:');
-    const allFields = form.getFields();
-    allFields.forEach(field => {
-      const name = field.getName();
-      const type = field.constructor.name;
-      console.log(`   - ${name} (${type})`);
-    });
-    console.log('📋 ENDE FELDLISTE\n');
-    */
-       // Hilfsfunktion: Sicher Textfeld setzen
+    
+    // Hilfsfunktion: Sicher Textfeld setzen
     function setTextField(fieldName, value) {
       try {
         const field = form.getTextField(fieldName);
@@ -1829,121 +1819,109 @@ async function generateLBVPDF(person, schuljahr, halbjahr, months, monthlyHours,
     }
 
     // Persönliche Daten
-    // Persönliche Daten
     setTextField('LBV_Nachname', person.nachname || person.name || '');
     setTextField('LBV_Vorname', person.vorname || '');
     setTextField('LBV_Geburtsdatum', person.geburtsdatum ? new Date(person.geburtsdatum).toLocaleDateString('de-DE') : '');
     setTextField('LBV_Personalnummer', person.personalnummer || '');
 
-   // Schuldaten
-setTextField('LBV_Schulnummer', schuldaten.schulnummer || '115022');
+    // Schuldaten
+    setTextField('LBV_Schulnummer', schuldaten.schulnummer || '115022');
 
-// Dienststelle mit Adresse (3-zeiliges Format)
-const schulname = schuldaten.schulname || 'Katholische Grundschule Voiswinkel';
-const strasse = schuldaten.strasse || 'Voiswinkeler Str. 73';
-const plzOrt = schuldaten.plzOrt || '42327 Wuppertal';
+    // Dienststelle mit Adresse (3-zeiliges Format)
+    const schulname = schuldaten.schulname || 'Katholische Grundschule Voiswinkel';
+    const strasse = schuldaten.strasse || 'Voiswinkeler Str. 73';
+    const plzOrt = schuldaten.plzOrt || '42327 Wuppertal';
+    const dienststelleKomplett = `${schulname}\n${strasse}\n${plzOrt}`;
+    setTextField('Dienststelle', dienststelleKomplett);
+    console.log(`🏫 Dienststelle:\n${dienststelleKomplett}`);
 
-const dienststelleKomplett = `${schulname}\n${strasse}\n${plzOrt}`;
+    // Telefon, Bearbeiter, Datum
+    setTextField('Telefon', schuldaten.telefon || '');
+    setTextField('Bearbeiter', schuldaten.bearbeiter || '');
+    const heute = new Date().toLocaleDateString('de-DE');
+    setTextField('Datum', heute);
+    console.log(`📞 Telefon: ${schuldaten.telefon || '(leer)'}`);
+    console.log(`👤 Bearbeiter: ${schuldaten.bearbeiter || '(leer)'}`);
+    console.log(`📅 Datum: ${heute}`);
 
-setTextField('Dienststelle', dienststelleKomplett);
-console.log(`🏫 Dienststelle:\n${dienststelleKomplett}`);
-// Telefon (nur "Telefon", NICHT "LBV_Telefon")
-setTextField('Telefon', schuldaten.telefon || '');
-
-// Bearbeiter (nur "Bearbeiter", NICHT "LBV_Bearbeiter")
-setTextField('Bearbeiter', schuldaten.bearbeiter || '');
-
-// Datum (aktuelles Datum, nur "Datum", NICHT "LBV_Datum")
-const heute = new Date().toLocaleDateString('de-DE');
-setTextField('Datum', heute);
-
-console.log(`📞 Telefon: ${schuldaten.telefon || '(leer)'}`);
-console.log(`👤 Bearbeiter: ${schuldaten.bearbeiter || '(leer)'}`);
-console.log(`📅 Datum: ${heute}`);
-  
-// Monatliche Stunden - NUR wenn Stunden > 0 (sonst # nicht überschreiben)
-monthlyHours.forEach((hours, index) => {
-  const fieldIndex = index + 1;
-  
-  // NUR befüllen wenn WIRKLICH Stunden vorhanden (> 0)
-  if (hours && hours > 0) {
-    // Monat/Jahr im Format MMJJ
-    const monthDate = new Date(months[index] + '-01');
-    const monat = String(monthDate.getMonth() + 1).padStart(2, '0');
-    const jahr = String(monthDate.getFullYear()).slice(-2);
-    
-    // Stunden dreistellig
-    const stundenGesamt = Math.floor(hours);
-    const stundenStr = String(stundenGesamt).padStart(3, '0');
-    
-    // Schlüssel (aus Stammdaten, Standard: 2)
-    const schluessel = person.schluessel || '2';
-    
-    // Merkmal: "A" für Teilzeitkräfte, sonst leer
-    const merkmal = (person.istTeilzeit || person.deputat < 28) ? 'A' : '';
-    
-    // Format: MMJJ#XXX#S#M (z.B. "0526#003#2#A" oder "0526#003#2#")
-    const komplettString = `${monat}${jahr}#${stundenStr}#${schluessel}#${merkmal}`;
-    
-    console.log(`✅ Monat ${fieldIndex}: ${komplettString} (${monat}/${jahr} = ${stundenStr} Std, Schlüssel ${schluessel}, Merkmal ${merkmal || '(leer)'})`);
-    
-    // Setze das Feld (aufgeteilt in .1 und .2)
-    try {
-      // Teil 1: Erste 10 Zeichen (MMJJ#XXX#S)
-      const teil1 = komplettString.substring(0, 10);
-      const field1 = form.getTextField(`FeldA_Input${fieldIndex}.1`);
-      field1.setText(teil1);
-      console.log(`   → FeldA_Input${fieldIndex}.1 gesetzt: "${teil1}"`);
+    // Monatliche Stunden - NUR wenn Stunden > 0 (sonst # nicht überschreiben)
+    monthlyHours.forEach((hours, index) => {
+      const fieldIndex = index + 1;
       
-      // Teil 2: Rest (#M) - nur wenn vorhanden
-      if (komplettString.length > 10) {
-        const teil2 = komplettString.substring(10);
+      // NUR befüllen wenn WIRKLICH Stunden vorhanden (> 0)
+      if (hours && hours > 0) {
+        // Monat/Jahr im Format MMJJ
+        const monthDate = new Date(months[index] + '-01');
+        const monat = String(monthDate.getMonth() + 1).padStart(2, '0');
+        const jahr = String(monthDate.getFullYear()).slice(-2);
+        
+        // Stunden dreistellig
+        const stundenGesamt = Math.floor(hours);
+        const stundenStr = String(stundenGesamt).padStart(3, '0');
+        
+        // Schlüssel (aus Stammdaten, Standard: 2)
+        const schluessel = person.schluessel || '2';
+        
+        // Merkmal: "A" für Teilzeitkräfte, sonst leer
+        const merkmal = (person.istTeilzeit || person.deputat < 28) ? 'A' : '';
+        
+        // Format: MMJJ#XXX#S#M (z.B. "0526#003#2#A" oder "0526#003#2#")
+        const komplettString = `${monat}${jahr}#${stundenStr}#${schluessel}#${merkmal}`;
+        
+        console.log(`✅ Monat ${fieldIndex}: ${komplettString} (${monat}/${jahr} = ${stundenStr} Std, Schlüssel ${schluessel}, Merkmal ${merkmal || '(leer)'})`);
+        
+        // Setze das Feld - KOMPLETTEN String in .1
         try {
-          const field2 = form.getTextField(`FeldA_Input${fieldIndex}.2`);
-          field2.setText(teil2);
-          console.log(`   → FeldA_Input${fieldIndex}.2 gesetzt: "${teil2}"`);
-        } catch (e2) {
-          console.warn(`   ⚠️ Feld FeldA_Input${fieldIndex}.2 nicht gefunden`);
+          const field = form.getTextField(`FeldA_Input${fieldIndex}.1`);
+          
+          // WICHTIG: maxLength entfernen, damit mehr als 10 Zeichen passen
+          field.setMaxLength(undefined);
+          
+          // Kompletten String setzen
+          field.setText(komplettString);
+          
+          console.log(`   → FeldA_Input${fieldIndex}.1 gesetzt: "${komplettString}" (${komplettString.length} Zeichen)`);
+          
+        } catch (e) {
+          // Fallback: Versuche ohne .1
+          try {
+            const field = form.getTextField(`FeldA_Input${fieldIndex}`);
+            field.setMaxLength(undefined);
+            field.setText(komplettString);
+            console.log(`   → FeldA_Input${fieldIndex} gesetzt: "${komplettString}"`);
+          } catch (e2) {
+            console.error(`   ❌ Feld FeldA_Input${fieldIndex} FEHLER:`, e.message);
+          }
         }
+        
+      } else {
+        console.log(`⏭️ Monat ${fieldIndex}: Übersprungen (keine Stunden, # bleibt erhalten)`);
       }
-    } catch (e) {
-      console.error(`   ❌ Feld FeldA_Input${fieldIndex}.1 FEHLER:`, e.message);
-    }
-  } else {
-    console.log(`⏭️ Monat ${fieldIndex}: Übersprungen (keine Stunden, # bleibt erhalten)`);
-  }
-});
+    });
 
     // Gesamtstunden NICHT befüllen (Block B bleibt leer)
-// Das LBV berechnet die Summe selbst aus Block A
-console.log(`💰 Gesamtstunden: ${formatNumber(totalHours)} (wird NICHT ins PDF geschrieben)`);
+    console.log(`💰 Gesamtstunden: ${formatNumber(totalHours)} (wird NICHT ins PDF geschrieben)`);
 
-
-    // Beschäftigungsstatus (optional)
-    // Checkbox nur wenn nötig
-    
     console.log('✅ Formular befüllt, entferne Annotationen...');
 
-// Entferne alle Annotationen (gelbe ?-Felder)
-const pages = pdfDoc.getPages();
-pages.forEach((page, pageIndex) => {
-  try {
-    const annotations = page.node.Annots();
-    if (annotations) {
-      // Lösche alle Annotationen
-      page.node.delete('Annots');
-      console.log(`   → Seite ${pageIndex + 1}: Annotationen entfernt`);
-    }
-  } catch (e) {
-    console.warn(`   ⚠️ Seite ${pageIndex + 1}: Keine Annotationen gefunden`);
-  }
-});
+    // Entferne alle Annotationen (gelbe ?-Felder)
+    const pages = pdfDoc.getPages();
+    pages.forEach((page, pageIndex) => {
+      try {
+        const annotations = page.node.Annots();
+        if (annotations) {
+          page.node.delete('Annots');
+          console.log(`   → Seite ${pageIndex + 1}: Annotationen entfernt`);
+        }
+      } catch (e) {
+        console.warn(`   ⚠️ Seite ${pageIndex + 1}: Keine Annotationen gefunden`);
+      }
+    });
 
-console.log('✅ Formular befüllt, speichere PDF...');
+    console.log('✅ Formular befüllt, speichere PDF...');
 
-// Speichere das PDF
-const pdfBytes = await pdfDoc.save();
-
+    // Speichere das PDF
+    const pdfBytes = await pdfDoc.save();
     
     // Download
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
@@ -1961,6 +1939,7 @@ const pdfBytes = await pdfDoc.save();
     alert('❌ Fehler beim Generieren des PDFs:\n\n' + error.message);
   }
 }
+
 
 
 // ============================================================================
