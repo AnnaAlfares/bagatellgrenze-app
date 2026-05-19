@@ -1866,7 +1866,12 @@ async function generateLBVPDF(person, schuljahr, halbjahr, months, monthlyHours,
         const merkmal = (person.istTeilzeit || person.deputat < 28) ? 'A' : '';
         
         // Format: MMJJ#XXX#S#M (z.B. "0526#003#2#A" oder "0526#003#2#")
-        const komplettString = `${monat}${jahr}#${stundenStr}#${schluessel}#${merkmal}`;
+        // Format: MMJJ#SSS#X#M (z.B. "0526#003#2#A")
+// Die # sind VORGEDRUCKT im PDF, wir schreiben sie MIT
+const komplettString = merkmal 
+  ? `${monat}${jahr}#${stundenStr}#${schluessel}#${merkmal}`
+  : `${monat}${jahr}#${stundenStr}#${schluessel}`;
+
         
         console.log(`✅ Monat ${fieldIndex}: ${komplettString} (${monat}/${jahr} = ${stundenStr} Std, Schlüssel ${schluessel}, Merkmal ${merkmal || '(leer)'})`);
         
