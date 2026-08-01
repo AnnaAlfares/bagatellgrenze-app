@@ -286,12 +286,46 @@
     font-size:1.3rem !important;
     font-weight:700 !important;
   }
+
+  .import-report{grid-template-columns:1fr;gap:var(--space-3)}
+  .radio-group{flex-direction:column;gap:var(--space-3)}
+  .radio-group label{font-size:1.05rem;min-height:44px}
+  .conflict-box{padding:var(--space-3);font-size:.95rem;overflow-wrap:anywhere}
+  .status-error{width:100%;text-align:center;box-sizing:border-box}
+  body{overflow-x:hidden}
 }
 
   @media (max-width: 400px){
     .stats{grid-template-columns:1fr}
     .toolbar{flex-direction:column;align-items:stretch}
     .button,.ghost,.danger{text-align:center}
+  }
+
+  /* Passwort-Modal (Backup-Verschlüsselung) */
+  .pw-modal-overlay{
+    position:fixed;inset:0;background:rgba(20,18,14,.55);
+    display:flex;align-items:center;justify-content:center;
+    padding:var(--space-4);z-index:1000;
+  }
+  .pw-modal{
+    background:var(--color-surface);border:1px solid var(--color-border);
+    border-radius:var(--radius-xl);box-shadow:var(--shadow-md);
+    padding:var(--space-6);width:100%;max-width:420px;
+    display:grid;gap:var(--space-4);
+    max-height:90vh;overflow-y:auto;
+  }
+  .pw-modal h3{margin:0;font-family:var(--font-display);font-size:1.3rem}
+  .pw-modal .helper{margin:0}
+  .pw-modal label{display:grid;gap:.45rem;font-size:var(--text-sm);font-weight:600}
+  .pw-modal-actions{display:flex;gap:var(--space-3);justify-content:flex-end}
+  .pw-modal-error{color:var(--color-error);font-size:var(--text-sm);font-weight:600}
+
+  @media (max-width: 700px){
+    .pw-modal{padding:var(--space-5);border-radius:var(--radius-lg)}
+    .pw-modal label{font-size:1.05rem}
+    .pw-modal input{padding:1rem 1.1rem;font-size:1.05rem;min-height:52px}
+    .pw-modal-actions{flex-direction:column-reverse}
+    .pw-modal-actions button{width:100%;min-height:52px}
   }
 </style>
 </head>
@@ -308,7 +342,7 @@
         </div>
         <div class="title">
           <h1>Mehrarbeit & Bagatellgrenze</h1>
-          <p>Web-App für eigene Erfassung, Sammelimport und Monatsabrechnung. Daten bleiben lokal im Browser und können per Backup-Datei zusammengeführt werden.</p>
+          <p>Web-App für eigene Erfassung, Sammelimport und Monatsabrechnung. Daten bleiben lokal im Browser und können per Backup-Datei zusammengeführt werden. Backups lassen sich optional mit Passwort verschlüsseln (AES-256).</p>
         </div>
       </div>
       <div class="toolbar">
@@ -558,6 +592,28 @@
 
             <div class="footer-note">
               💡 <strong>Hinweis:</strong> Die PIN wird gehasht gespeichert und kann nicht wiederhergestellt werden. Bitte merke dir die neue PIN!
+            </div>
+          </section>
+
+          <!-- BACKUP-VERSCHLÜSSELUNG (PUBLIC-KEY-VERFAHREN) -->
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>🔑 Backup-Verschlüsselung</h2>
+                <p>Mit einem Schlüsselpaar verschlüsseln alle Kolleg:innen ihre Backups automatisch – ganz ohne Passwort einzugeben oder weiterzugeben. Nur du kannst sie mit dem privaten Schlüssel wieder öffnen.</p>
+              </div>
+            </div>
+
+            <div id="keySetupStatus" class="status-card status-neutral">Wird geladen …</div>
+
+            <div class="small-actions" style="margin-top:1rem">
+              <button class="button primary" id="generateKeypairBtn">Schlüsselpaar erzeugen</button>
+              <button class="ghost" id="loadPrivateKeyBtn">Privaten Schlüssel laden</button>
+              <button class="danger" id="forgetPrivateKeyBtn">Schlüssel aus diesem Gerät entfernen</button>
+            </div>
+
+            <div class="footer-note">
+              💡 Nach dem Erzeugen zeigt dir die App den öffentlichen Schlüssel zum einmaligen Einbauen in den Quellcode (Anleitung erscheint automatisch). Der private Schlüssel wird nur als Datei heruntergeladen und bleibt ausschließlich bei dir – bewahre ihn wie ein echtes Passwort auf.
             </div>
           </section>
 
@@ -882,6 +938,23 @@ const STORAGE_KEY_ACTIVE_PERSON = 'mehrarbeit_active_person';
 const STORAGE_KEY_ADMIN_PIN = 'mehrarbeit_admin_pin';
 const STORAGE_KEY_THEME = 'mehrarbeit_theme';
 const STORAGE_KEY_SCHULDATEN = 'mehrarbeit_schuldaten';
+const STORAGE_KEY_ADMIN_PRIVATE_KEY = 'mehrarbeit_admin_private_key_jwk';
+
+// ============================================================================
+// BACKUP-VERSCHLÜSSELUNG: ÖFFENTLICHER SCHLÜSSEL (kein Geheimnis!)
+// ============================================================================
+// Sobald in der Verwaltungsansicht ein Schlüsselpaar erzeugt wurde, ersetzt
+// die Anleitung dort diese Zeile durch den öffentlichen Schlüssel. Alle
+// Kolleg:innen verschlüsseln ihre Backups dann automatisch damit – nur der
+// zugehörige PRIVATE Schlüssel (bleibt ausschließlich bei der verantwortlichen
+// Person) kann sie wieder entschlüsseln. Der öffentliche Schlüssel selbst ist
+// kein Geheimnis und darf im Quellcode/auf GitHub Pages stehen.
+const BACKUP_PUBLIC_KEY_JWK = null;
+
+// Laufzeit-Schlüssel (werden aus obiger Konstante bzw. einer geladenen
+// Datei erzeugt und nie dauerhaft im Quellcode gespeichert)
+let adminPublicKey = null;
+let adminPrivateKey = null;
 
 function loadData() {
   const p = localStorage.getItem(STORAGE_KEY_PERSONEN);
@@ -975,6 +1048,362 @@ async function hashPIN(pin) {
   const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   return hashHex;
 }
+
+// ============================================================================
+// BACKUP-VERSCHLÜSSELUNG (AES-256-GCM + PBKDF2)
+// ============================================================================
+// Schützt personenbezogene Daten (Namen, Arbeitszeiten, PIN-Hash) in
+// exportierten Backup-Dateien. Das Passwort verlässt nie den Browser und
+// wird nirgends gespeichert – ohne Passwort ist das Backup nicht lesbar.
+
+const PBKDF2_ITERATIONS = 210000;
+
+function buf2b64(buf) {
+  let binary = '';
+  const bytes = new Uint8Array(buf);
+  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
+
+function b642buf(b64) {
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+async function deriveAesKey(password, salt, iterations = PBKDF2_ITERATIONS) {
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw', enc.encode(password), { name: 'PBKDF2' }, false, ['deriveKey']
+  );
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations, hash: 'SHA-256' },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+
+async function encryptBackupData(plainObject, password) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveAesKey(password, salt);
+  const enc = new TextEncoder();
+  const plaintext = enc.encode(JSON.stringify(plainObject));
+  const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, plaintext);
+  return {
+    encrypted: true,
+    format: 'mehrarbeit-backup-aes-gcm',
+    version: '1.0',
+    kdf: 'PBKDF2-SHA256',
+    iterations: PBKDF2_ITERATIONS,
+    salt: buf2b64(salt),
+    iv: buf2b64(iv),
+    ciphertext: buf2b64(ciphertext)
+  };
+}
+
+// Wirft einen Fehler bei falschem Passwort oder beschädigter Datei.
+async function decryptBackupData(encryptedObject, password) {
+  const salt = b642buf(encryptedObject.salt);
+  const iv = b642buf(encryptedObject.iv);
+  const iterations = encryptedObject.iterations || PBKDF2_ITERATIONS;
+  const key = await deriveAesKey(password, salt, iterations);
+  const ciphertext = b642buf(encryptedObject.ciphertext);
+  const plainBuffer = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
+  const dec = new TextDecoder();
+  return JSON.parse(dec.decode(plainBuffer));
+}
+
+// Zeigt ein Passwort-Modal an und gibt ein Promise zurück, das mit dem
+// eingegebenen Passwort (String) oder null (abgebrochen) aufgelöst wird.
+function askPassword({ title, message, confirmField = false, errorText = '' }) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'pw-modal-overlay';
+    overlay.innerHTML = `
+      <div class="pw-modal" role="dialog" aria-modal="true" aria-labelledby="pwModalTitle">
+        <h3 id="pwModalTitle">${title}</h3>
+        <p class="helper">${message}</p>
+        ${errorText ? `<div class="pw-modal-error">${errorText}</div>` : ''}
+        <label>Passwort
+          <input type="password" id="pwModalInput" autocomplete="off" />
+        </label>
+        ${confirmField ? `<label>Passwort bestätigen<input type="password" id="pwModalInputConfirm" autocomplete="off" /></label>` : ''}
+        <div class="pw-modal-error hidden" id="pwModalError"></div>
+        <div class="pw-modal-actions">
+          <button type="button" class="ghost" id="pwModalCancel">Abbrechen</button>
+          <button type="button" class="button primary" id="pwModalOk">OK</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    const input = overlay.querySelector('#pwModalInput');
+    const confirmInput = overlay.querySelector('#pwModalInputConfirm');
+    const errorEl = overlay.querySelector('#pwModalError');
+    input.focus();
+
+    function cleanup(result) {
+      document.body.removeChild(overlay);
+      resolve(result);
+    }
+
+    function submit() {
+      const pw = input.value;
+      if (!pw || pw.length < 4) {
+        errorEl.textContent = 'Bitte ein Passwort mit mindestens 4 Zeichen eingeben.';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+      if (confirmField && pw !== confirmInput.value) {
+        errorEl.textContent = 'Die Passwörter stimmen nicht überein.';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+      cleanup(pw);
+    }
+
+    overlay.querySelector('#pwModalCancel').addEventListener('click', () => cleanup(null));
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) cleanup(null); });
+    overlay.querySelector('#pwModalOk').addEventListener('click', submit);
+    overlay.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); submit(); }
+      if (e.key === 'Escape') cleanup(null);
+    });
+  });
+}
+
+// ============================================================================
+// BACKUP-VERSCHLÜSSELUNG: PUBLIC-KEY-VERFAHREN (RSA-OAEP + AES-GCM)
+// ============================================================================
+// Hybrid-Verschlüsselung: Jedes Backup bekommt einen zufälligen AES-Schlüssel
+// (verschlüsselt die eigentlichen Daten), der wiederum mit dem öffentlichen
+// RSA-Schlüssel "eingepackt" wird. Nur der private Schlüssel kann diesen
+// AES-Schlüssel wieder auspacken. Dadurch muss NIE ein Geheimnis zwischen
+// Lehrkraft und Verantwortlicher ausgetauscht werden – jede Person exportiert
+// automatisch verschlüsselt, aber nur die Verantwortliche kann entschlüsseln.
+
+const RSA_OAEP_PARAMS = { name: 'RSA-OAEP', modulusLength: 4096, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' };
+
+async function generateAdminKeyPair() {
+  return crypto.subtle.generateKey(RSA_OAEP_PARAMS, true, ['wrapKey', 'unwrapKey']);
+}
+
+async function exportKeyJwk(key) {
+  return crypto.subtle.exportKey('jwk', key);
+}
+
+async function importPublicKeyJwk(jwk) {
+  return crypto.subtle.importKey('jwk', jwk, { name: 'RSA-OAEP', hash: 'SHA-256' }, true, ['wrapKey']);
+}
+
+async function importPrivateKeyJwk(jwk) {
+  return crypto.subtle.importKey('jwk', jwk, { name: 'RSA-OAEP', hash: 'SHA-256' }, true, ['unwrapKey']);
+}
+
+async function encryptBackupHybrid(plainObject, publicKey) {
+  const aesKey = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt']);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const enc = new TextEncoder();
+  const plaintext = enc.encode(JSON.stringify(plainObject));
+  const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, aesKey, plaintext);
+  const wrappedKey = await crypto.subtle.wrapKey('raw', aesKey, publicKey, { name: 'RSA-OAEP' });
+  return {
+    encrypted: true,
+    method: 'rsa-hybrid',
+    version: '1.0',
+    wrappedKey: buf2b64(wrappedKey),
+    iv: buf2b64(iv),
+    ciphertext: buf2b64(ciphertext)
+  };
+}
+
+// Wirft einen Fehler bei falschem privaten Schlüssel oder beschädigter Datei.
+async function decryptBackupHybrid(encryptedObject, privateKey) {
+  const wrappedKey = b642buf(encryptedObject.wrappedKey);
+  const iv = b642buf(encryptedObject.iv);
+  const aesKey = await crypto.subtle.unwrapKey(
+    'raw', wrappedKey, privateKey, { name: 'RSA-OAEP' }, { name: 'AES-GCM', length: 256 }, false, ['decrypt']
+  );
+  const ciphertext = b642buf(encryptedObject.ciphertext);
+  const plainBuffer = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, aesKey, ciphertext);
+  const dec = new TextDecoder();
+  return JSON.parse(dec.decode(plainBuffer));
+}
+
+// Datei-Auswahl-Modal für den privaten Schlüssel (kein Passwort-Textfeld,
+// sondern ein Datei-Upload, da der private Schlüssel als JSON-Datei vorliegt).
+function askPrivateKeyFile({ title, message }) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'pw-modal-overlay';
+    overlay.innerHTML = `
+      <div class="pw-modal" role="dialog" aria-modal="true" aria-labelledby="privKeyModalTitle">
+        <h3 id="privKeyModalTitle">${title}</h3>
+        <p class="helper">${message}</p>
+        <label>Private-Key-Datei (.json)
+          <input type="file" id="privKeyFileInput" accept="application/json" />
+        </label>
+        <label style="flex-direction:row;align-items:center;display:flex;gap:.6rem;font-weight:400">
+          <input type="checkbox" id="rememberKeyCheckbox" style="width:auto;min-height:auto" />
+          <span>Auf diesem Gerät merken (nur eigenes/vertrauenswürdiges Gerät!)</span>
+        </label>
+        <div class="pw-modal-error hidden" id="privKeyError"></div>
+        <div class="pw-modal-actions">
+          <button type="button" class="ghost" id="privKeyCancel">Abbrechen</button>
+          <button type="button" class="button primary" id="privKeyOk">Entschlüsseln</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    const fileInput = overlay.querySelector('#privKeyFileInput');
+    const rememberCb = overlay.querySelector('#rememberKeyCheckbox');
+    const errorEl = overlay.querySelector('#privKeyError');
+
+    function cleanup(result) {
+      document.body.removeChild(overlay);
+      resolve(result);
+    }
+
+    overlay.querySelector('#privKeyCancel').addEventListener('click', () => cleanup(null));
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) cleanup(null); });
+
+    overlay.querySelector('#privKeyOk').addEventListener('click', async () => {
+      const file = fileInput.files[0];
+      if (!file) {
+        errorEl.textContent = 'Bitte eine Schlüsseldatei auswählen.';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+      try {
+        const text = await file.text();
+        const jwk = JSON.parse(text);
+        const key = await importPrivateKeyJwk(jwk);
+        cleanup({ key, jwk, remember: rememberCb.checked });
+      } catch (err) {
+        errorEl.textContent = 'Ungültige oder beschädigte Schlüsseldatei.';
+        errorEl.classList.remove('hidden');
+      }
+    });
+  });
+}
+
+// Erzeugt ein neues Schlüsselpaar, lädt den privaten Schlüssel sofort als
+// Datei herunter und zeigt den öffentlichen Schlüssel zum Einbauen an.
+async function generateAdminKeypairFlow() {
+  if (BACKUP_PUBLIC_KEY_JWK !== null || adminPublicKey !== null) {
+    const proceed = confirm(
+      '⚠️ Es existiert bereits ein Schlüsselpaar!\n\n' +
+      'Wenn du jetzt ein neues erzeugst, können mit dem alten öffentlichen ' +
+      'Schlüssel verschlüsselte Backups NUR NOCH mit dem alten privaten ' +
+      'Schlüssel entschlüsselt werden (bewahre ihn also weiter auf).\n\n' +
+      'Neues Schlüsselpaar wirklich erzeugen?'
+    );
+    if (!proceed) return;
+  }
+
+  const keyPair = await generateAdminKeyPair();
+  const publicJwk = await exportKeyJwk(keyPair.publicKey);
+  const privateJwk = await exportKeyJwk(keyPair.privateKey);
+
+  // Privaten Schlüssel sofort als Datei herunterladen
+  const privBlob = new Blob([JSON.stringify(privateJwk, null, 2)], { type: 'application/json' });
+  const privUrl = URL.createObjectURL(privBlob);
+  const a = document.createElement('a');
+  a.href = privUrl;
+  a.download = `bagatellgrenze_privater_schluessel_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(privUrl);
+
+  adminPublicKey = keyPair.publicKey;
+  adminPrivateKey = keyPair.privateKey;
+
+  showPublicKeySetupModal(publicJwk);
+  renderKeySetupStatus();
+}
+
+function showPublicKeySetupModal(publicJwk) {
+  const codeLine = `const BACKUP_PUBLIC_KEY_JWK = ${JSON.stringify(publicJwk)};`;
+  const overlay = document.createElement('div');
+  overlay.className = 'pw-modal-overlay';
+  overlay.innerHTML = `
+    <div class="pw-modal" role="dialog" aria-modal="true" style="max-width:640px">
+      <h3>🔑 Schlüsselpaar erzeugt</h3>
+      <p class="helper">Der <strong>private Schlüssel</strong> wurde gerade als Datei heruntergeladen –
+      bewahre sie sicher auf (z. B. verschlüsselter USB-Stick, nicht in geteilten Cloud-Ordnern).
+      Sie ist der einzige Weg, verschlüsselte Backups zu öffnen.</p>
+      <p class="helper">Damit alle Kolleg:innen automatisch mit dem <strong>öffentlichen Schlüssel</strong>
+      verschlüsseln, ersetze in der HTML-Datei der App die Zeile mit
+      <code>BACKUP_PUBLIC_KEY_JWK</code> durch den folgenden Code und lade die Datei
+      danach erneut auf GitHub Pages hoch:</p>
+      <textarea readonly style="min-height:140px;font-family:monospace;font-size:.78rem;white-space:pre-wrap" id="pubKeyCodeArea">${codeLine}</textarea>
+      <div class="pw-modal-actions">
+        <button type="button" class="ghost" id="pubKeyCopyBtn">In Zwischenablage kopieren</button>
+        <button type="button" class="button primary" id="pubKeyCloseBtn">Fertig</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#pubKeyCopyBtn').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(codeLine);
+      overlay.querySelector('#pubKeyCopyBtn').textContent = '✅ Kopiert!';
+    } catch (err) {
+      overlay.querySelector('#pubKeyCodeArea').select();
+    }
+  });
+  overlay.querySelector('#pubKeyCloseBtn').addEventListener('click', () => document.body.removeChild(overlay));
+}
+
+function renderKeySetupStatus() {
+  const el = document.getElementById('keySetupStatus');
+  if (!el) return;
+
+  const hasPublicKey = BACKUP_PUBLIC_KEY_JWK !== null || adminPublicKey !== null;
+  const hasPrivateKey = adminPrivateKey !== null;
+
+  el.className = 'status-card ' + (hasPublicKey ? 'status-go' : 'status-neutral');
+
+  if (hasPublicKey && hasPrivateKey) {
+    el.innerHTML = '✅ Verschlüsselung aktiv – alle Backups werden automatisch verschlüsselt und du kannst sie hier entschlüsseln.';
+  } else if (hasPublicKey && !hasPrivateKey) {
+    el.innerHTML = '🔒 Öffentlicher Schlüssel eingerichtet – Backups werden verschlüsselt. Lade deinen privaten Schlüssel, um sie zu entschlüsseln.';
+  } else {
+    el.innerHTML = 'ℹ️ Noch kein Schlüsselpaar eingerichtet. Backups werden bis dahin unverschlüsselt (bzw. mit Passwort) exportiert.';
+  }
+}
+
+document.getElementById('generateKeypairBtn').addEventListener('click', generateAdminKeypairFlow);
+
+document.getElementById('loadPrivateKeyBtn').addEventListener('click', async () => {
+  const result = await askPrivateKeyFile({
+    title: '🔑 Privaten Schlüssel laden',
+    message: 'Wähle deine private Schlüsseldatei aus, um Backups entschlüsseln zu können.'
+  });
+  if (!result) return;
+  adminPrivateKey = result.key;
+  if (result.remember) {
+    localStorage.setItem(STORAGE_KEY_ADMIN_PRIVATE_KEY, JSON.stringify(result.jwk));
+  }
+  renderKeySetupStatus();
+  alert('✅ Privater Schlüssel geladen.');
+});
+
+document.getElementById('forgetPrivateKeyBtn').addEventListener('click', () => {
+  if (!adminPrivateKey && !localStorage.getItem(STORAGE_KEY_ADMIN_PRIVATE_KEY)) {
+    alert('ℹ️ Es ist kein privater Schlüssel auf diesem Gerät gespeichert.');
+    return;
+  }
+  if (!confirm('Privaten Schlüssel aus diesem Gerät entfernen?\n\nDu kannst ihn jederzeit erneut über die Schlüsseldatei laden.')) return;
+  adminPrivateKey = null;
+  localStorage.removeItem(STORAGE_KEY_ADMIN_PRIVATE_KEY);
+  renderKeySetupStatus();
+  alert('🗑️ Privater Schlüssel aus diesem Gerät entfernt.');
+});
 
 // ============================================================================
 // BERECHNUNGEN
@@ -2124,9 +2553,9 @@ function renderConflicts() {
 document.getElementById('exportBackupBtn').addEventListener('click', exportBackup);
 document.getElementById('exportBackupBtnEmployee').addEventListener('click', exportBackup);
 
-function exportBackup() {
+async function exportBackup() {
   const adminPIN = localStorage.getItem(STORAGE_KEY_ADMIN_PIN);
-  
+
   const data = {
     version: '2.0',
     exported: new Date().toISOString(),
@@ -2136,11 +2565,48 @@ function exportBackup() {
     adminPIN: adminPIN || null  // Gehasht!
   };
 
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  let fileContent;
+  let filenameSuffix = '';
+
+  if (adminPublicKey) {
+    // Öffentlicher Schlüssel ist eingerichtet: automatische Verschlüsselung,
+    // kein Passwort nötig – nur die Verantwortliche kann das Backup öffnen.
+    const encryptedData = await encryptBackupHybrid(data, adminPublicKey);
+    fileContent = JSON.stringify(encryptedData, null, 2);
+    filenameSuffix = '_verschluesselt';
+  } else {
+    // Fallback, solange kein Schlüsselpaar eingerichtet ist: optionales
+    // Passwort wie bisher.
+    const wantsEncryption = confirm(
+      '🔒 Backup verschlüsseln?\n\n' +
+      'Das Backup enthält personenbezogene Daten (Namen, Arbeitszeiten). ' +
+      'Eine Verschlüsselung mit Passwort wird empfohlen, besonders wenn die ' +
+      'Datei per E-Mail oder Cloud-Speicher geteilt wird.\n\n' +
+      'OK = verschlüsselt exportieren\n' +
+      'Abbrechen = unverschlüsselt exportieren'
+    );
+
+    if (wantsEncryption) {
+      const password = await askPassword({
+        title: '🔒 Backup verschlüsseln',
+        message: 'Wähle ein Passwort für dieses Backup. Ohne dieses Passwort ' +
+          'kann die Datei später nicht mehr entschlüsselt werden – notiere es dir sicher.',
+        confirmField: true
+      });
+      if (!password) return; // Abgebrochen
+      const encryptedData = await encryptBackupData(data, password);
+      fileContent = JSON.stringify(encryptedData, null, 2);
+      filenameSuffix = '_verschluesselt';
+    } else {
+      fileContent = JSON.stringify(data, null, 2);
+    }
+  }
+
+  const blob = new Blob([fileContent], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `mehrarbeit_backup_${new Date().toISOString().split('T')[0]}.json`;
+  a.download = `mehrarbeit_backup_${new Date().toISOString().split('T')[0]}${filenameSuffix}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -2152,31 +2618,129 @@ document.getElementById('importBackupInput').addEventListener('change', (e) => {
   const reader = new FileReader();
   reader.onload = async (event) => {
     try {
-      const imported = JSON.parse(event.target.result);
-      
+      let imported = JSON.parse(event.target.result);
+
+      // Verschlüsseltes Backup erkennen und entschlüsseln
+      if (imported && imported.encrypted === true && imported.method === 'rsa-hybrid') {
+        // Public-Key-Verfahren: privaten Schlüssel benötigt (kein Passwort)
+        if (!adminPrivateKey) {
+          const result = await askPrivateKeyFile({
+            title: '🔑 Privaten Schlüssel laden',
+            message: 'Dieses Backup wurde mit dem öffentlichen Schlüssel verschlüsselt. ' +
+              'Zum Entschlüsseln wird dein privater Schlüssel (JSON-Datei) benötigt.'
+          });
+          if (!result) { e.target.value = ''; return; } // Abgebrochen
+          adminPrivateKey = result.key;
+          if (result.remember) {
+            localStorage.setItem(STORAGE_KEY_ADMIN_PRIVATE_KEY, JSON.stringify(result.jwk));
+          }
+          renderKeySetupStatus();
+        }
+        try {
+          imported = await decryptBackupHybrid(imported, adminPrivateKey);
+        } catch (err) {
+          alert('❌ Entschlüsselung fehlgeschlagen: falscher privater Schlüssel oder beschädigte Datei.');
+          e.target.value = '';
+          return;
+        }
+      } else if (imported && imported.encrypted === true) {
+        // Älteres, passwortbasiertes Verfahren
+        let decrypted = null;
+        let errorText = '';
+        let attempts = 0;
+        while (!decrypted && attempts < 5) {
+          const password = await askPassword({
+            title: '🔒 Backup entschlüsseln',
+            message: 'Diese Backup-Datei ist verschlüsselt. Bitte das Passwort eingeben, mit dem sie erstellt wurde.',
+            errorText
+          });
+          if (!password) { e.target.value = ''; return; } // Abgebrochen
+          try {
+            decrypted = await decryptBackupData(imported, password);
+          } catch (err) {
+            attempts++;
+            errorText = 'Falsches Passwort oder beschädigte Datei. Bitte erneut versuchen.';
+          }
+        }
+        if (!decrypted) {
+          alert('❌ Entschlüsselung fehlgeschlagen: Falsches Passwort oder beschädigte Datei.');
+          e.target.value = '';
+          return;
+        }
+        imported = decrypted;
+      }
+
+      // Abwärtskompatibilität: Altes Format konvertieren
+      if (imported.kollegen && !imported.personen) {
+        console.log('⚠️ Altes Backup-Format erkannt, konvertiere...');
+        imported.personen = imported.kollegen;
+        imported.version = imported.version || "1.0";
+        delete imported.kollegen;
+      }
+
+      // Validierung
+      if (!imported.version) {
+        alert('❌ Ungültiges Backup-Format! Version fehlt.');
+        e.target.value = '';
+        return;
+      }
+      if (!imported.personen) {
+        alert('❌ Ungültiges Backup-Format! Personen fehlen.');
+        e.target.value = '';
+        return;
+      }
+      if (!imported.eintraege) {
+        imported.eintraege = [];
+      }
+
       // PIN-Handling: Wenn keine PIN im Backup, setze Standard-PIN
-if (!imported.admin_pin && !imported.adminPIN) {
-  console.log('⚠️ Keine PIN im Backup, setze Standard-PIN...');
-  const defaultPIN = '1544939';
-  const hash = await hashPIN(defaultPIN);
-  imported.admin_pin = hash;
-  imported.adminPIN = hash;
-  console.log('✅ Standard-PIN (1544939) gesetzt');
-}
+      if (!imported.admin_pin && !imported.adminPIN) {
+        console.log('⚠️ Keine PIN im Backup, setze Standard-PIN...');
+        const defaultPIN = '1544939';
+        const hash = await hashPIN(defaultPIN);
+        imported.admin_pin = hash;
+        imported.adminPIN = hash;
+        console.log('✅ Standard-PIN (1544939) gesetzt');
+      }
 
-// Abwärtskompatibilität: admin_pin → adminPIN
-if (imported.admin_pin && !imported.adminPIN) {
-  imported.adminPIN = imported.admin_pin;
-}
-if (imported.adminPIN && !imported.admin_pin) {
-  imported.admin_pin = imported.adminPIN;
-}
+      // Abwärtskompatibilität: admin_pin → adminPIN
+      if (imported.admin_pin && !imported.adminPIN) {
+        imported.adminPIN = imported.admin_pin;
+      }
+      if (imported.adminPIN && !imported.admin_pin) {
+        imported.admin_pin = imported.adminPIN;
+      }
 
-      
-      mergeData(imported);
+      console.log('📥 Import gestartet:', {
+        version: imported.version,
+        personen: imported.personen?.length || 0,
+        eintraege: imported.eintraege?.length || 0,
+        schuldaten: !!imported.schuldaten,
+        adminPIN: !!imported.adminPIN
+      });
+
+      // Import-Modus abfragen
+      const mode = prompt(
+        '📥 Import-Modus wählen:\n\n' +
+        '• "merge" = Daten zusammenführen (Konflikte werden erkannt)\n' +
+        '• "neu" = Nur neue Einträge hinzufügen\n' +
+        '• "ersetzen" = Alle lokalen Daten löschen und ersetzen\n\n' +
+        'Bitte eingeben:',
+        'merge'
+      );
+
+      if (!mode) {
+        console.log('ℹ️ Import abgebrochen');
+        e.target.value = '';
+        return;
+      }
+
+      mergeData(imported, mode.trim().toLowerCase());
       e.target.value = '';
     } catch (error) {
-      alert('❌ Fehler beim Importieren: Ungültige Datei!');
+      console.error('❌ Import-Fehler:', error);
+      alert('❌ Fehler beim Importieren: Ungültige Datei!\n\n' + error.message);
+      e.target.value = '';
     }
   };
   reader.readAsText(file);
@@ -2733,8 +3297,29 @@ function renderAll() {
 // INIT
 // ============================================================================
 
-function init() {
+async function initEncryptionKeys() {
+  if (BACKUP_PUBLIC_KEY_JWK !== null) {
+    try {
+      adminPublicKey = await importPublicKeyJwk(BACKUP_PUBLIC_KEY_JWK);
+    } catch (err) {
+      console.error('❌ Öffentlicher Schlüssel konnte nicht geladen werden:', err);
+    }
+  }
+  const cachedPrivateKey = localStorage.getItem(STORAGE_KEY_ADMIN_PRIVATE_KEY);
+  if (cachedPrivateKey) {
+    try {
+      adminPrivateKey = await importPrivateKeyJwk(JSON.parse(cachedPrivateKey));
+    } catch (err) {
+      console.error('❌ Gespeicherter privater Schlüssel ist ungültig, wurde entfernt:', err);
+      localStorage.removeItem(STORAGE_KEY_ADMIN_PRIVATE_KEY);
+    }
+  }
+  renderKeySetupStatus();
+}
+
+async function init() {
   loadData();
+  await initEncryptionKeys();
   
   // Debug-Info
   console.log('📊 Geladene Daten:', {
@@ -2771,82 +3356,6 @@ function init() {
 
 
 init();
-    // ============================================================================
-// BACKUP IMPORT EVENT LISTENER
-// ============================================================================
-
-document.getElementById('importBackupInput').addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = function(event) {
-    try {
-      const imported = JSON.parse(event.target.result);
-      
-      // Abwärtskompatibilität: Altes Format konvertieren
-      if (imported.kollegen && !imported.personen) {
-        console.log('⚠️ Altes Backup-Format erkannt, konvertiere...');
-        imported.personen = imported.kollegen;
-        imported.version = imported.version || "1.0";
-        delete imported.kollegen;
-      }
-      
-      // Validierung
-      if (!imported.version) {
-        alert('❌ Ungültiges Backup-Format! Version fehlt.');
-        return;
-      }
-      
-      if (!imported.personen) {
-        alert('❌ Ungültiges Backup-Format! Personen fehlen.');
-        return;
-      }
-      
-      // Einträge-Array sicherstellen
-      if (!imported.eintraege) {
-        imported.eintraege = [];
-      }
-      
-      // Debug-Info in Konsole
-      console.log('📥 Import gestartet:', {
-        version: imported.version,
-        personen: imported.personen?.length || 0,
-        eintraege: imported.eintraege?.length || 0,
-        schuldaten: !!imported.schuldaten,
-        adminPIN: !!imported.adminPIN
-      });
-
-      // Import-Modus abfragen
-      const mode = prompt(
-        '📥 Import-Modus wählen:\n\n' +
-        '• "merge" = Daten zusammenführen (Konflikte werden erkannt)\n' +
-        '• "neu" = Nur neue Einträge hinzufügen\n' +
-        '• "ersetzen" = Alle lokalen Daten löschen und ersetzen\n\n' +
-        'Bitte eingeben:',
-        'merge'
-      );
-      
-      if (!mode) {
-        console.log('ℹ️ Import abgebrochen');
-        e.target.value = '';
-        return;
-      }
-
-      // Merge durchführen
-      mergeData(imported, mode.trim().toLowerCase());
-
-      // Input zurücksetzen
-      e.target.value = '';
-      
-    } catch (err) {
-      console.error('❌ Import-Fehler:', err);
-      alert('❌ Fehler beim Importieren:\n\n' + err.message + '\n\nPrüfe die Konsole für Details.');
-    }
-  };
-  
-  reader.readAsText(file);
-});
 
 
   </script>
