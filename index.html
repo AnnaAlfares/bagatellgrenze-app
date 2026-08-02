@@ -167,6 +167,7 @@
   .status-card{border-radius:var(--radius-lg);padding:var(--space-4);border:1px solid var(--color-border);background:var(--color-surface-2)}
   .status-neutral{background:var(--color-surface-2);color:var(--color-text)}
   .status-go{background:color-mix(in srgb, var(--color-success) 14%, var(--color-surface));color:var(--color-success);border-color:color-mix(in srgb, var(--color-success) 28%, var(--color-border))}
+  .status-warn{background:color-mix(in srgb, var(--color-warning) 14%, var(--color-surface));color:var(--color-warning);border-color:color-mix(in srgb, var(--color-warning) 28%, var(--color-border))}
   .quick-add{display:flex;gap:.5rem;flex-wrap:wrap}
   .quick-add button{min-height:40px;padding:.5rem .75rem;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text)}
   .import-report{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-4)}
@@ -323,9 +324,10 @@
   @media (max-width: 700px){
     .pw-modal{padding:var(--space-5);border-radius:var(--radius-lg)}
     .pw-modal label{font-size:1.05rem}
-    .pw-modal input{padding:1rem 1.1rem;font-size:1.05rem;min-height:52px}
-    .pw-modal-actions{flex-direction:column-reverse}
+    .pw-modal input:not([type=checkbox]){padding:1rem 1.1rem;font-size:1.05rem;min-height:52px}
+    .pw-modal-actions{flex-direction:column-reverse;align-items:stretch}
     .pw-modal-actions button{width:100%;min-height:52px}
+    .pw-modal-actions > div{display:flex;flex-direction:column-reverse;gap:var(--space-3);width:100%}
   }
 </style>
 </head>
@@ -389,6 +391,7 @@
             <div class="stat"><div class="k">Grenze</div><div class="v" id="empLimit">0,0</div></div>
             <div class="stat"><div class="k" id="remainingLabel">Offen</div><div class="v" id="empRemaining">0,0</div></div>
             <div class="stat"><div class="k">Vergütbar</div><div class="v" id="empPayable">0,0</div></div>
+            <div class="stat"><div class="k">Status</div><div class="v" id="empAmpel" title="">⚪</div></div>
           </div>
 
           <div class="grid two">
@@ -502,9 +505,13 @@
               <div class="stat"><div class="k">Offen</div><div class="v" id="empRemainingDetail">0,0</div></div>
               <div class="stat"><div class="k">Vergütbar</div><div class="v" id="empPayableDetail">0,0</div></div>
             </div>
+            <div class="small-actions" style="margin-bottom:var(--space-5)">
+              <button class="ghost" id="exportMonatsuebersichtBtnEmployee">📄 Monatsübersicht (PDF)</button>
+            </div>
             <div class="banner">
               📁 Bitte exportiere dein Backup und leite es an die verantwortliche Person weiter.<br>
               <button class="button primary" id="exportBackupBtnEmployee" style="margin-top:var(--space-3)">Backup exportieren</button>
+              <button class="ghost" id="exportAuskunftBtnEmployee" style="margin-top:var(--space-3)">📄 Meine Daten (Auskunft)</button>
             </div>
           </section>
         </section>
@@ -614,6 +621,144 @@
 
             <div class="footer-note">
               💡 Nach dem Erzeugen zeigt dir die App den öffentlichen Schlüssel zum einmaligen Einbauen in den Quellcode (Anleitung erscheint automatisch). Der private Schlüssel wird nur als Datei heruntergeladen und bleibt ausschließlich bei dir – bewahre ihn wie ein echtes Passwort auf.
+            </div>
+          </section>
+
+          <!-- DATENSCHUTZ: AUFBEWAHRUNGSFRIST & AUSKUNFT -->
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>🗑️ Aufbewahrungsfrist</h2>
+                <p>Einträge, die älter als die eingestellte Frist sind, können hier geprüft und gelöscht werden.</p>
+              </div>
+            </div>
+
+            <label style="max-width:260px">Aufbewahrungsfrist (Jahre)
+              <input id="aufbewahrungsjahre" type="number" min="1" step="1" placeholder="z. B. 4">
+            </label>
+
+            <div id="retentionStatus" class="status-card status-neutral" style="margin-top:1rem">Wird geladen …</div>
+
+            <div class="small-actions" style="margin-top:1rem">
+              <button class="button primary" id="saveRetentionBtn">Frist speichern</button>
+              <button class="ghost" id="reviewOldEntriesBtn">Alte Einträge prüfen</button>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>📄 Datenauskunft (Art. 15 DSGVO)</h2>
+                <p>Erstellt für eine Person eine lesbare Übersicht aller gespeicherten Daten – zum Drucken/als PDF speichern.</p>
+              </div>
+            </div>
+
+            <div class="grid two">
+              <label>Person
+                <select id="auskunftPersonSelect">
+                  <option value="">Person auswählen</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="small-actions" style="margin-top:1rem">
+              <button class="button primary" id="exportAuskunftBtnAdmin">Auskunft erstellen</button>
+            </div>
+          </section>
+
+          <!-- SICHERHEIT: AUTOMATISCHE SPERRE -->
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>🔒 Automatische Sperre</h2>
+                <p>Ohne Aktivität wird die Verantwortlichenansicht automatisch verlassen – wichtig an gemeinsam genutzten Rechnern (z. B. im Lehrerzimmer).</p>
+              </div>
+            </div>
+
+            <label style="max-width:260px">Sperre nach (Minuten Inaktivität)
+              <input id="autoLockMinutes" type="number" min="1" step="1" placeholder="z. B. 10">
+            </label>
+
+            <div class="small-actions" style="margin-top:1rem">
+              <button class="button primary" id="saveAutoLockBtn">Speichern</button>
+            </div>
+
+            <div class="footer-note">
+              💡 Die reguläre Anmeldung läuft unabhängig davon nach 30 Minuten ab. Diese Einstellung sperrt zusätzlich sofort, wenn niemand mehr am Gerät aktiv ist.
+            </div>
+          </section>
+
+          <!-- SICHERHEIT: ÄNDERUNGSPROTOKOLL -->
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>🧾 Änderungsprotokoll</h2>
+                <p>Zeigt, wer wann welchen Eintrag erstellt, geändert oder gelöscht hat (inkl. Backup-Importe). Zeigt die letzten 150 Ereignisse.</p>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Zeitpunkt</th><th>Aktion</th><th>Person</th><th>Datum</th><th>Details</th><th>Quelle</th></tr></thead>
+                <tbody id="auditLogBody"></tbody>
+              </table>
+            </div>
+
+            <div class="small-actions" style="margin-top:1rem">
+              <button class="ghost" id="exportAuditLogBtn">Als CSV exportieren</button>
+              <button class="danger" id="clearAuditLogBtn">Protokoll leeren</button>
+            </div>
+          </section>
+
+          <!-- ÜBERSICHT: JAHRESÜBERSICHT / DASHBOARD -->
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>📊 Jahresübersicht</h2>
+                <p>Verlauf einer Person über ein Schuljahr (August–Juli) – zeigt auf einen Blick, wie nah jeder Monat an der Bagatellgrenze liegt.</p>
+              </div>
+            </div>
+
+            <div class="grid two">
+              <label>Person
+                <select id="jahresPersonSelect">
+                  <option value="">Person auswählen</option>
+                </select>
+              </label>
+              <label>Schuljahr
+                <select id="jahresSchuljahrSelect">
+                  <option value="">Bitte auswählen...</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="small-actions" style="margin-top:1rem">
+              <button class="button primary" id="showJahresuebersichtBtn">Anzeigen</button>
+              <button class="ghost" id="exportMonatsuebersichtBtnAdmin">📄 Monatsübersicht (PDF, aktueller Monat oben)</button>
+            </div>
+
+            <div id="jahresUebersichtResult" style="margin-top:var(--space-5)">
+              <p class="helper">Bitte Person und Schuljahr auswählen und auf "Anzeigen" klicken.</p>
+            </div>
+          </section>
+
+          <!-- KOMFORT: CSV-SAMMELIMPORT -->
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>📥 CSV-Sammelimport</h2>
+                <p>Mehrere Einträge auf einmal importieren, z. B. aus einem Excel-Stundenzettel. Spalten: Kürzel (oder Name), Datum, Stunden, optional Bemerkung.</p>
+              </div>
+            </div>
+
+            <div class="small-actions">
+              <label class="button" for="csvImportInput" style="display:inline-flex;align-items:center">CSV-Datei auswählen</label>
+              <input id="csvImportInput" type="file" accept=".csv,text/csv" class="hidden" />
+              <button class="ghost" id="downloadCsvTemplateBtn">Vorlage herunterladen</button>
+            </div>
+
+            <div class="footer-note">
+              💡 Vor dem Import zeigt dir die App eine Vorschau aller Zeilen inkl. eventueller Fehler – es wird nichts ungeprüft übernommen.
             </div>
           </section>
 
@@ -803,6 +948,7 @@
                 <thead>
                   <tr>
                     <th>Name</th>
+                    <th>Ampel</th>
                     <th>Monat</th>
                     <th>Stunden</th>
                     <th>Bagatellgrenze</th>
@@ -939,6 +1085,9 @@ const STORAGE_KEY_ADMIN_PIN = 'mehrarbeit_admin_pin';
 const STORAGE_KEY_THEME = 'mehrarbeit_theme';
 const STORAGE_KEY_SCHULDATEN = 'mehrarbeit_schuldaten';
 const STORAGE_KEY_ADMIN_PRIVATE_KEY = 'mehrarbeit_admin_private_key_jwk';
+const STORAGE_KEY_AUDIT_LOG = 'mehrarbeit_audit_log';
+const AUDIT_LOG_MAX_ENTRIES = 500;
+let auditLog = [];
 
 // ============================================================================
 // BACKUP-VERSCHLÜSSELUNG: ÖFFENTLICHER SCHLÜSSEL (kein Geheimnis!)
@@ -961,10 +1110,12 @@ function loadData() {
   const e = localStorage.getItem(STORAGE_KEY_EINTRAEGE);
   const c = localStorage.getItem(STORAGE_KEY_CONFLICTS);
   const s = localStorage.getItem(STORAGE_KEY_SCHULDATEN);
+  const a = localStorage.getItem(STORAGE_KEY_AUDIT_LOG);
   
   personen = p ? JSON.parse(p) : [];
   eintraege = e ? JSON.parse(e) : [];
   conflicts = c ? JSON.parse(c) : [];
+  auditLog = a ? JSON.parse(a) : [];
   
   if (s) {
     schuldaten = JSON.parse(s);
@@ -1406,6 +1557,672 @@ document.getElementById('forgetPrivateKeyBtn').addEventListener('click', () => {
 });
 
 // ============================================================================
+// DATENSCHUTZ: AUFBEWAHRUNGSFRIST
+// ============================================================================
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : String(str);
+  return div.innerHTML;
+}
+
+function getRetentionYears() {
+  const y = parseFloat(schuldaten.aufbewahrungsjahre);
+  return (!isNaN(y) && y > 0) ? y : 4;
+}
+
+function findOldEntries() {
+  const years = getRetentionYears();
+  const cutoff = new Date();
+  cutoff.setFullYear(cutoff.getFullYear() - years);
+  return eintraege.filter(e => {
+    const d = new Date(e.datum);
+    return !isNaN(d.getTime()) && d < cutoff;
+  }).sort((a, b) => a.datum.localeCompare(b.datum));
+}
+
+function renderRetentionStatus() {
+  const el = document.getElementById('retentionStatus');
+  if (!el) return;
+  const years = getRetentionYears();
+  const old = findOldEntries();
+
+  if (old.length === 0) {
+    el.className = 'status-card status-go';
+    el.innerHTML = `✅ Keine Einträge älter als ${years} Jahre gefunden.`;
+  } else {
+    el.className = 'status-card status-warn';
+    el.innerHTML = `⚠️ ${old.length} Eintrag/Einträge sind älter als ${years} Jahre und sollten geprüft werden.`;
+  }
+}
+
+function openRetentionReviewModal() {
+  const old = findOldEntries();
+  if (old.length === 0) {
+    alert(`✅ Keine Einträge älter als ${getRetentionYears()} Jahre gefunden.`);
+    return;
+  }
+
+  const overlay = document.createElement('div');
+  overlay.className = 'pw-modal-overlay';
+  const rows = old.map(e => {
+    const person = personen.find(p => p.id === e.personId);
+    const name = person ? (person.vorname ? `${person.vorname} ${person.nachname || person.name || ''}`.trim() : (person.nachname || person.name || person.kuerzel || '—')) : '(gelöschte Person)';
+    return `
+      <label style="display:flex;align-items:flex-start;gap:.6rem;font-weight:400;padding:.5rem 0;border-bottom:1px solid var(--color-border)">
+        <input type="checkbox" class="retentionCheckbox" data-id="${e.id}" checked style="width:auto;margin-top:.25rem" />
+        <span>
+          <strong>${escapeHtml(new Date(e.datum).toLocaleDateString('de-DE'))}</strong> · ${escapeHtml(name)} · ${e.stunden} Std.<br>
+          <span style="color:var(--color-text-muted, inherit);font-size:.85rem">${escapeHtml(e.bemerkung || 'ohne Bemerkung')}</span>
+        </span>
+      </label>`;
+  }).join('');
+
+  overlay.innerHTML = `
+    <div class="pw-modal" role="dialog" aria-modal="true" style="max-width:640px">
+      <h3>🗑️ Alte Einträge prüfen</h3>
+      <p class="helper">Diese ${old.length} Einträge sind älter als ${getRetentionYears()} Jahre. Wähle aus, welche gelöscht werden sollen.</p>
+      <div style="max-height:45vh;overflow-y:auto">${rows}</div>
+      <div class="pw-modal-actions" style="justify-content:space-between">
+        <button type="button" class="ghost" id="retentionSelectAllBtn">Alle abwählen</button>
+        <div style="display:flex;gap:var(--space-3)">
+          <button type="button" class="ghost" id="retentionCancelBtn">Abbrechen</button>
+          <button type="button" class="danger" id="retentionDeleteBtn">Ausgewählte löschen</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  let allChecked = true;
+  overlay.querySelector('#retentionSelectAllBtn').addEventListener('click', () => {
+    allChecked = !allChecked;
+    overlay.querySelectorAll('.retentionCheckbox').forEach(cb => cb.checked = allChecked);
+    overlay.querySelector('#retentionSelectAllBtn').textContent = allChecked ? 'Alle abwählen' : 'Alle auswählen';
+  });
+
+  overlay.querySelector('#retentionCancelBtn').addEventListener('click', () => document.body.removeChild(overlay));
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) document.body.removeChild(overlay); });
+
+  overlay.querySelector('#retentionDeleteBtn').addEventListener('click', () => {
+    const idsToDelete = Array.from(overlay.querySelectorAll('.retentionCheckbox:checked')).map(cb => cb.dataset.id);
+    if (idsToDelete.length === 0) {
+      alert('ℹ️ Keine Einträge ausgewählt.');
+      return;
+    }
+    if (!confirm(`❌ ${idsToDelete.length} Eintrag/Einträge unwiderruflich löschen?`)) return;
+
+    const deletedEntries = eintraege.filter(e => idsToDelete.includes(e.id));
+    eintraege = eintraege.filter(e => !idsToDelete.includes(e.id));
+    deletedEntries.forEach(entry => {
+      logAuditEvent('delete', {
+        personId: entry.personId,
+        datum: entry.datum,
+        stunden: entry.stunden,
+        bemerkung: entry.bemerkung,
+        source: 'Aufbewahrungsfrist-Bereinigung'
+      });
+    });
+    saveData();
+    renderAll();
+    renderRetentionStatus();
+    document.body.removeChild(overlay);
+    alert(`✅ ${idsToDelete.length} Eintrag/Einträge gelöscht.`);
+  });
+}
+
+// ============================================================================
+// DATENSCHUTZ: AUSKUNFT NACH ART. 15 DSGVO
+// ============================================================================
+
+function buildAuskunftHtml(person, personEintraege) {
+  const rows = personEintraege
+    .slice()
+    .sort((a, b) => a.datum.localeCompare(b.datum))
+    .map(e => `<tr><td>${escapeHtml(new Date(e.datum).toLocaleDateString('de-DE'))}</td><td>${escapeHtml(String(e.stunden).replace('.', ','))}</td><td>${escapeHtml(e.bemerkung || '')}</td><td>${e.lastModified ? escapeHtml(new Date(e.lastModified).toLocaleString('de-DE')) : '—'}</td></tr>`)
+    .join('');
+  const totalStunden = personEintraege.reduce((s, e) => s + (parseFloat(e.stunden) || 0), 0);
+  const statusText = person.beschaeftigungsstatus === 'beamte' || person.status === 'beamte'
+    ? 'Beamte/r'
+    : (person.beschaeftigungsstatus === 'tarifbeschaeftigt' || person.status === 'angestellte' ? 'Angestellte/r (Tarifbeschäftigte/r)' : '—');
+  const name = `${person.vorname || ''} ${person.nachname || person.name || ''}`.trim() || '—';
+
+  return `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><title>Datenauskunft – ${escapeHtml(name)}</title>
+<style>
+  body{font-family:system-ui,sans-serif;padding:2rem;color:#1a1a1a;max-width:800px;margin:auto;line-height:1.5}
+  h1{font-size:1.4rem;margin-bottom:.2rem}
+  h2{font-size:1.05rem;margin-top:2rem;border-bottom:1px solid #ccc;padding-bottom:.3rem}
+  table{width:100%;border-collapse:collapse;margin-top:.6rem}
+  th,td{border:1px solid #ccc;padding:.45rem .6rem;text-align:left;font-size:.88rem}
+  th{background:#f2f2f2}
+  dl{display:grid;grid-template-columns:200px 1fr;gap:.35rem .8rem;margin-top:.6rem}
+  dt{font-weight:600}
+  dd{margin:0}
+  .meta{color:#666;font-size:.82rem;margin-top:2.5rem}
+  .printbar{margin-bottom:1.5rem}
+  @media print{ .printbar{display:none} body{padding:0} }
+</style></head><body>
+<div class="printbar"><button onclick="window.print()">Als PDF drucken/speichern</button></div>
+<h1>Auskunft nach Art. 15 DSGVO</h1>
+<p>${escapeHtml(schuldaten.schulname || '')}, erstellt am ${new Date().toLocaleDateString('de-DE')}</p>
+
+<h2>Gespeicherte Stammdaten</h2>
+<dl>
+  <dt>Name</dt><dd>${escapeHtml(name)}</dd>
+  <dt>Kürzel</dt><dd>${escapeHtml(person.kuerzel || '—')}</dd>
+  <dt>Personalnummer</dt><dd>${escapeHtml(person.personalnummer || '—')}</dd>
+  <dt>Geburtsdatum</dt><dd>${person.geburtsdatum ? escapeHtml(new Date(person.geburtsdatum).toLocaleDateString('de-DE')) : '—'}</dd>
+  <dt>Wochenstunden (Deputat)</dt><dd>${escapeHtml(person.deputat || person.teilzeit || '—')}</dd>
+  <dt>Beschäftigungsstatus</dt><dd>${escapeHtml(statusText)}</dd>
+  <dt>Schlüssel (Mehrarbeitssatz)</dt><dd>${escapeHtml(person.schluessel || '—')}</dd>
+  <dt>Quote</dt><dd>${escapeHtml(person.quote || '—')}</dd>
+  <dt>Bagatellgrenze (Monat)</dt><dd>${escapeHtml(person.grenze || '—')}</dd>
+</dl>
+
+<h2>Erfasste Mehrarbeits-Einträge (${personEintraege.length})</h2>
+<table><thead><tr><th>Datum</th><th>Stunden</th><th>Bemerkung</th><th>Zuletzt geändert</th></tr></thead>
+<tbody>${rows || '<tr><td colspan="4">Keine Einträge vorhanden.</td></tr>'}</tbody></table>
+<p><strong>Summe:</strong> ${String(totalStunden.toFixed(1)).replace('.', ',')} Stunden</p>
+
+<p class="meta">Diese Auskunft wurde automatisch aus der lokalen Anwendung „Mehrarbeit erfassen" erzeugt und enthält alle zu dieser Person gespeicherten personenbezogenen Daten (Art. 15 DSGVO). Sie wird nirgends hochgeladen – bitte die geöffnete Seite selbst speichern/drucken.</p>
+</body></html>`;
+}
+
+function exportAuskunft(personId) {
+  const person = personen.find(p => p.id === personId);
+  if (!person) {
+    alert('⚠️ Bitte zuerst eine Person auswählen!');
+    return;
+  }
+  const personEintraege = eintraege.filter(e => e.personId === personId);
+  const html = buildAuskunftHtml(person, personEintraege);
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+  // Blob-URL absichtlich nicht sofort widerrufen, damit der neue Tab sie noch laden kann.
+}
+
+// ============================================================================
+// KOMFORT: CSV-SAMMELIMPORT (z. B. aus Excel-Stundenzetteln)
+// ============================================================================
+// Erwartete Spalten (Reihenfolge egal, Groß-/Kleinschreibung egal):
+// Kürzel (oder Name), Datum, Stunden, optional Bemerkung.
+// Trennzeichen ";" oder "," werden automatisch erkannt, Dezimalkomma möglich,
+// Datum als TT.MM.JJJJ oder JJJJ-MM-TT.
+
+function parseCsvText(text) {
+  const firstLine = (text.split(/\r?\n/)[0] || '');
+  const delimiter = (firstLine.split(';').length >= firstLine.split(',').length) ? ';' : ',';
+
+  const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+  return lines.map(line => {
+    const result = [];
+    let cur = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') {
+        if (inQuotes && line[i + 1] === '"') { cur += '"'; i++; }
+        else inQuotes = !inQuotes;
+      } else if (c === delimiter && !inQuotes) {
+        result.push(cur.trim());
+        cur = '';
+      } else {
+        cur += c;
+      }
+    }
+    result.push(cur.trim());
+    return result;
+  });
+}
+
+function parseFlexibleDate(str) {
+  if (!str) return null;
+  str = str.trim();
+  let m = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) return str;
+  m = str.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if (m) {
+    const [, d, mo, y] = m;
+    return `${y}-${mo.padStart(2, '0')}-${d.padStart(2, '0')}`;
+  }
+  return null;
+}
+
+function findPersonByKuerzelOrName(value) {
+  if (!value) return null;
+  const v = value.trim().toLowerCase();
+  if (!v) return null;
+  let p = personen.find(p => (p.kuerzel || '').toLowerCase() === v);
+  if (p) return p;
+  p = personen.find(p => (p.name || `${p.vorname || ''} ${p.nachname || ''}`.trim()).toLowerCase() === v);
+  return p || null;
+}
+
+function downloadCsvTemplate() {
+  const csv = 'Kürzel;Datum;Stunden;Bemerkung\nAB;01.08.2026;2;Vertretung 5b\nCD;03.08.2026;1,5;\n';
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'sammelimport_vorlage.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function handleCsvImportFile(file) {
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    const rows = parseCsvText(event.target.result);
+    if (rows.length < 2) {
+      alert('⚠️ Die CSV-Datei enthält keine Datenzeilen.');
+      return;
+    }
+
+    const header = rows[0].map(h => h.toLowerCase());
+    const idxKuerzel = header.findIndex(h => ['kürzel', 'kuerzel', 'name', 'person'].includes(h));
+    const idxDatum = header.findIndex(h => ['datum', 'date'].includes(h));
+    const idxStunden = header.findIndex(h => ['stunden', 'std', 'hours'].includes(h));
+    const idxBemerkung = header.findIndex(h => ['bemerkung', 'notiz', 'kommentar'].includes(h));
+
+    if (idxKuerzel === -1 || idxDatum === -1 || idxStunden === -1) {
+      alert('⚠️ Die CSV-Datei muss mindestens die Spalten "Kürzel" (oder "Name"), "Datum" und "Stunden" enthalten.\n\nLade dir gerne die Vorlage herunter.');
+      return;
+    }
+
+    const results = [];
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      if (row.every(c => c === '')) continue;
+
+      const kuerzelRaw = row[idxKuerzel] || '';
+      const datumRaw = row[idxDatum] || '';
+      const stundenRaw = row[idxStunden] || '';
+      const bemerkung = idxBemerkung !== -1 ? (row[idxBemerkung] || '') : '';
+
+      const person = findPersonByKuerzelOrName(kuerzelRaw);
+      const datum = parseFlexibleDate(datumRaw);
+      const stunden = parseGermanNumber(stundenRaw);
+
+      let error = null;
+      if (!person) error = `Person "${kuerzelRaw}" nicht gefunden`;
+      else if (!datum) error = `Datum "${datumRaw}" ungültig (erwartet TT.MM.JJJJ)`;
+      else if (!stunden || stunden <= 0) error = `Stunden "${stundenRaw}" ungültig`;
+      else {
+        const { errors } = validateEintragPlausibilitaet(datum, stunden);
+        if (errors.length > 0) error = errors.join(' ');
+      }
+
+      results.push({ zeile: i + 1, kuerzelRaw, person, datum, stunden, bemerkung, error });
+    }
+
+    showCsvImportReviewModal(results);
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function showCsvImportReviewModal(results) {
+  const valid = results.filter(r => !r.error);
+  const invalid = results.filter(r => r.error);
+
+  const overlay = document.createElement('div');
+  overlay.className = 'pw-modal-overlay';
+
+  const rowsHtml = results.map(r => `
+    <tr style="${r.error ? 'color:var(--color-error)' : ''}">
+      <td>${r.zeile}</td>
+      <td>${escapeHtml(r.person ? r.person.name : r.kuerzelRaw)}</td>
+      <td>${r.datum ? escapeHtml(new Date(r.datum).toLocaleDateString('de-DE')) : '—'}</td>
+      <td>${r.stunden ? escapeHtml(String(r.stunden).replace('.', ',')) : '—'}</td>
+      <td>${escapeHtml(r.error || '✓ OK')}</td>
+    </tr>`).join('');
+
+  overlay.innerHTML = `
+    <div class="pw-modal" role="dialog" aria-modal="true" style="max-width:680px">
+      <h3>📥 CSV-Sammelimport prüfen</h3>
+      <p class="helper">${valid.length} von ${results.length} Zeile(n) sind gültig und werden importiert.${invalid.length > 0 ? ` ${invalid.length} Zeile(n) mit Fehlern werden übersprungen.` : ''}</p>
+      <div style="max-height:45vh;overflow-y:auto">
+        <table style="width:100%;font-size:.82rem;border-collapse:collapse">
+          <thead><tr><th>Zeile</th><th>Person</th><th>Datum</th><th>Std.</th><th>Status</th></tr></thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+      </div>
+      <div class="pw-modal-actions">
+        <button type="button" class="ghost" id="csvImportCancelBtn">Abbrechen</button>
+        <button type="button" class="button primary" id="csvImportConfirmBtn">${valid.length} Einträge importieren</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  overlay.querySelector('#csvImportCancelBtn').addEventListener('click', () => document.body.removeChild(overlay));
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) document.body.removeChild(overlay); });
+
+  overlay.querySelector('#csvImportConfirmBtn').addEventListener('click', () => {
+    if (valid.length === 0) {
+      alert('ℹ️ Keine gültigen Zeilen zum Importieren.');
+      return;
+    }
+    valid.forEach(r => {
+      eintraege.push({
+        id: generateId(),
+        personId: r.person.id,
+        datum: r.datum,
+        stunden: r.stunden,
+        bemerkung: r.bemerkung,
+        lastModified: new Date().toISOString()
+      });
+    });
+    logAuditEvent('import', {
+      source: 'CSV-Sammelimport',
+      details: { importiert: valid.length, uebersprungen: invalid.length }
+    });
+    saveData();
+    updatePersonSelects();
+    renderAll();
+    document.body.removeChild(overlay);
+    alert(`✅ ${valid.length} Einträge importiert.`);
+  });
+}
+
+// ============================================================================
+// SICHERHEIT: ÄNDERUNGSPROTOKOLL
+// ============================================================================
+
+function saveAuditLog() {
+  if (auditLog.length > AUDIT_LOG_MAX_ENTRIES) {
+    auditLog = auditLog.slice(auditLog.length - AUDIT_LOG_MAX_ENTRIES);
+  }
+  localStorage.setItem(STORAGE_KEY_AUDIT_LOG, JSON.stringify(auditLog));
+}
+
+// action: 'create' | 'update' | 'delete' | 'import'
+function logAuditEvent(action, { personId, datum, stunden, bemerkung, source, details } = {}) {
+  const person = personId ? personen.find(p => p.id === personId) : null;
+  auditLog.push({
+    id: generateId(),
+    timestamp: new Date().toISOString(),
+    action,
+    personId: personId || null,
+    personName: person ? (person.name || `${person.vorname || ''} ${person.nachname || ''}`.trim()) : null,
+    datum: datum || null,
+    stunden: (stunden !== undefined && stunden !== null) ? stunden : null,
+    bemerkung: bemerkung || null,
+    source: source || 'unbekannt',
+    details: details || null
+  });
+  saveAuditLog();
+  renderAuditLog();
+}
+
+function renderAuditLog() {
+  const tbody = document.getElementById('auditLogBody');
+  if (!tbody) return;
+
+  if (auditLog.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--color-text-muted)">Noch keine Änderungen protokolliert</td></tr>';
+    return;
+  }
+
+  const actionLabels = { create: '➕ Erstellt', update: '✏️ Geändert', delete: '🗑️ Gelöscht', import: '📥 Import' };
+
+  tbody.innerHTML = auditLog
+    .slice()
+    .reverse()
+    .slice(0, 150)
+    .map(a => {
+      const detailText = a.stunden !== null && a.stunden !== undefined
+        ? `${String(a.stunden).replace('.', ',')} Std.`
+        : (a.details ? escapeHtml(JSON.stringify(a.details)) : '—');
+      return `
+        <tr>
+          <td>${escapeHtml(new Date(a.timestamp).toLocaleString('de-DE'))}</td>
+          <td>${actionLabels[a.action] || escapeHtml(a.action)}</td>
+          <td>${escapeHtml(a.personName || '—')}</td>
+          <td>${a.datum ? escapeHtml(new Date(a.datum).toLocaleDateString('de-DE')) : '—'}</td>
+          <td>${detailText}</td>
+          <td>${escapeHtml(a.source || '—')}</td>
+        </tr>`;
+    })
+    .join('');
+}
+
+function exportAuditLogCsv() {
+  if (auditLog.length === 0) {
+    alert('ℹ️ Es liegen noch keine Protokolleinträge vor.');
+    return;
+  }
+  const header = ['Zeitpunkt', 'Aktion', 'Person', 'Datum', 'Stunden', 'Bemerkung', 'Quelle'];
+  const rows = auditLog.map(a => [
+    new Date(a.timestamp).toLocaleString('de-DE'),
+    a.action,
+    a.personName || '',
+    a.datum ? new Date(a.datum).toLocaleDateString('de-DE') : '',
+    a.stunden !== null && a.stunden !== undefined ? a.stunden : '',
+    a.bemerkung || (a.details ? JSON.stringify(a.details) : ''),
+    a.source || ''
+  ]);
+  const csv = [header, ...rows]
+    .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';'))
+    .join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `aenderungsprotokoll_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ============================================================================
+// ÜBERSICHT: JAHRESÜBERSICHT (DASHBOARD)
+// ============================================================================
+
+function populateJahresSchuljahrSelect() {
+  const select = document.getElementById('jahresSchuljahrSelect');
+  if (!select) return;
+  const currentYear = new Date().getFullYear();
+  select.innerHTML = '<option value="">Bitte auswählen...</option>';
+  for (let i = -2; i <= 2; i++) {
+    const startYear = currentYear + i;
+    const endYear = startYear + 1;
+    select.innerHTML += `<option value="${startYear}/${endYear}">${startYear}/${endYear}</option>`;
+  }
+}
+
+// Ein Schuljahr läuft in NRW von August bis Juli des Folgejahres.
+function schuljahrMonths(schuljahr) {
+  const [startYear, endYear] = schuljahr.split('/').map(Number);
+  return [
+    `${startYear}-08`, `${startYear}-09`, `${startYear}-10`, `${startYear}-11`, `${startYear}-12`,
+    `${endYear}-01`, `${endYear}-02`, `${endYear}-03`, `${endYear}-04`, `${endYear}-05`, `${endYear}-06`, `${endYear}-07`
+  ];
+}
+
+function ampelColor(ampel) {
+  if (ampel.emoji === '🔴') return 'var(--color-error)';
+  if (ampel.emoji === '🟡') return 'var(--color-warning)';
+  if (ampel.emoji === '🟢') return 'var(--color-success)';
+  return 'var(--color-border)';
+}
+
+function renderJahresuebersicht() {
+  const personId = document.getElementById('jahresPersonSelect').value;
+  const schuljahr = document.getElementById('jahresSchuljahrSelect').value;
+  const container = document.getElementById('jahresUebersichtResult');
+  if (!container) return;
+
+  if (!personId || !schuljahr) {
+    container.innerHTML = '<p class="helper">Bitte Person und Schuljahr auswählen und auf "Anzeigen" klicken.</p>';
+    return;
+  }
+
+  const person = personen.find(p => p.id === personId);
+  if (!person) {
+    container.innerHTML = '<p class="helper">Person nicht gefunden.</p>';
+    return;
+  }
+
+  const limit = person.grenze || 0;
+  const months = schuljahrMonths(schuljahr);
+  const rows = months.map(monthKey => {
+    const hours = getMonthlyHours(personId, monthKey);
+    const ampel = getAmpelStatus(hours, limit);
+    const pct = limit > 0 ? Math.min(100, (hours / limit) * 100) : 0;
+    const monthName = new Date(monthKey + '-01').toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+    return { monthKey, monthName, hours, ampel, pct };
+  });
+
+  const totalHours = rows.reduce((sum, r) => sum + r.hours, 0);
+
+  const barsHtml = rows.map(r => `
+    <div style="display:grid;grid-template-columns:120px 1fr 64px 28px;align-items:center;gap:.6rem;margin-bottom:.5rem">
+      <span style="font-size:.85rem">${escapeHtml(r.monthName)}</span>
+      <div style="background:var(--color-surface-2);border-radius:6px;overflow:hidden;height:14px">
+        <div style="width:${r.pct}%;height:100%;background:${ampelColor(r.ampel)}"></div>
+      </div>
+      <span style="font-size:.85rem;text-align:right">${formatNumber(r.hours)} Std.</span>
+      <span title="${escapeHtml(r.ampel.label)}">${r.ampel.emoji}</span>
+    </div>
+  `).join('');
+
+  container.innerHTML = `
+    <p class="helper">Bagatellgrenze/Monat: <strong>${formatNumber(limit)} Std.</strong> · Gesamt im Schuljahr: <strong>${formatNumber(totalHours)} Std.</strong></p>
+    <div style="margin-top:var(--space-3)">${barsHtml}</div>
+  `;
+}
+
+// ============================================================================
+// ÜBERSICHT: MONATSÜBERSICHT ALS PDF (DRUCKANSICHT)
+// ============================================================================
+
+function buildMonatsuebersichtHtml(person, monthKey) {
+  const personEintraege = eintraege
+    .filter(e => e.personId === person.id && getMonthKey(e.datum) === monthKey)
+    .sort((a, b) => a.datum.localeCompare(b.datum));
+
+  const hours = getMonthlyHours(person.id, monthKey);
+  const limit = person.grenze || 0;
+  let remaining = 0, payable = 0;
+  if (hours >= limit && limit > 0) {
+    payable = hours;
+    remaining = 0;
+  } else {
+    payable = 0;
+    remaining = limit - hours;
+  }
+  const ampel = getAmpelStatus(hours, limit);
+  const monthName = new Date(monthKey + '-01').toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+  const name = person.name || `${person.vorname || ''} ${person.nachname || ''}`.trim();
+
+  const rows = personEintraege
+    .map(e => `<tr><td>${escapeHtml(new Date(e.datum).toLocaleDateString('de-DE'))}</td><td>${escapeHtml(String(e.stunden).replace('.', ','))}</td><td>${escapeHtml(e.bemerkung || '')}</td></tr>`)
+    .join('');
+
+  return `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><title>Monatsübersicht – ${escapeHtml(name)} – ${escapeHtml(monthName)}</title>
+<style>
+  body{font-family:system-ui,sans-serif;padding:2rem;color:#1a1a1a;max-width:800px;margin:auto;line-height:1.5}
+  h1{font-size:1.3rem;margin-bottom:.1rem}
+  h2{font-size:1rem;margin-top:1.8rem;border-bottom:1px solid #ccc;padding-bottom:.3rem}
+  table{width:100%;border-collapse:collapse;margin-top:.5rem}
+  th,td{border:1px solid #ccc;padding:.4rem .6rem;text-align:left;font-size:.88rem}
+  th{background:#f2f2f2}
+  dl{display:grid;grid-template-columns:200px 1fr;gap:.3rem .8rem;margin-top:.5rem}
+  dt{font-weight:600} dd{margin:0}
+  .signature{margin-top:3.5rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem}
+  .signature div{border-top:1px solid #333;padding-top:.3rem;font-size:.82rem;color:#555}
+  .printbar{margin-bottom:1.5rem}
+  @media print{ .printbar{display:none} body{padding:0} }
+</style></head><body>
+<div class="printbar"><button onclick="window.print()">Als PDF drucken/speichern</button></div>
+<h1>Monatsübersicht Mehrarbeit</h1>
+<p>${escapeHtml(schuldaten.schulname || '')} · ${escapeHtml(monthName)}</p>
+
+<h2>Person</h2>
+<dl>
+  <dt>Name</dt><dd>${escapeHtml(name)}</dd>
+  <dt>Kürzel</dt><dd>${escapeHtml(person.kuerzel || '—')}</dd>
+</dl>
+
+<h2>Erfasste Einträge (${personEintraege.length})</h2>
+<table><thead><tr><th>Datum</th><th>Stunden</th><th>Bemerkung</th></tr></thead>
+<tbody>${rows || '<tr><td colspan="3">Keine Einträge in diesem Monat.</td></tr>'}</tbody></table>
+
+<h2>Zusammenfassung</h2>
+<dl>
+  <dt>Summe Stunden</dt><dd>${formatNumber(hours)} Std.</dd>
+  <dt>Bagatellgrenze</dt><dd>${formatNumber(limit)} Std.</dd>
+  <dt>Noch offen</dt><dd>${formatNumber(remaining)} Std.</dd>
+  <dt>Vergütbar</dt><dd>${formatNumber(payable)} Std.</dd>
+  <dt>Status</dt><dd>${ampel.emoji} ${escapeHtml(ampel.label)}</dd>
+</dl>
+
+<div class="signature">
+  <div>Unterschrift Kolleg:in</div>
+  <div>Unterschrift Verantwortliche/r</div>
+</div>
+</body></html>`;
+}
+
+function exportMonatsuebersicht(personId, monthKey) {
+  const person = personen.find(p => p.id === personId);
+  if (!person) {
+    alert('⚠️ Bitte zuerst eine Person auswählen!');
+    return;
+  }
+  if (!monthKey) {
+    alert('⚠️ Bitte zuerst einen Monat auswählen!');
+    return;
+  }
+  const html = buildMonatsuebersichtHtml(person, monthKey);
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+  // Blob-URL absichtlich nicht sofort widerrufen, damit der neue Tab sie noch laden kann.
+}
+
+// ============================================================================
+// SICHERHEIT: AUTOMATISCHE SPERRE (INAKTIVITÄT)
+// ============================================================================
+
+let inactivityTimer = null;
+
+function getAutoLockMinutes() {
+  const m = parseFloat(schuldaten.autoLockMinutes);
+  return (!isNaN(m) && m > 0) ? m : 10;
+}
+
+function clearInactivityTimer() {
+  if (inactivityTimer) {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = null;
+  }
+}
+
+function resetInactivityTimer() {
+  clearInactivityTimer();
+  const adminView = document.getElementById('adminView');
+  const isAdminActive = adminView && !adminView.classList.contains('hidden');
+  const isLoggedIn = sessionStorage.getItem('admin_logged_in') === 'true';
+  if (!isAdminActive || !isLoggedIn) return;
+
+  const minutes = getAutoLockMinutes();
+  inactivityTimer = setTimeout(autoLockAdmin, minutes * 60 * 1000);
+}
+
+function autoLockAdmin() {
+  if (sessionStorage.getItem('admin_logged_in') !== 'true') return;
+  sessionStorage.removeItem('admin_logged_in');
+  sessionStorage.removeItem('admin_session_expires');
+  switchToRole('employee');
+  alert('🔒 Du wurdest wegen Inaktivität automatisch aus der Verantwortlichenansicht abgemeldet.');
+}
+
+['mousemove', 'keydown', 'click', 'touchstart', 'scroll'].forEach(evt => {
+  document.addEventListener(evt, resetInactivityTimer, { passive: true });
+});
+
+// ============================================================================
 // BERECHNUNGEN
 // ============================================================================
 
@@ -1431,6 +2248,57 @@ function getMonthlyHours(personId, monthKey) {
 
 function formatNumber(num) {
   return num.toFixed(1).replace('.', ',');
+}
+
+// Ampel-Status: grün (< 70% der Bagatellgrenze), gelb (70–99%), rot (>= 100%)
+function getAmpelStatus(hours, limit) {
+  if (!limit || limit <= 0) return { emoji: '⚪', label: 'Keine Grenze hinterlegt', css: '' };
+  const pct = hours / limit;
+  if (pct >= 1) return { emoji: '🔴', label: 'Grenze erreicht/überschritten', css: 'status-error' };
+  if (pct >= 0.7) return { emoji: '🟡', label: 'Nähert sich der Grenze', css: 'warn' };
+  return { emoji: '🟢', label: 'Im grünen Bereich', css: 'positive' };
+}
+
+// ============================================================================
+// KOMFORT: PLAUSIBILITÄTSPRÜFUNG BEI EINGABE
+// ============================================================================
+// Gibt { errors, warnings } zurück. errors blockieren das Speichern,
+// warnings können nach Rückfrage trotzdem gespeichert werden.
+function validateEintragPlausibilitaet(datum, stunden) {
+  const errors = [];
+  const warnings = [];
+
+  const eingabeDatum = new Date(datum);
+  const heute = new Date();
+  heute.setHours(23, 59, 59, 999);
+
+  if (isNaN(eingabeDatum.getTime())) {
+    errors.push('Das eingegebene Datum ist ungültig.');
+  } else if (eingabeDatum > heute) {
+    errors.push('Das Datum liegt in der Zukunft – Mehrarbeit kann erst nach der geleisteten Zeit erfasst werden.');
+  }
+
+  if (!isNaN(stunden)) {
+    if (stunden > 12) {
+      warnings.push(`${String(stunden).replace('.', ',')} Stunden an einem Tag sind ungewöhnlich viel. Bitte prüfen, ob die Zahl stimmt.`);
+    }
+  }
+
+  return { errors, warnings };
+}
+
+// Prüft errors/warnings und fragt bei warnings nach Bestätigung.
+// Gibt true zurück, wenn gespeichert werden darf.
+function checkEintragPlausibilitaet(datum, stunden) {
+  const { errors, warnings } = validateEintragPlausibilitaet(datum, stunden);
+  if (errors.length > 0) {
+    alert('⚠️ ' + errors.join('\n'));
+    return false;
+  }
+  if (warnings.length > 0) {
+    return confirm('⚠️ ' + warnings.join('\n') + '\n\nTrotzdem speichern?');
+  }
+  return true;
 }
 
 function parseGermanNumber(str) {
@@ -1503,11 +2371,15 @@ function updatePersonSelects() {
   const adminPersonFilter = document.getElementById('adminPersonFilter');
   const whoAreYouSelect = document.getElementById('whoAreYouSelect');
   const lbvPersonSelect = document.getElementById('lbvPerson');
+  const auskunftPersonSelect = document.getElementById('auskunftPersonSelect');
+  const jahresPersonSelect = document.getElementById('jahresPersonSelect');
 
   const currentActive = activeSelect.value;
   const currentAdmin = adminPersonSelect.value;
   const currentAdminEntry = adminEntryPersonSelect.value;
   const currentFilter = adminPersonFilter.value;
+  const currentAuskunft = auskunftPersonSelect ? auskunftPersonSelect.value : '';
+  const currentJahres = jahresPersonSelect ? jahresPersonSelect.value : '';
 
   activeSelect.innerHTML = '<option value="">Person auswählen</option>';
   adminPersonSelect.innerHTML = '<option value="">Neue Person anlegen...</option>';
@@ -1515,6 +2387,8 @@ function updatePersonSelects() {
   adminPersonFilter.innerHTML = '<option value="">Alle Personen</option>';
   whoAreYouSelect.innerHTML = '<option value="">Bitte auswählen...</option>';
   lbvPersonSelect.innerHTML = '<option value="">Bitte auswählen...</option>';
+  if (auskunftPersonSelect) auskunftPersonSelect.innerHTML = '<option value="">Person auswählen</option>';
+  if (jahresPersonSelect) jahresPersonSelect.innerHTML = '<option value="">Person auswählen</option>';
 
   personen.forEach(p => {
     activeSelect.innerHTML += `<option value="${p.id}">${p.name} (${p.kuerzel})</option>`;
@@ -1523,6 +2397,8 @@ function updatePersonSelects() {
     adminPersonFilter.innerHTML += `<option value="${p.id}">${p.name} (${p.kuerzel})</option>`;
     whoAreYouSelect.innerHTML += `<option value="${p.id}">${p.name} (${p.kuerzel})</option>`;
     lbvPersonSelect.innerHTML += `<option value="${p.id}">${p.name} (${p.kuerzel})</option>`;
+    if (auskunftPersonSelect) auskunftPersonSelect.innerHTML += `<option value="${p.id}">${p.name} (${p.kuerzel})</option>`;
+    if (jahresPersonSelect) jahresPersonSelect.innerHTML += `<option value="${p.id}">${p.name} (${p.kuerzel})</option>`;
   });
 
   // Wert wiederherstellen (erst currentActive, dann savedPerson als Fallback)
@@ -1536,6 +2412,8 @@ function updatePersonSelects() {
   if (currentAdmin) adminPersonSelect.value = currentAdmin;
   if (currentAdminEntry) adminEntryPersonSelect.value = currentAdminEntry;
   if (currentFilter) adminPersonFilter.value = currentFilter;
+  if (currentAuskunft && auskunftPersonSelect) auskunftPersonSelect.value = currentAuskunft;
+  if (currentJahres && jahresPersonSelect) jahresPersonSelect.value = currentJahres;
 
   // Sperre das Dropdown, wenn eine Person ausgewählt ist
   if (activeSelect.value) {
@@ -1679,6 +2557,8 @@ document.getElementById('saveEintragBtn').addEventListener('click', () => {
     return;
   }
 
+  if (!checkEintragPlausibilitaet(datum, stunden)) return;
+
   if (currentEditingEntryId) {
     const entry = eintraege.find(e => e.id === currentEditingEntryId);
     if (entry) {
@@ -1686,6 +2566,7 @@ document.getElementById('saveEintragBtn').addEventListener('click', () => {
       entry.stunden = stunden;
       entry.bemerkung = bemerkung;
       entry.lastModified = new Date().toISOString();
+      logAuditEvent('update', { personId, datum, stunden, bemerkung, source: 'Mitarbeiteransicht' });
     }
     currentEditingEntryId = null;
   } else {
@@ -1697,6 +2578,7 @@ document.getElementById('saveEintragBtn').addEventListener('click', () => {
       bemerkung,
       lastModified: new Date().toISOString()
     });
+    logAuditEvent('create', { personId, datum, stunden, bemerkung, source: 'Mitarbeiteransicht' });
   }
 
   saveData();
@@ -1714,7 +2596,17 @@ document.getElementById('deleteEintragBtn').addEventListener('click', () => {
 
   if (!confirm('❌ Eintrag wirklich löschen?')) return;
 
+  const entryToDelete = eintraege.find(e => e.id === currentEditingEntryId);
   eintraege = eintraege.filter(e => e.id !== currentEditingEntryId);
+  if (entryToDelete) {
+    logAuditEvent('delete', {
+      personId: entryToDelete.personId,
+      datum: entryToDelete.datum,
+      stunden: entryToDelete.stunden,
+      bemerkung: entryToDelete.bemerkung,
+      source: 'Mitarbeiteransicht'
+    });
+  }
   currentEditingEntryId = null;
   saveData();
   clearEintragForm();
@@ -1753,6 +2645,8 @@ function renderEmployeeView() {
     document.getElementById('empLimit').textContent = '0,0';
     document.getElementById('empRemaining').textContent = '0,0';
     document.getElementById('empPayable').textContent = '0,0';
+    document.getElementById('empAmpel').textContent = '⚪';
+    document.getElementById('empAmpel').title = '';
     document.getElementById('empMonthHoursDetail').textContent = '0,0';
     document.getElementById('empLimitDetail').textContent = '0,0';
     document.getElementById('empRemainingDetail').textContent = '0,0';
@@ -1785,6 +2679,11 @@ if (hours >= limit && limit > 0) {
   document.getElementById('empLimit').textContent = formatNumber(limit);
   document.getElementById('empRemaining').textContent = formatNumber(remaining);
   document.getElementById('empPayable').textContent = formatNumber(payable);
+
+  const ampel = getAmpelStatus(hours, limit);
+  const ampelEl = document.getElementById('empAmpel');
+  ampelEl.textContent = ampel.emoji;
+  ampelEl.title = ampel.label;
 
   document.getElementById('empMonthHoursDetail').textContent = formatNumber(hours);
   document.getElementById('empLimitDetail').textContent = formatNumber(limit);
@@ -1837,6 +2736,8 @@ function loadSchuldatenToForm() {
   document.getElementById('schultelefon').value = schuldaten.telefon || '';
   document.getElementById('schulleitung').value = schuldaten.schulleitung || '';
   document.getElementById('schulbearbeiter').value = schuldaten.bearbeiter || '';
+  document.getElementById('aufbewahrungsjahre').value = getRetentionYears();
+  document.getElementById('autoLockMinutes').value = getAutoLockMinutes();
 }
 
 document.getElementById('saveSchuldatenBtn').addEventListener('click', () => {
@@ -1850,6 +2751,73 @@ document.getElementById('saveSchuldatenBtn').addEventListener('click', () => {
   
   saveData();
   alert('✅ Schuldaten gespeichert!');
+});
+
+document.getElementById('saveAutoLockBtn').addEventListener('click', () => {
+  const minutes = parseFloat(document.getElementById('autoLockMinutes').value);
+  if (isNaN(minutes) || minutes <= 0) {
+    alert('⚠️ Bitte eine gültige Anzahl Minuten eingeben!');
+    return;
+  }
+  schuldaten.autoLockMinutes = minutes;
+  saveData();
+  resetInactivityTimer();
+  alert('✅ Automatische Sperre gespeichert!');
+});
+
+document.getElementById('exportAuditLogBtn').addEventListener('click', exportAuditLogCsv);
+
+document.getElementById('clearAuditLogBtn').addEventListener('click', () => {
+  if (auditLog.length === 0) {
+    alert('ℹ️ Protokoll ist bereits leer.');
+    return;
+  }
+  if (!confirm('❌ Gesamtes Änderungsprotokoll unwiderruflich löschen?')) return;
+  auditLog = [];
+  saveAuditLog();
+  renderAuditLog();
+  alert('✅ Protokoll geleert.');
+});
+
+document.getElementById('downloadCsvTemplateBtn').addEventListener('click', downloadCsvTemplate);
+
+document.getElementById('csvImportInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  handleCsvImportFile(file);
+  e.target.value = '';
+});
+
+document.getElementById('saveRetentionBtn').addEventListener('click', () => {
+  const years = parseFloat(document.getElementById('aufbewahrungsjahre').value);
+  if (isNaN(years) || years <= 0) {
+    alert('⚠️ Bitte eine gültige Anzahl Jahre eingeben!');
+    return;
+  }
+  schuldaten.aufbewahrungsjahre = years;
+  saveData();
+  renderRetentionStatus();
+  alert('✅ Aufbewahrungsfrist gespeichert!');
+});
+
+document.getElementById('reviewOldEntriesBtn').addEventListener('click', openRetentionReviewModal);
+
+document.getElementById('exportAuskunftBtnAdmin').addEventListener('click', () => {
+  const personId = document.getElementById('auskunftPersonSelect').value;
+  if (!personId) {
+    alert('⚠️ Bitte zuerst eine Person auswählen!');
+    return;
+  }
+  exportAuskunft(personId);
+});
+
+document.getElementById('exportAuskunftBtnEmployee').addEventListener('click', () => {
+  const personId = document.getElementById('activePersonSelect').value;
+  if (!personId) {
+    alert('⚠️ Bitte zuerst deine Person auswählen!');
+    return;
+  }
+  exportAuskunft(personId);
 });
 
 
@@ -2080,6 +3048,8 @@ document.getElementById('adminSaveEntryBtn').addEventListener('click', () => {
     return;
   }
 
+  if (!checkEintragPlausibilitaet(datum, stunden)) return;
+
   eintraege.push({
     id: generateId(),
     personId,
@@ -2088,6 +3058,7 @@ document.getElementById('adminSaveEntryBtn').addEventListener('click', () => {
     bemerkung,
     lastModified: new Date().toISOString()
   });
+  logAuditEvent('create', { personId, datum, stunden, bemerkung, source: 'Verantwortlichenansicht' });
 
   saveData();
   clearAdminEntryForm();
@@ -2140,7 +3111,17 @@ function renderAdminManageEntries() {
 
 function deleteAdminEntry(entryId) {
   if (!confirm('❌ Eintrag wirklich löschen?')) return;
+  const entryToDelete = eintraege.find(e => e.id === entryId);
   eintraege = eintraege.filter(e => e.id !== entryId);
+  if (entryToDelete) {
+    logAuditEvent('delete', {
+      personId: entryToDelete.personId,
+      datum: entryToDelete.datum,
+      stunden: entryToDelete.stunden,
+      bemerkung: entryToDelete.bemerkung,
+      source: 'Verantwortlichenansicht'
+    });
+  }
   saveData();
   renderAll();
 }
@@ -2399,7 +3380,7 @@ function renderAdminSummary() {
   const filterPersonId = document.getElementById('adminPersonFilter').value;
 
   if (!monthKey) {
-    document.getElementById('summaryBody').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--color-text-muted)">Bitte Monat auswählen</td></tr>';
+    document.getElementById('summaryBody').innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--color-text-muted)">Bitte Monat auswählen</td></tr>';
     return;
   }
 
@@ -2412,6 +3393,7 @@ function renderAdminSummary() {
   const rows = filteredPersons.map(person => {
   const hours = getMonthlyHours(person.id, monthKey);
   const limit = person.grenze || 0;
+  const ampel = getAmpelStatus(hours, limit);
   
   // Neue Logik: Wenn Grenze erreicht → ALLE Stunden vergütbar
   let remaining = 0;
@@ -2442,6 +3424,7 @@ function renderAdminSummary() {
     return `
       <tr>
         <td>${person.name}</td>
+        <td title="${ampel.label}">${ampel.emoji}</td>
         <td>${monthName}</td>
         <td>${formatNumber(hours)}</td>
         <td>${formatNumber(limit)}</td>
@@ -2452,7 +3435,7 @@ function renderAdminSummary() {
     `;
   });
 
-  tbody.innerHTML = rows.join('') || '<tr><td colspan="7" style="text-align:center;color:var(--color-text-muted)">Keine Daten vorhanden</td></tr>';
+  tbody.innerHTML = rows.join('') || '<tr><td colspan="8" style="text-align:center;color:var(--color-text-muted)">Keine Daten vorhanden</td></tr>';
 }
 
 // ============================================================================
@@ -2799,6 +3782,11 @@ function mergeData(imported, mode = 'merge') {
     saveData();
     updatePersonSelects();
     renderAll();
+    renderRetentionStatus();
+    logAuditEvent('import', {
+      source: 'Backup-Import',
+      details: { modus: 'ersetzen', personen: personen.length, eintraege: eintraege.length }
+    });
     
     alert(`✅ Daten komplett ersetzt!\n\n📊 Personen: ${personen.length}\n📝 Einträge: ${eintraege.length}`);
     return;
@@ -2834,6 +3822,11 @@ function mergeData(imported, mode = 'merge') {
     saveData();
     updatePersonSelects();
     renderAll();
+    renderRetentionStatus();
+    logAuditEvent('import', {
+      source: 'Backup-Import',
+      details: { modus: 'neu', neu: newCount }
+    });
     
     document.getElementById('reportNew').textContent = newCount;
     document.getElementById('reportUpdated').textContent = 0;
@@ -2938,6 +3931,11 @@ function mergeData(imported, mode = 'merge') {
   saveData();
   updatePersonSelects();
   renderAll();
+  renderRetentionStatus();
+  logAuditEvent('import', {
+    source: 'Backup-Import',
+    details: { modus: 'merge', neu: newCount, aktualisiert: updatedCount, konflikte: conflictCount }
+  });
 
   document.getElementById('reportNew').textContent = newCount;
   document.getElementById('reportUpdated').textContent = updatedCount;
@@ -3107,6 +4105,7 @@ function switchToRole(role) {
    if (role === 'employee') {
     // Session bleibt erhalten (mit Timeout)
     // sessionStorage.removeItem('admin_logged_in');
+    clearInactivityTimer();
   
   // Prüfe ob Person ausgewählt ist
   const activePerson = localStorage.getItem(STORAGE_KEY_ACTIVE_PERSON);
@@ -3144,6 +4143,7 @@ function switchToRole(role) {
     
     document.getElementById('employeeView').classList.add('hidden');
     document.getElementById('adminView').classList.remove('hidden');
+    resetInactivityTimer();
   }
 
   renderAll();
@@ -3291,6 +4291,8 @@ function renderAll() {
   renderAdminAllEntries();
   renderConflicts();
   renderAdminManageEntries();
+  renderRetentionStatus();
+  renderAuditLog();
 }
 
 // ============================================================================
@@ -3340,6 +4342,7 @@ async function init() {
   initTheme();
   setCurrentMonth();
   loadSchuldatenToForm();
+  renderRetentionStatus();
   populateLBVSchuljahrSelect();
 
 
