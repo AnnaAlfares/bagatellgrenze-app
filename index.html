@@ -2759,7 +2759,18 @@ document.getElementById('saveKollegeBtn').addEventListener('click', async () => 
   const person = personen.find(p => p.id === personId);
   if (!person) return;
 
-  const deputat = parseFloat(document.getElementById('kollegeDeputat').value) || 0;
+  const deputatRaw = document.getElementById('kollegeDeputat').value;
+  const deputat = parseFloat(deputatRaw) || 0;
+
+  // Sicherheitsnetz: verhindert, dass ein leer angezeigtes Feld einen
+  // vorhandenen Wert unbemerkt auf 0 zurücksetzt (z. B. falls die Maske aus
+  // irgendeinem Grund nicht korrekt vorbefüllt wurde).
+  const oldDeputatCheck = parseFloat(person.deputat);
+  if ((!deputatRaw || deputatRaw === '') && !isNaN(oldDeputatCheck) && oldDeputatCheck > 0) {
+    if (!confirm(`⚠️ Das Feld "Wochenstunden (Deputat)" ist leer, bisher war ${oldDeputatCheck} Std. hinterlegt.\n\nWirklich auf 0 setzen? Falls das Feld versehentlich leer ist, bitte Abbrechen klicken und den richtigen Wert eintragen.`)) {
+      return;
+    }
+  }
 const vorname = document.getElementById('kollegeVorname').value.trim();
 const personalnummer = document.getElementById('kollegePersonalnummer').value.trim();
 const geburtsdatum = document.getElementById('kollegeGeburtsdatum').value;
@@ -3210,7 +3221,8 @@ document.getElementById('adminSavePersonBtn').addEventListener('click', async ()
   const name = `${vorname} ${nachname}`.trim();
   const personalnummer = document.getElementById('adminPersonalnummer').value.trim();
   const geburtsdatum = document.getElementById('adminGeburtsdatum').value;
-  const deputat = parseFloat(document.getElementById('adminDeputat').value) || 0;
+  const deputatRawAdmin = document.getElementById('adminDeputat').value;
+  const deputat = parseFloat(deputatRawAdmin) || 0;
   const schluessel = document.getElementById('adminSchluessel').value.trim();
 
   let beschaeftigungsstatus = '';
@@ -3228,6 +3240,15 @@ document.getElementById('adminSavePersonBtn').addEventListener('click', async ()
   if (currentEditingPersonId) {
     const person = personen.find(p => p.id === currentEditingPersonId);
     if (person) {
+      // Sicherheitsnetz: verhindert, dass ein leer angezeigtes Feld einen
+      // vorhandenen Wert unbemerkt auf 0 zurücksetzt.
+      const oldDeputatCheckAdmin = parseFloat(person.deputat);
+      if ((!deputatRawAdmin || deputatRawAdmin === '') && !isNaN(oldDeputatCheckAdmin) && oldDeputatCheckAdmin > 0) {
+        if (!confirm(`⚠️ Das Feld "Wochenstunden (Deputat)" ist leer, bisher war ${oldDeputatCheckAdmin} Std. hinterlegt.\n\nWirklich auf 0 setzen? Falls das Feld versehentlich leer ist, bitte Abbrechen klicken und den richtigen Wert eintragen.`)) {
+          return;
+        }
+      }
+
       // Ändert sich die Teilzeit, fragen ab wann die neue Grenze gilt –
       // bereits erfasste Einträge davor bleiben nach der alten Grenze bewertet.
       const oldDeputat = parseFloat(person.deputat);
@@ -4608,13 +4629,20 @@ async function init() {
   populateJahresSchuljahrSelect();
 
 
+  // WICHTIG: updatePersonSelects() muss VOR loadPersonDataToForm() laufen, da die
+  // <option>-Elemente von activePersonSelect erst dort erzeugt werden UND die
+  // Funktion den gespeicherten Personenwert (STORAGE_KEY_ACTIVE_PERSON) bereits
+  // selbst wiederherstellt. Vorher wurde activePersonSelect.value gesetzt, BEVOR
+  // die Optionen existierten – das Setzen schlug still fehl, wodurch die
+  // Stammdaten-Maske beim Erstladen leer blieb (erst ein späterer
+  // switchToRole()-Durchlauf lud sie korrekt nach).
+  updatePersonSelects();
+
   const savedPerson = localStorage.getItem(STORAGE_KEY_ACTIVE_PERSON);
-  if (savedPerson) {
-    document.getElementById('activePersonSelect').value = savedPerson;
+  if (savedPerson && document.getElementById('activePersonSelect').value === savedPerson) {
     loadPersonDataToForm();
   }
 
-  updatePersonSelects();
   renderAll();
   checkFirstRun();
 }
