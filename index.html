@@ -771,6 +771,8 @@
               </div>
             </div>
 
+            <div id="tzsReviewBanner" class="status-card status-warn hidden" style="margin-bottom:1rem"></div>
+
             <div class="grid two">
               <label>Kürzel
                 <input id="adminKuerzel" type="text" placeholder="z. B. MU" maxlength="3" style="text-transform: uppercase;">
@@ -1169,6 +1171,12 @@ function migrateData() {
       person.istTeilzeit = person.deputat < 28;
       changed = true;
       console.log(`✅ Migration: ${person.name} - istVollzeit/istTeilzeit berechnet`);
+    }
+
+    // Migration 6: lastModified hinzufügen (für konsistenten Personen-Merge)
+    if (!person.lastModified) {
+      person.lastModified = '1970-01-01T00:00:00.000Z';
+      changed = true;
     }
   });
   
@@ -1687,6 +1695,18 @@ function buildAuskunftHtml(person, personEintraege) {
     : (person.beschaeftigungsstatus === 'tarifbeschaeftigt' || person.status === 'angestellte' ? 'Angestellte/r (Tarifbeschäftigte/r)' : '—');
   const name = `${person.vorname || ''} ${person.nachname || person.name || ''}`.trim() || '—';
 
+  const history = (person.deputatHistory && person.deputatHistory.length > 0)
+    ? person.deputatHistory.slice().sort((a, b) => a.gueltigAb.localeCompare(b.gueltigAb))
+    : [{ gueltigAb: DEPUTAT_HISTORY_EPOCH, deputat: person.deputat || 0, quote: person.quote || 0, grenze: person.grenze || 0 }];
+
+  const historyRows = history.map((h, i) => {
+    const von = h.gueltigAb === DEPUTAT_HISTORY_EPOCH ? '(seit jeher)' : escapeHtml(new Date(h.gueltigAb + '-01').toLocaleDateString('de-DE', { month: 'long', year: 'numeric' }));
+    const bis = i < history.length - 1
+      ? escapeHtml(new Date(history[i + 1].gueltigAb + '-01').toLocaleDateString('de-DE', { month: 'long', year: 'numeric' }))
+      : 'laufend';
+    return `<tr><td>${von}</td><td>${bis}</td><td>${escapeHtml(String(h.deputat))}</td><td>${escapeHtml(String(h.quote))}</td><td>${escapeHtml(String(h.grenze))}</td></tr>`;
+  }).join('');
+
   return `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><title>Datenauskunft – ${escapeHtml(name)}</title>
 <style>
   body{font-family:system-ui,sans-serif;padding:2rem;color:#1a1a1a;max-width:800px;margin:auto;line-height:1.5}
@@ -1712,12 +1732,17 @@ function buildAuskunftHtml(person, personEintraege) {
   <dt>Kürzel</dt><dd>${escapeHtml(person.kuerzel || '—')}</dd>
   <dt>Personalnummer</dt><dd>${escapeHtml(person.personalnummer || '—')}</dd>
   <dt>Geburtsdatum</dt><dd>${person.geburtsdatum ? escapeHtml(new Date(person.geburtsdatum).toLocaleDateString('de-DE')) : '—'}</dd>
-  <dt>Wochenstunden (Deputat)</dt><dd>${escapeHtml(person.deputat || person.teilzeit || '—')}</dd>
+  <dt>Wochenstunden (Deputat, aktuell)</dt><dd>${escapeHtml(person.deputat || person.teilzeit || '—')}</dd>
   <dt>Beschäftigungsstatus</dt><dd>${escapeHtml(statusText)}</dd>
   <dt>Schlüssel (Mehrarbeitssatz)</dt><dd>${escapeHtml(person.schluessel || '—')}</dd>
-  <dt>Quote</dt><dd>${escapeHtml(person.quote || '—')}</dd>
-  <dt>Bagatellgrenze (Monat)</dt><dd>${escapeHtml(person.grenze || '—')}</dd>
+  <dt>Quote (aktuell)</dt><dd>${escapeHtml(person.quote || '—')}</dd>
+  <dt>Bagatellgrenze (aktuell)</dt><dd>${escapeHtml(person.grenze || '—')}</dd>
 </dl>
+
+<h2>Historie der Teilzeitstunden</h2>
+<p style="font-size:.85rem;color:#555">Für jeden Monat wird die zu diesem Zeitpunkt gültige Bagatellgrenze zur Berechnung herangezogen – nicht der aktuelle Wert.</p>
+<table><thead><tr><th>Gültig ab</th><th>Gültig bis</th><th>Deputat (Std.)</th><th>Quote</th><th>Bagatellgrenze</th></tr></thead>
+<tbody>${historyRows}</tbody></table>
 
 <h2>Erfasste Mehrarbeits-Einträge (${personEintraege.length})</h2>
 <table><thead><tr><th>Datum</th><th>Stunden</th><th>Bemerkung</th><th>Zuletzt geändert</th></tr></thead>
@@ -2063,14 +2088,14 @@ function renderJahresuebersicht() {
     return;
   }
 
-  const limit = person.grenze || 0;
   const months = schuljahrMonths(schuljahr);
   const rows = months.map(monthKey => {
     const hours = getMonthlyHours(personId, monthKey);
+    const limit = getGrenzeForMonth(person, monthKey);
     const ampel = getAmpelStatus(hours, limit);
     const pct = limit > 0 ? Math.min(100, (hours / limit) * 100) : 0;
     const monthName = new Date(monthKey + '-01').toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
-    return { monthKey, monthName, hours, ampel, pct };
+    return { monthKey, monthName, hours, ampel, pct, limit };
   });
 
   const totalHours = rows.reduce((sum, r) => sum + r.hours, 0);
@@ -2082,12 +2107,12 @@ function renderJahresuebersicht() {
         <div style="width:${r.pct}%;height:100%;background:${ampelColor(r.ampel)}"></div>
       </div>
       <span style="font-size:.85rem;text-align:right">${formatNumber(r.hours)} Std.</span>
-      <span title="${escapeHtml(r.ampel.label)}">${r.ampel.emoji}</span>
+      <span title="${escapeHtml(r.ampel.label)} (Grenze: ${formatNumber(r.limit)} Std.)">${r.ampel.emoji}</span>
     </div>
   `).join('');
 
   container.innerHTML = `
-    <p class="helper">Bagatellgrenze/Monat: <strong>${formatNumber(limit)} Std.</strong> · Gesamt im Schuljahr: <strong>${formatNumber(totalHours)} Std.</strong></p>
+    <p class="helper">Gesamt im Schuljahr: <strong>${formatNumber(totalHours)} Std.</strong> · Die Bagatellgrenze wird je Monat anhand der zu diesem Zeitpunkt gültigen Teilzeit berechnet (siehe Symbol-Tooltip).</p>
     <div style="margin-top:var(--space-3)">${barsHtml}</div>
   `;
 }
@@ -2102,7 +2127,7 @@ function buildMonatsuebersichtHtml(person, monthKey) {
     .sort((a, b) => a.datum.localeCompare(b.datum));
 
   const hours = getMonthlyHours(person.id, monthKey);
-  const limit = person.grenze || 0;
+  const limit = getGrenzeForMonth(person, monthKey);
   let remaining = 0, payable = 0;
   if (hours >= limit && limit > 0) {
     payable = hours;
@@ -2235,9 +2260,242 @@ function berechneBagatellgrenze(quote) {
   return parseFloat((3 * quote).toFixed(1));
 }
 
+// ============================================================================
+// TEILZEIT-HISTORIE: MONATSGENAUE BAGATELLGRENZE
+// ============================================================================
+// Ändert sich die Teilzeit einer Person im Laufe des Schuljahres (meist zum
+// August oder Februar), gilt die neue Bagatellgrenze erst AB dem gewählten
+// Monat. Bereits erfasste Einträge aus der Zeit davor werden weiterhin nach
+// der zu diesem Zeitpunkt gültigen (alten) Grenze berechnet.
+// person.deputatHistory: [{ id, gueltigAb: 'YYYY-MM', deputat, quote, grenze }]
+const DEPUTAT_HISTORY_EPOCH = '0001-01'; // "seit jeher", vor jeder bekannten Änderung
+
+function getPeriodForMonth(person, monthKey) {
+  const history = person.deputatHistory;
+  if (!history || history.length === 0) {
+    return { deputat: person.deputat || 0, quote: person.quote || 0, grenze: person.grenze || 0 };
+  }
+  const sorted = history.slice().sort((a, b) => a.gueltigAb.localeCompare(b.gueltigAb));
+  const applicable = sorted.filter(h => h.gueltigAb <= monthKey);
+  const entry = applicable.length > 0 ? applicable[applicable.length - 1] : sorted[0];
+  return { deputat: entry.deputat || 0, quote: entry.quote || 0, grenze: entry.grenze || 0 };
+}
+
+function getGrenzeForMonth(person, monthKey) {
+  return getPeriodForMonth(person, monthKey).grenze || 0;
+}
+
+// Aktualisiert Deputat/Quote/Grenze einer Person. Hat sich das Deputat
+// geändert, wird die bisherige Kombination in der Historie festgehalten
+// (ab "seit jeher", falls noch keine Historie existiert) und die neue
+// Kombination ab gueltigAbMonth ('YYYY-MM') hinterlegt.
+function applyDeputatChange(person, newDeputat, gueltigAbMonth) {
+  const vollzeit = 28;
+  const newQuote = berechneQuote(newDeputat, vollzeit);
+  const newGrenze = berechneBagatellgrenze(newQuote);
+
+  const oldDeputat = parseFloat(person.deputat);
+  const hasOldValue = person.deputat !== undefined && person.deputat !== null && person.deputat !== '';
+  const deputatChanged = hasOldValue && oldDeputat !== newDeputat;
+
+  if (deputatChanged) {
+    if (!person.deputatHistory || person.deputatHistory.length === 0) {
+      person.deputatHistory = [{
+        id: generateId(),
+        gueltigAb: DEPUTAT_HISTORY_EPOCH,
+        deputat: oldDeputat || 0,
+        quote: person.quote || 0,
+        grenze: person.grenze || 0
+      }];
+    }
+    person.deputatHistory.push({
+      id: generateId(),
+      gueltigAb: gueltigAbMonth || DEPUTAT_HISTORY_EPOCH,
+      deputat: newDeputat,
+      quote: newQuote,
+      grenze: newGrenze
+    });
+    person.deputatHistory.sort((a, b) => a.gueltigAb.localeCompare(b.gueltigAb));
+  }
+
+  person.deputat = newDeputat;
+  person.teilzeit = newDeputat; // Abwärtskompatibilität
+  person.quote = newQuote;
+  person.grenze = newGrenze;
+  person.istVollzeit = newDeputat >= 28;
+  person.istTeilzeit = newDeputat < 28;
+
+  return deputatChanged;
+}
+
+// ============================================================================
+// PERSONEN-MERGE: KONSISTENTE, VERLUSTFREIE ZUSAMMENFÜHRUNG
+// ============================================================================
+// Wird beim Import-Modus "merge" für bereits vorhandene Personen (gleiche ID)
+// verwendet. Zwei Prinzipien gelten für ALLE Felder gleichermaßen:
+// 1) Historische/additive Daten (deputatHistory) gehen NIE verloren – Einträge
+//    aus beiden Seiten werden vereinigt statt dass eine Seite die andere
+//    überschreibt.
+// 2) Für alle übrigen Stammdaten (Name, Kürzel, Personalnummer, ...) gewinnt
+//    einheitlich die zuletzt bearbeitete Version (anhand lastModified) –
+//    nicht mehr "wer zuletzt importiert wurde".
+// Gibt true zurück, wenn sich dadurch tatsächlich etwas geändert hat.
+function mergePersonRecords(existing, imported) {
+  const beforeJson = JSON.stringify(existing);
+
+  const existingMod = existing.lastModified || '1970-01-01T00:00:00.000Z';
+  const importedMod = imported.lastModified || '1970-01-01T00:00:00.000Z';
+  const importedIsNewer = importedMod > existingMod;
+  const newerSource = importedIsNewer ? imported : existing;
+
+  // 1) Stammdaten: einheitlich "neuer gewinnt", aber nie ein Feld durch eine
+  // leere/fehlende Angabe der älteren Seite ersetzen.
+  const scalarFields = ['kuerzel', 'vorname', 'nachname', 'name', 'personalnummer', 'geburtsdatum', 'beschaeftigungsstatus', 'status', 'schluessel'];
+  scalarFields.forEach(field => {
+    if (newerSource[field] !== undefined && newerSource[field] !== null && newerSource[field] !== '') {
+      existing[field] = newerSource[field];
+    }
+  });
+
+  // 2) Teilzeit-Historie: additiv vereinigen, dedupliziert nach (gueltigAb + Deputat)
+  const existingHistory = existing.deputatHistory || [];
+  const importedHistory = imported.deputatHistory || [];
+  if (existingHistory.length > 0 || importedHistory.length > 0) {
+    const dedupeMap = new Map();
+    [...existingHistory, ...importedHistory].forEach(entry => {
+      const key = `${entry.gueltigAb}|${entry.deputat}`;
+      if (!dedupeMap.has(key)) dedupeMap.set(key, entry);
+    });
+    const mergedHistory = Array.from(dedupeMap.values()).sort((a, b) => a.gueltigAb.localeCompare(b.gueltigAb));
+    existing.deputatHistory = mergedHistory;
+
+    const latest = mergedHistory[mergedHistory.length - 1];
+    existing.deputat = latest.deputat;
+    existing.teilzeit = latest.deputat;
+    existing.quote = latest.quote;
+    existing.grenze = latest.grenze;
+    existing.istVollzeit = latest.deputat >= 28;
+    existing.istTeilzeit = latest.deputat < 28;
+  } else if (newerSource.deputat !== undefined) {
+    // Kein History-Eintrag auf beiden Seiten vorhanden (sehr alte Datensätze) →
+    // einfaches "neuer gewinnt" als Fallback.
+    existing.deputat = newerSource.deputat;
+    existing.teilzeit = newerSource.deputat;
+    existing.quote = newerSource.quote;
+    existing.grenze = newerSource.grenze;
+    existing.istVollzeit = newerSource.istVollzeit;
+    existing.istTeilzeit = newerSource.istTeilzeit;
+  }
+
+  existing.lastModified = importedIsNewer ? importedMod : existingMod;
+
+  return JSON.stringify(existing) !== beforeJson;
+}
+
+// Ermittelt den nächsten typischen Wechseltermin (1. August oder 1. Februar)
+// ab heute – Teilzeitänderungen erfolgen meist zu diesen Terminen.
+function getNextHalbjahrGrenze() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const candidates = [
+    new Date(year, 1, 1),      // 1. Februar
+    new Date(year, 7, 1),      // 1. August
+    new Date(year + 1, 1, 1)   // 1. Februar Folgejahr
+  ];
+  const next = candidates.find(d => d >= today) || candidates[candidates.length - 1];
+  return `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}`;
+}
+
+// Fragt (per Modal), ab welchem Monat eine geänderte Teilzeit gelten soll.
+// Gibt 'YYYY-MM' zurück oder null, wenn abgebrochen wurde.
+function askGueltigAbDate({ oldValue, newValue }) {
+  return new Promise((resolve) => {
+    const suggestedMonth = getNextHalbjahrGrenze();
+    const overlay = document.createElement('div');
+    overlay.className = 'pw-modal-overlay';
+    overlay.innerHTML = `
+      <div class="pw-modal" role="dialog" aria-modal="true" style="max-width:480px">
+        <h3>📅 Ab wann gilt die neue Teilzeit?</h3>
+        <p class="helper">Die Teilzeitstunden ändern sich von ${escapeHtml(String(oldValue))} auf ${escapeHtml(String(newValue))}. Bereits erfasste Einträge <strong>vor</strong> diesem Monat zählen weiterhin nach der bisherigen Bagatellgrenze – erst ab dem gewählten Monat gilt die neue. Vorausgefüllt ist der nächste typische Wechseltermin (1. Februar/August); bei einer reinen Korrektur einfach auf den aktuellen Monat ändern.</p>
+        <label>Gültig ab
+          <input type="month" id="gueltigAbInput" value="${suggestedMonth}" />
+        </label>
+        <div class="pw-modal-error hidden" id="gueltigAbError"></div>
+        <div class="pw-modal-actions">
+          <button type="button" class="ghost" id="gueltigAbCancel">Abbrechen</button>
+          <button type="button" class="button primary" id="gueltigAbOk">Übernehmen</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    const input = overlay.querySelector('#gueltigAbInput');
+    const errorEl = overlay.querySelector('#gueltigAbError');
+
+    function cleanup(result) {
+      document.body.removeChild(overlay);
+      resolve(result);
+    }
+
+    overlay.querySelector('#gueltigAbCancel').addEventListener('click', () => cleanup(null));
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) cleanup(null); });
+    overlay.querySelector('#gueltigAbOk').addEventListener('click', () => {
+      if (!input.value) {
+        errorEl.textContent = 'Bitte einen Monat auswählen.';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+      cleanup(input.value);
+    });
+  });
+}
+
 function getMonthKey(date) {
   const d = new Date(date);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+// ============================================================================
+// TEILZEIT-HISTORIE: HALBJAHRES-ERINNERUNG
+// ============================================================================
+// Teilzeitwechsel erfolgen meist zum 1.8. oder 1.2. Diese Funktion erinnert
+// die Verantwortliche Person einmal pro Halbjahr daran, die hinterlegten
+// Teilzeitstunden aller Kolleg:innen zu prüfen und ggf. zu aktualisieren.
+
+function getCurrentHalbjahrPeriode() {
+  const today = new Date();
+  const month = today.getMonth() + 1; // 1–12
+  const year = today.getFullYear();
+  if (month >= 8) return `H1-${year}`;       // August–Dezember
+  if (month === 1) return `H1-${year - 1}`;  // Januar gehört noch zum 1. Halbjahr des Vorjahres
+  return `H2-${year}`;                        // Februar–Juli
+}
+
+function renderTzsReviewBanner() {
+  const el = document.getElementById('tzsReviewBanner');
+  if (!el) return;
+
+  const current = getCurrentHalbjahrPeriode();
+  if (schuldaten.lastTzsReviewPeriode === current || personen.length === 0) {
+    el.classList.add('hidden');
+    return;
+  }
+
+  el.classList.remove('hidden');
+  const [halbjahr, year] = current.split('-');
+  const label = halbjahr === 'H1'
+    ? `1. Halbjahr (August ${year} – Januar ${Number(year) + 1})`
+    : `2. Halbjahr (Februar – Juli ${year})`;
+
+  el.innerHTML = `
+    📅 <strong>Neues Halbjahr: ${escapeHtml(label)}.</strong> Teilzeitwechsel erfolgen meist zum 1.8. oder 1.2. – bitte prüfen, ob die hinterlegten Teilzeitstunden aller Kolleg:innen noch aktuell sind, und bei Änderungen hier aktualisieren (Gültig-ab-Datum nicht vergessen).
+    <div style="margin-top:.6rem"><button type="button" class="button primary" id="confirmTzsReviewBtn">✅ Für dieses Halbjahr geprüft</button></div>
+  `;
+  document.getElementById('confirmTzsReviewBtn').addEventListener('click', () => {
+    schuldaten.lastTzsReviewPeriode = current;
+    saveData();
+    renderTzsReviewBanner();
+  });
 }
 
 function getMonthlyHours(personId, monthKey) {
@@ -2250,13 +2508,23 @@ function formatNumber(num) {
   return num.toFixed(1).replace('.', ',');
 }
 
-// Ampel-Status: grün (< 70% der Bagatellgrenze), gelb (70–99%), rot (>= 100%)
+// Ampel-Status (Abrechnungslogik): Nur wenn die Bagatellgrenze im Monat
+// ÜBERSCHRITTEN wird, sind die geleisteten Mehrarbeitsstunden abrechenbar –
+// wird sie nicht überschritten, verfällt der Anspruch auf Vergütung der
+// geleisteten Stunden ersatzlos. Deshalb:
+// 🟢 grün  = Grenze überschritten → abrechenbar, alles gut
+// 🔴 rot   = kurz vor der Grenze, aber noch nicht überschritten → Handlungsbedarf
+//            (z. B. hier für den nächsten Vertretungseinsatz einplanen, damit
+//            die Grenze noch im Monat überschritten wird und nichts verfällt)
+// 🟡 gelb  = noch weit von der Grenze entfernt
+// ⚪ grau  = noch keine Stunden erfasst bzw. keine Grenze hinterlegt
 function getAmpelStatus(hours, limit) {
   if (!limit || limit <= 0) return { emoji: '⚪', label: 'Keine Grenze hinterlegt', css: '' };
+  if (!hours || hours <= 0) return { emoji: '⚪', label: 'Noch keine Stunden erfasst', css: '' };
   const pct = hours / limit;
-  if (pct >= 1) return { emoji: '🔴', label: 'Grenze erreicht/überschritten', css: 'status-error' };
-  if (pct >= 0.7) return { emoji: '🟡', label: 'Nähert sich der Grenze', css: 'warn' };
-  return { emoji: '🟢', label: 'Im grünen Bereich', css: 'positive' };
+  if (pct >= 1) return { emoji: '🟢', label: 'Grenze überschritten – abrechenbar!', css: 'positive' };
+  if (pct >= 0.7) return { emoji: '🔴', label: 'Kurz vor der Grenze – für Vertretungseinsatz einplanen, sonst verfällt der Anspruch!', css: 'status-error' };
+  return { emoji: '🟡', label: 'Noch nicht abrechenbar', css: 'warn' };
 }
 
 // ============================================================================
@@ -2480,7 +2748,7 @@ document.getElementById('kollegeDeputat').addEventListener('input', () => {
   document.getElementById('grenze').value = grenze;
 });
 
-document.getElementById('saveKollegeBtn').addEventListener('click', () => {
+document.getElementById('saveKollegeBtn').addEventListener('click', async () => {
 
   const personId = document.getElementById('activePersonSelect').value;
   if (!personId) {
@@ -2492,7 +2760,6 @@ document.getElementById('saveKollegeBtn').addEventListener('click', () => {
   if (!person) return;
 
   const deputat = parseFloat(document.getElementById('kollegeDeputat').value) || 0;
-const vollzeit = 28;
 const vorname = document.getElementById('kollegeVorname').value.trim();
 const personalnummer = document.getElementById('kollegePersonalnummer').value.trim();
 const geburtsdatum = document.getElementById('kollegeGeburtsdatum').value;
@@ -2505,22 +2772,36 @@ if (document.getElementById('kollegeStatusBeamte').checked) {
   beschaeftigungsstatus = 'tarifbeschaeftigt';
 }
 
+// Wenn sich die Teilzeit ändert, fragen ab wann die neue Grenze gilt –
+// bereits erfasste Einträge davor bleiben nach der alten Grenze bewertet.
+const oldDeputat = parseFloat(person.deputat);
+let gueltigAb = null;
+if (person.deputat !== undefined && person.deputat !== null && person.deputat !== '' && oldDeputat !== deputat) {
+  gueltigAb = await askGueltigAbDate({ oldValue: oldDeputat || 0, newValue: deputat });
+  if (!gueltigAb) return; // Abgebrochen: gar nichts speichern
+}
+
 person.vorname = vorname;
-person.deputat = deputat;
-person.teilzeit = deputat; // Abwärtskompatibilität
-person.quote = berechneQuote(deputat, vollzeit);
-person.grenze = berechneBagatellgrenze(person.quote);
 person.personalnummer = personalnummer;
 person.geburtsdatum = geburtsdatum;
 person.beschaeftigungsstatus = beschaeftigungsstatus;
 person.status = beschaeftigungsstatus; // Abwärtskompatibilität
 person.schluessel = schluessel || '2';
-person.istVollzeit = deputat >= 28;
-person.istTeilzeit = deputat < 28;
+applyDeputatChange(person, deputat, gueltigAb);
+person.lastModified = new Date().toISOString();
 
 
   saveData();
   alert('✅ Daten gespeichert!');
+  renderAll();
+});
+
+document.getElementById('activePersonSelect').addEventListener('change', (e) => {
+  const personId = e.target.value;
+  if (!personId) return;
+  localStorage.setItem(STORAGE_KEY_ACTIVE_PERSON, personId);
+  e.target.disabled = true;
+  loadPersonDataToForm();
   renderAll();
 });
 
@@ -2659,7 +2940,7 @@ function renderEmployeeView() {
   if (!person) return;
 
  const hours = getMonthlyHours(personId, monthKey);
- const limit = person.grenze || 0;
+ const limit = getGrenzeForMonth(person, monthKey);
 
 // Neue Logik: Wenn Grenze erreicht → ALLE Stunden vergütbar
 let remaining = 0;
@@ -2922,7 +3203,7 @@ document.getElementById('adminQuote').value = person.quote || '';
 document.getElementById('adminGrenze').value = person.grenze || '';
 });
 
-document.getElementById('adminSavePersonBtn').addEventListener('click', () => {
+document.getElementById('adminSavePersonBtn').addEventListener('click', async () => {
   const kuerzel = document.getElementById('adminKuerzel').value.trim().toUpperCase();
   const vorname = document.getElementById('adminVorname').value.trim();
   const nachname = document.getElementById('adminNachname').value.trim();
@@ -2931,7 +3212,6 @@ document.getElementById('adminSavePersonBtn').addEventListener('click', () => {
   const geburtsdatum = document.getElementById('adminGeburtsdatum').value;
   const deputat = parseFloat(document.getElementById('adminDeputat').value) || 0;
   const schluessel = document.getElementById('adminSchluessel').value.trim();
-  const vollzeit = 28;
 
   let beschaeftigungsstatus = '';
   if (document.getElementById('adminStatusBeamte').checked) {
@@ -2945,29 +3225,33 @@ document.getElementById('adminSavePersonBtn').addEventListener('click', () => {
     return;
   }
 
-    const quote = berechneQuote(deputat, vollzeit);
-  const grenze = berechneBagatellgrenze(quote);
-
   if (currentEditingPersonId) {
     const person = personen.find(p => p.id === currentEditingPersonId);
     if (person) {
+      // Ändert sich die Teilzeit, fragen ab wann die neue Grenze gilt –
+      // bereits erfasste Einträge davor bleiben nach der alten Grenze bewertet.
+      const oldDeputat = parseFloat(person.deputat);
+      let gueltigAb = null;
+      if (person.deputat !== undefined && person.deputat !== null && person.deputat !== '' && oldDeputat !== deputat) {
+        gueltigAb = await askGueltigAbDate({ oldValue: oldDeputat || 0, newValue: deputat });
+        if (!gueltigAb) return; // Abgebrochen: gar nichts speichern
+      }
+
       person.kuerzel = kuerzel;
       person.vorname = vorname;
       person.nachname = nachname;
       person.name = name;
       person.personalnummer = personalnummer;
       person.geburtsdatum = geburtsdatum;
-      person.deputat = deputat;
-      person.teilzeit = deputat; // Abwärtskompatibilität
       person.beschaeftigungsstatus = beschaeftigungsstatus;
       person.status = beschaeftigungsstatus; // Abwärtskompatibilität
       person.schluessel = schluessel || '2';
-      person.quote = quote;
-      person.grenze = grenze;
-      person.istVollzeit = deputat >= 28;
-      person.istTeilzeit = deputat < 28;
+      applyDeputatChange(person, deputat, gueltigAb);
+      person.lastModified = new Date().toISOString();
     }
   } else {
+    const quote = berechneQuote(deputat, 28);
+    const grenze = berechneBagatellgrenze(quote);
     personen.push({
       id: generateId(),
       kuerzel,
@@ -2984,7 +3268,9 @@ document.getElementById('adminSavePersonBtn').addEventListener('click', () => {
       quote,
       grenze,
       istVollzeit: deputat >= 28,
-      istTeilzeit: deputat < 28
+      istTeilzeit: deputat < 28,
+      deputatHistory: [{ id: generateId(), gueltigAb: DEPUTAT_HISTORY_EPOCH, deputat, quote, grenze }],
+      lastModified: new Date().toISOString()
     });
   }
 
@@ -3392,7 +3678,7 @@ function renderAdminSummary() {
   const tbody = document.getElementById('summaryBody');
   const rows = filteredPersons.map(person => {
   const hours = getMonthlyHours(person.id, monthKey);
-  const limit = person.grenze || 0;
+  const limit = getGrenzeForMonth(person, monthKey);
   const ampel = getAmpelStatus(hours, limit);
   
   // Neue Logik: Wenn Grenze erreicht → ALLE Stunden vergütbar
@@ -3452,7 +3738,7 @@ function renderVertretungsHinweise() {
   const hinweise = personen
     .map(person => {
       const hours = getMonthlyHours(person.id, monthKey);
-      const limit = person.grenze || 0;
+      const limit = getGrenzeForMonth(person, monthKey);
       const remaining = limit - hours;
       return { person, hours, limit, remaining };
     })
@@ -3845,35 +4131,7 @@ function mergeData(imported, mode = 'merge') {
       personen.push(importedPerson);
       newCount++;
     } else {
-      // Bestehende Person aktualisieren
-      // Ergänze neue Felder, ohne alte zu überschreiben
-      if (!existing.personalnummer && importedPerson.personalnummer) {
-        existing.personalnummer = importedPerson.personalnummer;
-      }
-      if (!existing.geburtsdatum && importedPerson.geburtsdatum) {
-        existing.geburtsdatum = importedPerson.geburtsdatum;
-      }
-      if (!existing.status && importedPerson.status) {
-        existing.status = importedPerson.status;
-      }
-      
-      // Aktualisiere Stammdaten (Name, Kürzel, Teilzeit, etc.)
-      const localMod = existing.lastModified || '1970-01-01';
-      const importedMod = importedPerson.lastModified || '1970-01-01';
-      
-      if (importedMod > localMod || !existing.lastModified) {
-        // Behalte neue Felder, aktualisiere den Rest
-        const personalnummer = existing.personalnummer || importedPerson.personalnummer;
-        const geburtsdatum = existing.geburtsdatum || importedPerson.geburtsdatum;
-        const status = existing.status || importedPerson.status;
-        
-        Object.assign(existing, importedPerson);
-        
-        // Stelle sicher, dass neue Felder nicht überschrieben werden
-        if (personalnummer) existing.personalnummer = personalnummer;
-        if (geburtsdatum) existing.geburtsdatum = geburtsdatum;
-        if (status) existing.status = status;
-        
+      if (mergePersonRecords(existing, importedPerson)) {
         updatedCount++;
       }
     }
@@ -3984,7 +4242,7 @@ document.getElementById('exportMonthSummaryBtn').addEventListener('click', () =>
     ['Name', 'Kürzel', 'Monat', 'Stunden', 'Bagatellgrenze', 'Noch offen', 'Vergütbar'].join(';'),
     ...personen.map(person => {
   const hours = getMonthlyHours(person.id, monthKey);
-  const limit = person.grenze || 0;
+  const limit = getGrenzeForMonth(person, monthKey);
   
   let remaining = 0;
   let payable = 0;
@@ -4025,7 +4283,7 @@ document.getElementById('exportAccountingBtn').addEventListener('click', () => {
     ['Name', 'Kürzel', 'Monat', 'Teilzeit', 'Mehrarbeit gesamt', 'Vergütbar gesamt', 'Davon höherer Tarif (bis 28h)', 'Davon niedrigerer Tarif (über 28h)'].join(';'),
     ...personen.map(person => {
   const hours = getMonthlyHours(person.id, monthKey);
-  const limit = person.grenze || 0;
+  const limit = getGrenzeForMonth(person, monthKey);
   
   let payable = 0;
   if (hours >= limit && limit > 0) {
@@ -4116,8 +4374,10 @@ function switchToRole(role) {
     dropdown.disabled = false;
     dropdown.focus(); // Fokus auf Dropdown
   } else {
-    // Person bereits ausgewählt → Dropdown sperren
+    // Person bereits ausgewählt → Dropdown sperren und Stammdaten-Maske aktuell halten
     dropdown.disabled = true;
+    dropdown.value = activePerson;
+    loadPersonDataToForm();
   }
   
   document.getElementById('employeeView').classList.remove('hidden');
@@ -4293,6 +4553,7 @@ function renderAll() {
   renderAdminManageEntries();
   renderRetentionStatus();
   renderAuditLog();
+  renderTzsReviewBanner();
 }
 
 // ============================================================================
@@ -4344,6 +4605,7 @@ async function init() {
   loadSchuldatenToForm();
   renderRetentionStatus();
   populateLBVSchuljahrSelect();
+  populateJahresSchuljahrSelect();
 
 
   const savedPerson = localStorage.getItem(STORAGE_KEY_ACTIVE_PERSON);
