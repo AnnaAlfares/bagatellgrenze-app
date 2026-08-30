@@ -1100,7 +1100,8 @@ let auditLog = [];
 // zugehörige PRIVATE Schlüssel (bleibt ausschließlich bei der verantwortlichen
 // Person) kann sie wieder entschlüsseln. Der öffentliche Schlüssel selbst ist
 // kein Geheimnis und darf im Quellcode/auf GitHub Pages stehen.
-const BACKUP_PUBLIC_KEY_JWK = {"alg":"RSA-OAEP-256","e":"AQAB","ext":true,"key_ops":["wrapKey"],"kty":"RSA","n":"y1xtDoM_OQNDYtKmour32qgBLWrt45oeAUWtgURRZUV0WnPN2RMTuRRF_Ob_jpBH4qTATWJfbmrWxCu8kSwRyPerbBO6UhXxp-YZEi9PbZRnrHvxLhk08IHw1SUf4ei1_aThDpR06h6N7_9RYnUnpwuxtN0AeicMyTYhbiGaA1xYswakyJJIFmLMP5MnGtHrF9YeF33P_iMjEDXrB2RCi45eIMHdMFiM2T6tC9lfy_A0jVL4pkapgveo32a-jPCIWGoNYrwdjw7wtCUgKNEQH9VAPXiBGg6W3KGDu2OYMDokMYJEd-IIvqsa1FqNPhiTIJywGNZ7ka-R6Pj0RCuttgMJveLhKUGLL9H8HaTtW2TlJwtID9SaX0_4qs0t_XX02YPVTcXG7peD_m7tMOk1vaQfkQgiEJhPBm91v29YXL4Vn_sKZyX-mmOuUqX1FsHHJNpLqnW1STB8UpEV1vWxeYO0c954B1KfgWLJj7uvrENVauLzY3dRF67b4tCdlLSISBjYMymxVfz1hAxG2-Didbk9J7B3lMWK2Ql1OyRdeBtJ6g4QgRY_mgD1JF2nXllKxvhy6eLwXbFA9TgzqtUkvN7zY-vWgqbUuB2Gv_N45lsL5WYdiKSOXWtAs0gsxXfzq5pqVdJ3W1KBQXOQlnPuwMZcnLMwF9_p7gjKHtcg-yE"};
+const BACKUP_PUBLIC_KEY_JWK = null;
+
 // Laufzeit-Schlüssel (werden aus obiger Konstante bzw. einer geladenen
 // Datei erzeugt und nie dauerhaft im Quellcode gespeichert)
 let adminPublicKey = null;
@@ -2116,6 +2117,8 @@ function renderJahresuebersicht() {
   `;
 }
 
+document.getElementById('showJahresuebersichtBtn').addEventListener('click', renderJahresuebersicht);
+
 // ============================================================================
 // ÜBERSICHT: MONATSÜBERSICHT ALS PDF (DRUCKANSICHT)
 // ============================================================================
@@ -2274,15 +2277,30 @@ function berechneBagatellgrenze(teilzeit, vollzeit = 28) {
 // person.deputatHistory: [{ id, gueltigAb: 'YYYY-MM', deputat, quote, grenze }]
 const DEPUTAT_HISTORY_EPOCH = '0001-01'; // "seit jeher", vor jeder bekannten Änderung
 
+// Ermittelt Deputat/Quote/Grenze für einen bestimmten Monat aus der
+// Teilzeit-Historie. Quote und Grenze werden IMMER frisch aus dem Deputat
+// neu berechnet (nicht aus dem ggf. veralteten oder – bei sehr alten
+// "seit jeher"-Einträgen ohne ursprünglich berechnete Grenze – sogar
+// leeren gespeicherten Wert gelesen). Das verhindert u. a., dass ein
+// Historieneintrag mit grenze:0 (z. B. bei importierten Alt-Datensätzen)
+// dazu führt, dass im LBV-Formular plötzlich wieder alle Monate statt nur
+// der über der Bagatellgrenze liegenden erscheinen.
 function getPeriodForMonth(person, monthKey) {
   const history = person.deputatHistory;
+  let deputat;
   if (!history || history.length === 0) {
-    return { deputat: person.deputat || 0, quote: person.quote || 0, grenze: person.grenze || 0 };
+    deputat = person.deputat || 0;
+  } else {
+    const sorted = history.slice().sort((a, b) => a.gueltigAb.localeCompare(b.gueltigAb));
+    const applicable = sorted.filter(h => h.gueltigAb <= monthKey);
+    const entry = applicable.length > 0 ? applicable[applicable.length - 1] : sorted[0];
+    deputat = entry.deputat || 0;
   }
-  const sorted = history.slice().sort((a, b) => a.gueltigAb.localeCompare(b.gueltigAb));
-  const applicable = sorted.filter(h => h.gueltigAb <= monthKey);
-  const entry = applicable.length > 0 ? applicable[applicable.length - 1] : sorted[0];
-  return { deputat: entry.deputat || 0, quote: entry.quote || 0, grenze: entry.grenze || 0 };
+  return {
+    deputat,
+    quote: berechneQuote(deputat),
+    grenze: berechneBagatellgrenze(deputat)
+  };
 }
 
 function getGrenzeForMonth(person, monthKey) {
@@ -3674,17 +3692,42 @@ const komplettString = teil1 + '#' + teil2;  // Für Logging
 
     console.log('✅ Formular befüllt, entferne Annotationen...');
 
-    // Entferne alle Annotationen (gelbe ?-Felder)
+    // Entferne NUR echte Hinweis-Icons (gelbe "?"-Kommentare), nicht die
+    // Formularfelder selbst (Widgets)! Vorher wurde hier pauschal JEDE
+    // Annotation der Seite gelöscht – das reißt auch alle ausgefüllten
+    // Textfelder, Checkboxen und insbesondere das Barcode-Feld (eigene
+    // eingebettete Schriftart /3of9Barcode) mit heraus. Widgets bleiben
+    // jetzt erhalten, nur Nicht-Widget-Annotationen (Kommentare/Popups)
+    // werden entfernt.
     const pages = pdfDoc.getPages();
     pages.forEach((page, pageIndex) => {
       try {
-        const annotations = page.node.Annots();
-        if (annotations) {
-          page.node.delete('Annots');
-          console.log(`   → Seite ${pageIndex + 1}: Annotationen entfernt`);
+        const annots = page.node.Annots();
+        if (!annots) return;
+        const size = annots.size();
+        const kept = PDFLib.PDFArray.withContext(pdfDoc.context);
+        let removedCount = 0;
+        for (let i = 0; i < size; i++) {
+          const ref = annots.get(i);
+          let isWidget = false;
+          try {
+            const dict = pdfDoc.context.lookup(ref);
+            const subtype = dict && dict.get ? dict.get(PDFLib.PDFName.of('Subtype')) : null;
+            isWidget = !!subtype && subtype.toString() === '/Widget';
+          } catch (lookupErr) {
+            // Konnte Subtype nicht bestimmen -> sicherheitshalber behalten
+            isWidget = true;
+          }
+          if (isWidget) {
+            kept.push(ref);
+          } else {
+            removedCount++;
+          }
         }
+        page.node.set(PDFLib.PDFName.of('Annots'), kept);
+        console.log(`   → Seite ${pageIndex + 1}: ${removedCount} Hinweis-Annotation(en) entfernt, ${kept.size()} Formularfeld(er) behalten`);
       } catch (e) {
-        console.warn(`   ⚠️ Seite ${pageIndex + 1}: Keine Annotationen gefunden`);
+        console.warn(`   ⚠️ Seite ${pageIndex + 1}: Annotationen konnten nicht bereinigt werden, lasse sie unangetastet:`, e);
       }
     });
 
@@ -3790,24 +3833,28 @@ function renderVertretungsHinweise() {
     return;
   }
 
+  // MSB-Logik: Vergütung entsteht erst, wenn die Grenze ÜBERSCHRITTEN wird
+  // (nicht nur erreicht). Da praktisch nur ganze Stunden vertreten werden,
+  // ist "restStunden" die Anzahl ganzer Stunden, die noch fehlt, bis die
+  // Grenze tatsächlich überschritten ist (nicht der rohe Dezimal-Rest).
   const hinweise = personen
     .map(person => {
       const hours = getMonthlyHours(person.id, monthKey);
       const limit = getGrenzeForMonth(person, monthKey);
-      const remaining = limit - hours;
-      return { person, hours, limit, remaining };
+      const restStunden = limit > 0 ? Math.floor(limit - hours) + 1 : 0;
+      return { person, hours, limit, restStunden };
     })
-    .filter(h => h.remaining > 0)
-    .sort((a, b) => b.remaining - a.remaining);
+    .filter(h => h.limit > 0 && !(h.hours > h.limit))
+    .sort((a, b) => b.restStunden - a.restStunden);
 
   if (hinweise.length === 0) {
-    document.getElementById('vertretungsHinweisBody').innerHTML = '<div class="status-card status-go">✅ Alle Personen haben die Bagatellgrenze erreicht oder überschritten!</div>';
+    document.getElementById('vertretungsHinweisBody').innerHTML = '<div class="status-card status-go">✅ Alle Personen haben die Bagatellgrenze überschritten!</div>';
     return;
   }
 
   const html = hinweise.map(h => `
     <div class="status-card">
-      <strong>${h.person.name}</strong> braucht noch <strong>${formatNumber(h.remaining)} Stunden</strong> 
+      <strong>${h.person.name}</strong> braucht noch <strong>${h.restStunden} ${h.restStunden === 1 ? 'ganze Stunde' : 'ganze Stunden'}</strong>, um die Grenze zu überschreiten
       (aktuell: ${formatNumber(h.hours)} / ${formatNumber(h.limit)})
     </div>
   `).join('');
