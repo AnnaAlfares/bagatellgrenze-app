@@ -1101,7 +1101,6 @@ let auditLog = [];
 // Person) kann sie wieder entschlüsseln. Der öffentliche Schlüssel selbst ist
 // kein Geheimnis und darf im Quellcode/auf GitHub Pages stehen.
 const BACKUP_PUBLIC_KEY_JWK = {"alg":"RSA-OAEP-256","e":"AQAB","ext":true,"key_ops":["wrapKey"],"kty":"RSA","n":"y1xtDoM_OQNDYtKmour32qgBLWrt45oeAUWtgURRZUV0WnPN2RMTuRRF_Ob_jpBH4qTATWJfbmrWxCu8kSwRyPerbBO6UhXxp-YZEi9PbZRnrHvxLhk08IHw1SUf4ei1_aThDpR06h6N7_9RYnUnpwuxtN0AeicMyTYhbiGaA1xYswakyJJIFmLMP5MnGtHrF9YeF33P_iMjEDXrB2RCi45eIMHdMFiM2T6tC9lfy_A0jVL4pkapgveo32a-jPCIWGoNYrwdjw7wtCUgKNEQH9VAPXiBGg6W3KGDu2OYMDokMYJEd-IIvqsa1FqNPhiTIJywGNZ7ka-R6Pj0RCuttgMJveLhKUGLL9H8HaTtW2TlJwtID9SaX0_4qs0t_XX02YPVTcXG7peD_m7tMOk1vaQfkQgiEJhPBm91v29YXL4Vn_sKZyX-mmOuUqX1FsHHJNpLqnW1STB8UpEV1vWxeYO0c954B1KfgWLJj7uvrENVauLzY3dRF67b4tCdlLSISBjYMymxVfz1hAxG2-Didbk9J7B3lMWK2Ql1OyRdeBtJ6g4QgRY_mgD1JF2nXllKxvhy6eLwXbFA9TgzqtUkvN7zY-vWgqbUuB2Gv_N45lsL5WYdiKSOXWtAs0gsxXfzq5pqVdJ3W1KBQXOQlnPuwMZcnLMwF9_p7gjKHtcg-yE"};
-
 // Laufzeit-Schlüssel (werden aus obiger Konstante bzw. einer geladenen
 // Datei erzeugt und nie dauerhaft im Quellcode gespeichert)
 let adminPublicKey = null;
@@ -2129,7 +2128,7 @@ function buildMonatsuebersichtHtml(person, monthKey) {
   const hours = getMonthlyHours(person.id, monthKey);
   const limit = getGrenzeForMonth(person, monthKey);
   let remaining = 0, payable = 0;
-  if (hours >= limit && limit > 0) {
+  if (hours > limit && limit > 0) {
     payable = hours;
     remaining = 0;
   } else {
@@ -2256,8 +2255,13 @@ function berechneQuote(teilzeit, vollzeit = 28) {
   return parseFloat((teilzeit / vollzeit).toFixed(2));
 }
 
-function berechneBagatellgrenze(quote) {
-  return parseFloat((3 * quote).toFixed(1));
+// Berechnet die Bagatellgrenze direkt aus dem Deputat (nicht aus der bereits
+// gerundeten Quote!), auf 2 Nachkommastellen genau – passend zu den
+// MSB-Beispielwerten (z. B. 18 Std. → 1,93 / 22 Std. → 2,36). Die separat
+// gerundete "Quote" dient nur der Anzeige, nicht der Grenzberechnung.
+function berechneBagatellgrenze(teilzeit, vollzeit = 28) {
+  if (!teilzeit || teilzeit <= 0) return 0;
+  return parseFloat((3 * (teilzeit / vollzeit)).toFixed(2));
 }
 
 // ============================================================================
@@ -2292,7 +2296,7 @@ function getGrenzeForMonth(person, monthKey) {
 function applyDeputatChange(person, newDeputat, gueltigAbMonth) {
   const vollzeit = 28;
   const newQuote = berechneQuote(newDeputat, vollzeit);
-  const newGrenze = berechneBagatellgrenze(newQuote);
+  const newGrenze = berechneBagatellgrenze(newDeputat, vollzeit);
 
   const oldDeputat = parseFloat(person.deputat);
   const hasOldValue = person.deputat !== undefined && person.deputat !== null && person.deputat !== '';
@@ -2522,7 +2526,7 @@ function getAmpelStatus(hours, limit) {
   if (!limit || limit <= 0) return { emoji: '⚪', label: 'Keine Grenze hinterlegt', css: '' };
   if (!hours || hours <= 0) return { emoji: '⚪', label: 'Noch keine Stunden erfasst', css: '' };
   const pct = hours / limit;
-  if (pct >= 1) return { emoji: '🟢', label: 'Grenze überschritten – abrechenbar!', css: 'positive' };
+  if (pct > 1) return { emoji: '🟢', label: 'Grenze überschritten – abrechenbar!', css: 'positive' };
   if (pct >= 0.7) return { emoji: '🔴', label: 'Kurz vor der Grenze – für Vertretungseinsatz einplanen, sonst verfällt der Anspruch!', css: 'status-error' };
   return { emoji: '🟡', label: 'Noch nicht abrechenbar', css: 'warn' };
 }
@@ -2743,7 +2747,7 @@ document.getElementById('kollegeDeputat').addEventListener('input', () => {
   const deputat = parseFloat(document.getElementById('kollegeDeputat').value) || 0;
   const vollzeit = 28;
   const quote = berechneQuote(deputat, vollzeit);
-  const grenze = berechneBagatellgrenze(quote);
+  const grenze = berechneBagatellgrenze(deputat, vollzeit);
   document.getElementById('quote').value = quote;
   document.getElementById('grenze').value = grenze;
 });
@@ -2759,18 +2763,7 @@ document.getElementById('saveKollegeBtn').addEventListener('click', async () => 
   const person = personen.find(p => p.id === personId);
   if (!person) return;
 
-  const deputatRaw = document.getElementById('kollegeDeputat').value;
-  const deputat = parseFloat(deputatRaw) || 0;
-
-  // Sicherheitsnetz: verhindert, dass ein leer angezeigtes Feld einen
-  // vorhandenen Wert unbemerkt auf 0 zurücksetzt (z. B. falls die Maske aus
-  // irgendeinem Grund nicht korrekt vorbefüllt wurde).
-  const oldDeputatCheck = parseFloat(person.deputat);
-  if ((!deputatRaw || deputatRaw === '') && !isNaN(oldDeputatCheck) && oldDeputatCheck > 0) {
-    if (!confirm(`⚠️ Das Feld "Wochenstunden (Deputat)" ist leer, bisher war ${oldDeputatCheck} Std. hinterlegt.\n\nWirklich auf 0 setzen? Falls das Feld versehentlich leer ist, bitte Abbrechen klicken und den richtigen Wert eintragen.`)) {
-      return;
-    }
-  }
+  const deputat = parseFloat(document.getElementById('kollegeDeputat').value) || 0;
 const vorname = document.getElementById('kollegeVorname').value.trim();
 const personalnummer = document.getElementById('kollegePersonalnummer').value.trim();
 const geburtsdatum = document.getElementById('kollegeGeburtsdatum').value;
@@ -2957,7 +2950,7 @@ function renderEmployeeView() {
 let remaining = 0;
 let payable = 0;
 
-if (hours >= limit && limit > 0) {
+if (hours > limit && limit > 0) {
   // Grenze erreicht oder überschritten
   payable = hours;
   remaining = 0;
@@ -3173,7 +3166,7 @@ document.getElementById('adminDeputat').addEventListener('input', () => {
   const deputat = parseFloat(document.getElementById('adminDeputat').value) || 0;
   const vollzeit = 28;
   const quote = berechneQuote(deputat, vollzeit);
-  const grenze = berechneBagatellgrenze(quote);
+  const grenze = berechneBagatellgrenze(deputat, vollzeit);
   document.getElementById('adminQuote').value = quote;
   document.getElementById('adminGrenze').value = grenze;
 });
@@ -3221,8 +3214,7 @@ document.getElementById('adminSavePersonBtn').addEventListener('click', async ()
   const name = `${vorname} ${nachname}`.trim();
   const personalnummer = document.getElementById('adminPersonalnummer').value.trim();
   const geburtsdatum = document.getElementById('adminGeburtsdatum').value;
-  const deputatRawAdmin = document.getElementById('adminDeputat').value;
-  const deputat = parseFloat(deputatRawAdmin) || 0;
+  const deputat = parseFloat(document.getElementById('adminDeputat').value) || 0;
   const schluessel = document.getElementById('adminSchluessel').value.trim();
 
   let beschaeftigungsstatus = '';
@@ -3240,15 +3232,6 @@ document.getElementById('adminSavePersonBtn').addEventListener('click', async ()
   if (currentEditingPersonId) {
     const person = personen.find(p => p.id === currentEditingPersonId);
     if (person) {
-      // Sicherheitsnetz: verhindert, dass ein leer angezeigtes Feld einen
-      // vorhandenen Wert unbemerkt auf 0 zurücksetzt.
-      const oldDeputatCheckAdmin = parseFloat(person.deputat);
-      if ((!deputatRawAdmin || deputatRawAdmin === '') && !isNaN(oldDeputatCheckAdmin) && oldDeputatCheckAdmin > 0) {
-        if (!confirm(`⚠️ Das Feld "Wochenstunden (Deputat)" ist leer, bisher war ${oldDeputatCheckAdmin} Std. hinterlegt.\n\nWirklich auf 0 setzen? Falls das Feld versehentlich leer ist, bitte Abbrechen klicken und den richtigen Wert eintragen.`)) {
-          return;
-        }
-      }
-
       // Ändert sich die Teilzeit, fragen ab wann die neue Grenze gilt –
       // bereits erfasste Einträge davor bleiben nach der alten Grenze bewertet.
       const oldDeputat = parseFloat(person.deputat);
@@ -3272,7 +3255,7 @@ document.getElementById('adminSavePersonBtn').addEventListener('click', async ()
     }
   } else {
     const quote = berechneQuote(deputat, 28);
-    const grenze = berechneBagatellgrenze(quote);
+    const grenze = berechneBagatellgrenze(deputat, 28);
     personen.push({
       id: generateId(),
       kuerzel,
@@ -3492,23 +3475,25 @@ document.getElementById('generateLBVBtn').addEventListener('click', async () => 
     ];
   }
 
-  // Berechne Stunden pro Monat
-  const monthlyHours = months.map(monthKey => {
-    return getMonthlyHours(personId, monthKey);
-  });
+  // Berechne Stunden pro Monat sowie die zu diesem Zeitpunkt gültige
+  // Bagatellgrenze und das gültige Deputat (wegen möglicher TZS-Wechsel
+  // innerhalb des Halbjahres).
+  const monthlyHours = months.map(monthKey => getMonthlyHours(personId, monthKey));
+  const monthlyGrenzen = months.map(monthKey => getGrenzeForMonth(person, monthKey));
+  const monthlyDeputat = months.map(monthKey => getPeriodForMonth(person, monthKey).deputat);
 
   const totalHours = monthlyHours.reduce((sum, h) => sum + h, 0);
 
   // Generiere PDF
   try {
-    await generateLBVPDF(person, schuljahr, halbjahr, months, monthlyHours, totalHours);
+    await generateLBVPDF(person, schuljahr, halbjahr, months, monthlyHours, totalHours, monthlyGrenzen, monthlyDeputat);
   } catch (error) {
     console.error('Fehler beim Generieren des PDFs:', error);
     alert('❌ Fehler beim Generieren des PDFs. Bitte prüfen Sie die Konsole für Details.');
   }
 });
 
-async function generateLBVPDF(person, schuljahr, halbjahr, months, monthlyHours, totalHours) {
+async function generateLBVPDF(person, schuljahr, halbjahr, months, monthlyHours, totalHours, monthlyGrenzen, monthlyDeputat) {
   const formUrl = './LBV_ABes_23.pdf';
   
   try {
@@ -3574,11 +3559,17 @@ console.log(`GESAMT: ${allFields.length} Felder\n`);
     console.log(`👤 Bearbeiter: ${schuldaten.bearbeiter || '(leer)'}`);
     console.log(`📅 Datum: ${heute}`);
 
-    // Monatliche Stunden - NUR wenn Stunden > 0
+    // Monatliche Stunden - NUR wenn die individuelle Bagatellgrenze in
+    // diesem Monat tatsächlich ÜBERSCHRITTEN wurde (nicht nur erreicht).
+    // Da in der Praxis nur ganze Vertretungsstunden anfallen, entspricht das
+    // dem MSB-Grundsatz "erste volle Unterrichtsstunde über dem Grenzwert".
+    // Monate darunter erscheinen laut Vorgabe gar nicht erst im Formular.
 monthlyHours.forEach((hours, index) => {
   const fieldIndex = index + 1;
-  
-  if (hours && hours > 0) {
+  const grenzeMonat = (monthlyGrenzen && monthlyGrenzen[index]) || 0;
+  const deputatMonat = (monthlyDeputat && monthlyDeputat[index] !== undefined) ? monthlyDeputat[index] : (person.deputat || 0);
+
+  if (hours && hours > grenzeMonat) {
     // Monat/Jahr im Format MMJJ
     const monthDate = new Date(months[index] + '-01');
     const monat = String(monthDate.getMonth() + 1).padStart(2, '0');
@@ -3591,17 +3582,18 @@ monthlyHours.forEach((hours, index) => {
     // Schlüssel (aus Stammdaten, Standard: 2)
     const schluessel = person.schluessel || '2';
     
-    // Merkmal: "A" für Teilzeitkräfte, sonst leer
-    const merkmal = (person.istTeilzeit || person.deputat < 28) ? 'A' : '';
+    // Merkmal: "A" für Teilzeitkräfte (bezogen auf das für DIESEN Monat
+    // gültige Deputat, wegen möglicher TZS-Wechsel), "V" für Vollzeit.
+    const merkmal = deputatMonat < 28 ? 'A' : 'V';
     
     // Format für Feld .1: MMJJ#SSS#X (10 Zeichen, z.B. "0526#003#2")
-    // Format für Feld .2: M (1 Zeichen, z.B. "A")
+    // Format für Feld .2: M (1 Zeichen, z.B. "A" oder "V")
 const teil1 = `${monat}${jahr}#${stundenStr}#${schluessel}`;  // 10 Zeichen
-const teil2 = merkmal || '';  // 1 Zeichen (nur "A" oder leer)
-const komplettString = teil1 + (teil2 ? '#' + teil2 : '');  // Für Logging
+const teil2 = merkmal;  // 1 Zeichen ("A" oder "V")
+const komplettString = teil1 + '#' + teil2;  // Für Logging
 
     
-        console.log(`✅ Monat ${fieldIndex}: ${komplettString} (${monat}/${jahr} = ${stundenStr} Std, Schlüssel ${schluessel}, Merkmal ${merkmal || '(leer)'})`);
+        console.log(`✅ Monat ${fieldIndex}: ${komplettString} (${monat}/${jahr} = ${stundenStr} Std. über Grenze ${grenzeMonat}, Schlüssel ${schluessel}, Merkmal ${merkmal})`);
     
     console.log(`   📋 Teil 1: "${teil1}" (${teil1.length} Zeichen)`);
     console.log(`   📋 Teil 2: "${teil2}" (${teil2.length} Zeichen)`);
@@ -3615,19 +3607,17 @@ const komplettString = teil1 + (teil2 ? '#' + teil2 : '');  // Für Logging
       console.error(`   ❌ FeldA_Input${fieldIndex}.1 FEHLER:`, e);
     }
     
-    // Feld .2 befüllen (nur Merkmal, 1 Zeichen: "A" oder leer)
-    if (teil2) {
-      try {
-        const field2 = form.getTextField(`FeldA_Input${fieldIndex}.2`);
-        field2.setText(teil2);  // NUR "A", OHNE "#"
-        console.log(`   ✅ FeldA_Input${fieldIndex}.2 ERFOLGREICH gesetzt`);
-      } catch (e) {
-        console.error(`   ❌ FeldA_Input${fieldIndex}.2 FEHLER:`, e);
-      }
-    } else {
-      console.log(`   ℹ️ FeldA_Input${fieldIndex}.2 = (leer, kein Merkmal)`);
+    // Feld .2 befüllen (Merkmal, 1 Zeichen: "A" oder "V")
+    try {
+      const field2 = form.getTextField(`FeldA_Input${fieldIndex}.2`);
+      field2.setText(teil2);
+      console.log(`   ✅ FeldA_Input${fieldIndex}.2 ERFOLGREICH gesetzt`);
+    } catch (e) {
+      console.error(`   ❌ FeldA_Input${fieldIndex}.2 FEHLER:`, e);
     }
   
+  } else if (hours && hours > 0) {
+    console.log(`⏭️ Monat ${fieldIndex}: Übersprungen (${hours} Std. unter/gleich Bagatellgrenze ${grenzeMonat} – nicht vergütungsfähig)`);
   } else {
     console.log(`⏭️ Monat ${fieldIndex}: Übersprungen (keine Stunden)`);
   }
@@ -3637,6 +3627,50 @@ const komplettString = teil1 + (teil2 ? '#' + teil2 : '');  // Für Logging
 
     // Gesamtstunden NICHT befüllen (Block B bleibt leer)
     console.log(`💰 Gesamtstunden: ${formatNumber(totalHours)} (wird NICHT ins PDF geschrieben)`);
+
+    // --------------------------------------------------------------------
+    // DIAGNOSE (Barcode-Problem): Listet jede Annotation vor dem Entfernen
+    // mit Subtype/Feldtyp/Feldname auf. Verändert nichts – rein informativ,
+    // damit wir sehen, ob das Barcode-Feld ein eigener Name ist und welchen
+    // Subtype die gelben "?"-Hinweise tatsächlich haben, bevor wir den
+    // Lösch-Schritt darunter gezielter machen.
+    // --------------------------------------------------------------------
+    console.log('🔍 Diagnose: Annotationen vor dem Entfernen...');
+    try {
+      pdfDoc.getPages().forEach((page, pageIndex) => {
+        const annots = page.node.Annots();
+        if (!annots) { console.log(`   Seite ${pageIndex + 1}: keine Annots`); return; }
+        const size = annots.size();
+        console.log(`   Seite ${pageIndex + 1}: ${size} Annotation(en)`);
+        for (let i = 0; i < size; i++) {
+          try {
+            const ref = annots.get(i);
+            const dict = pdfDoc.context.lookup(ref);
+            const subtype = dict && dict.get ? dict.get(PDFLib.PDFName.of('Subtype')) : null;
+            const ft = dict && dict.get ? dict.get(PDFLib.PDFName.of('FT')) : null;
+            const t = dict && dict.get ? dict.get(PDFLib.PDFName.of('T')) : null;
+            const rect = dict && dict.get ? dict.get(PDFLib.PDFName.of('Rect')) : null;
+            console.log(`     [${i}] Subtype=${subtype} FT=${ft} T=${t} Rect=${rect}`);
+          } catch (innerErr) {
+            console.log(`     [${i}] (konnte nicht gelesen werden)`, innerErr);
+          }
+        }
+      });
+    } catch (diagErr) {
+      console.warn('   ⚠️ Diagnose fehlgeschlagen:', diagErr);
+    }
+
+    // NeedAppearances explizit deaktivieren: Ohne diese Zeile kann es sein,
+    // dass Viewer/Drucker beim Öffnen ALLE Feld-Erscheinungsbilder neu
+    // berechnen (statt die vorhandenen zu benutzen) – dabei kann die
+    // eingebettete Barcode-Schrift verloren gehen und stattdessen der rohe
+    // Text erscheinen. Risikoarme, bekannte Gegenmaßnahme.
+    try {
+      form.acroForm.dict.set(PDFLib.PDFName.of('NeedAppearances'), PDFLib.PDFBool.False);
+      console.log('✅ NeedAppearances auf false gesetzt');
+    } catch (naErr) {
+      console.warn('⚠️ NeedAppearances konnte nicht gesetzt werden:', naErr);
+    }
 
     console.log('✅ Formular befüllt, entferne Annotationen...');
 
@@ -3706,7 +3740,7 @@ function renderAdminSummary() {
   let remaining = 0;
   let payable = 0;
   
-  if (hours >= limit && limit > 0) {
+  if (hours > limit && limit > 0) {
     payable = hours;
     remaining = 0;
   } else {
@@ -4268,7 +4302,7 @@ document.getElementById('exportMonthSummaryBtn').addEventListener('click', () =>
   let remaining = 0;
   let payable = 0;
   
-  if (hours >= limit && limit > 0) {
+  if (hours > limit && limit > 0) {
     payable = hours;
     remaining = 0;
   } else {
@@ -4307,7 +4341,7 @@ document.getElementById('exportAccountingBtn').addEventListener('click', () => {
   const limit = getGrenzeForMonth(person, monthKey);
   
   let payable = 0;
-  if (hours >= limit && limit > 0) {
+  if (hours > limit && limit > 0) {
     payable = hours;
   }
 
@@ -4629,20 +4663,13 @@ async function init() {
   populateJahresSchuljahrSelect();
 
 
-  // WICHTIG: updatePersonSelects() muss VOR loadPersonDataToForm() laufen, da die
-  // <option>-Elemente von activePersonSelect erst dort erzeugt werden UND die
-  // Funktion den gespeicherten Personenwert (STORAGE_KEY_ACTIVE_PERSON) bereits
-  // selbst wiederherstellt. Vorher wurde activePersonSelect.value gesetzt, BEVOR
-  // die Optionen existierten – das Setzen schlug still fehl, wodurch die
-  // Stammdaten-Maske beim Erstladen leer blieb (erst ein späterer
-  // switchToRole()-Durchlauf lud sie korrekt nach).
-  updatePersonSelects();
-
   const savedPerson = localStorage.getItem(STORAGE_KEY_ACTIVE_PERSON);
-  if (savedPerson && document.getElementById('activePersonSelect').value === savedPerson) {
+  if (savedPerson) {
+    document.getElementById('activePersonSelect').value = savedPerson;
     loadPersonDataToForm();
   }
 
+  updatePersonSelects();
   renderAll();
   checkFirstRun();
 }
