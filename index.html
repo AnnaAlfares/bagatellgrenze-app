@@ -3575,6 +3575,44 @@ console.log('🔎 Barcode-Feld-Diagnose:');
     setTextField('LBV_Geburtsdatum', person.geburtsdatum ? new Date(person.geburtsdatum).toLocaleDateString('de-DE') : '');
     setTextField('LBV_Personalnummer', person.personalnummer || '');
 
+    // --------------------------------------------------------------------
+    // BARCODE-FELDER: Das Original-Formular berechnet diese Werte über ein
+    // eingebettetes PDF-JavaScript ("Will Print"-Aktion), das pdf-lib nicht
+    // ausführen kann. Formel 1:1 aus dem im PDF gefundenen Skript
+    // übernommen (barcode_fixvalue_1 = "ABes23", barcode_fixvalue_2 =
+    // "201902", danach die Personalnummer):
+    //   LBV_Barcode_Text  = "ABes23/201902/<Personalnummer>"
+    //   LBV_Barcode_9of3  = "*ABes23/201902/<Personalnummer>*"
+    // Das zweite Feld nutzt bereits im Original-PDF die eingebettete
+    // Schriftart "/3of9Barcode" als Default Appearance.
+    // --------------------------------------------------------------------
+    const barcodeFixValue1 = 'ABes23';
+    const barcodeFixValue2 = '201902';
+    const barcodeText = `${barcodeFixValue1}/${barcodeFixValue2}/${person.personalnummer || ''}`;
+    setTextField('LBV_Barcode_Text', barcodeText);
+    setTextField('LBV_Barcode_9of3', `*${barcodeText}*`);
+    console.log(`🔢 Barcode-Felder berechnet: "${barcodeText}"`);
+
+    // Versuche, für das Barcode-Feld explizit die im PDF bereits eingebettete
+    // Schriftart "3of9Barcode" zu verwenden (statt der von pdf-lib sonst
+    // automatisch gewählten Standardschrift). Falls das aus irgendeinem
+    // Grund fehlschlägt, bleibt der oben gesetzte Text trotzdem korrekt
+    // (nur eventuell mit falscher Schriftart dargestellt) – kein Abbruch.
+    try {
+      const acroFormDict = form.acroForm.dict;
+      const drRef = acroFormDict.get(PDFLib.PDFName.of('DR'));
+      const drDict = pdfDoc.context.lookup(drRef);
+      const fontDictRef = drDict.get(PDFLib.PDFName.of('Font'));
+      const fontDict = pdfDoc.context.lookup(fontDictRef);
+      const barcodeFontRef = fontDict.get(PDFLib.PDFName.of('3of9Barcode'));
+      const barcodeFont = PDFLib.PDFFont.load(pdfDoc.context, barcodeFontRef, '3of9Barcode');
+      const field9of3 = form.getTextField('LBV_Barcode_9of3');
+      field9of3.updateAppearances(barcodeFont);
+      console.log('✅ Barcode-Feld mit eingebetteter Schrift "3of9Barcode" neu gezeichnet');
+    } catch (fontErr) {
+      console.warn('⚠️ Eingebettete Barcode-Schrift konnte nicht explizit gesetzt werden (Wert bleibt trotzdem korrekt):', fontErr);
+    }
+
     // Schuldaten
     setTextField('LBV_Schulnummer', schuldaten.schulnummer || '115022');
 
