@@ -3540,6 +3540,24 @@ console.log('=====================================');
 console.log(`GESAMT: ${allFields.length} Felder\n`);
 // ========== ENDE DEBUG ==========
 
+// ========== DIAGNOSE: BARCODE-FELDER (rein lesend, ändert nichts) ==========
+console.log('🔎 Barcode-Feld-Diagnose:');
+['LBV_Barcode_Text', 'LBV_Barcode_9of3'].forEach(fieldName => {
+  try {
+    const f = form.getTextField(fieldName);
+    const value = f.getText();
+    const daOwn = f.acroField.dict.get(PDFLib.PDFName.of('DA'));
+    const apOwn = f.acroField.dict.get(PDFLib.PDFName.of('AP'));
+    console.log(`   ${fieldName}:`);
+    console.log(`     Wert = ${JSON.stringify(value)}`);
+    console.log(`     Eigenes DA (Default Appearance) = ${daOwn ? daOwn.toString() : '(keins, erbt von AcroForm: /Helv 0 Tf 0 g)'}`);
+    console.log(`     Eigenes AP (vorgerenderte Erscheinung) vorhanden = ${!!apOwn}`);
+  } catch (e) {
+    console.log(`   ${fieldName}: konnte nicht gelesen werden –`, e.message || e);
+  }
+});
+// ========== ENDE DIAGNOSE ==========
+
     // Hilfsfunktion: Sicher Textfeld setzen
     function setTextField(fieldName, value) {
       try {
