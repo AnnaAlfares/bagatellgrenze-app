@@ -1103,7 +1103,7 @@ let auditLog = [];
 // zugehörige PRIVATE Schlüssel (bleibt ausschließlich bei der verantwortlichen
 // Person) kann sie wieder entschlüsseln. Der öffentliche Schlüssel selbst ist
 // kein Geheimnis und darf im Quellcode/auf GitHub Pages stehen.
-const BACKUP_PUBLIC_KEY_JWK = null;
+const BACKUP_PUBLIC_KEY_JWK = {"alg":"RSA-OAEP-256","e":"AQAB","ext":true,"key_ops":["wrapKey"],"kty":"RSA","n":"y1xtDoM_OQNDYtKmour32qgBLWrt45oeAUWtgURRZUV0WnPN2RMTuRRF_Ob_jpBH4qTATWJfbmrWxCu8kSwRyPerbBO6UhXxp-YZEi9PbZRnrHvxLhk08IHw1SUf4ei1_aThDpR06h6N7_9RYnUnpwuxtN0AeicMyTYhbiGaA1xYswakyJJIFmLMP5MnGtHrF9YeF33P_iMjEDXrB2RCi45eIMHdMFiM2T6tC9lfy_A0jVL4pkapgveo32a-jPCIWGoNYrwdjw7wtCUgKNEQH9VAPXiBGg6W3KGDu2OYMDokMYJEd-IIvqsa1FqNPhiTIJywGNZ7ka-R6Pj0RCuttgMJveLhKUGLL9H8HaTtW2TlJwtID9SaX0_4qs0t_XX02YPVTcXG7peD_m7tMOk1vaQfkQgiEJhPBm91v29YXL4Vn_sKZyX-mmOuUqX1FsHHJNpLqnW1STB8UpEV1vWxeYO0c954B1KfgWLJj7uvrENVauLzY3dRF67b4tCdlLSISBjYMymxVfz1hAxG2-Didbk9J7B3lMWK2Ql1OyRdeBtJ6g4QgRY_mgD1JF2nXllKxvhy6eLwXbFA9TgzqtUkvN7zY-vWgqbUuB2Gv_N45lsL5WYdiKSOXWtAs0gsxXfzq5pqVdJ3W1KBQXOQlnPuwMZcnLMwF9_p7gjKHtcg-yE"};
 
 // Laufzeit-Schlüssel (werden aus obiger Konstante bzw. einer geladenen
 // Datei erzeugt und nie dauerhaft im Quellcode gespeichert)
