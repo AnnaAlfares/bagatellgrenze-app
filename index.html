@@ -10,6 +10,9 @@
   
   <!-- PDF-LIB Library (offline-fähig, CDN-Fallback) -->
   <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <!-- fontkit: wird benötigt, damit pdf-lib die im LBV-Formular eingebettete
+       Barcode-TrueType-Schrift ("3of9Barcode") selbst neu einbetten kann. -->
+  <script src="https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
   
   <style>
   :root, [data-theme="light"] {
@@ -3594,23 +3597,34 @@ console.log('🔎 Barcode-Feld-Diagnose:');
     console.log(`🔢 Barcode-Felder berechnet: "${barcodeText}"`);
 
     // Versuche, für das Barcode-Feld explizit die im PDF bereits eingebettete
-    // Schriftart "3of9Barcode" zu verwenden (statt der von pdf-lib sonst
-    // automatisch gewählten Standardschrift). Falls das aus irgendeinem
+    // Schriftart "3of9Barcode" zu verwenden. pdf-lib kann eine bereits im
+    // Dokument vorhandene Schrift nicht einfach "referenzieren" – die
+    // TrueType-Bytes müssen aus dem FontDescriptor (FontFile2) extrahiert
+    // und über fontkit neu eingebettet werden. Falls das aus irgendeinem
     // Grund fehlschlägt, bleibt der oben gesetzte Text trotzdem korrekt
     // (nur eventuell mit falscher Schriftart dargestellt) – kein Abbruch.
     try {
+      if (!window.fontkit) {
+        throw new Error('fontkit nicht geladen (CDN-Skript fehlt/blockiert)');
+      }
+      pdfDoc.registerFontkit(window.fontkit);
+
       const acroFormDict = form.acroForm.dict;
-      const drRef = acroFormDict.get(PDFLib.PDFName.of('DR'));
-      const drDict = pdfDoc.context.lookup(drRef);
-      const fontDictRef = drDict.get(PDFLib.PDFName.of('Font'));
-      const fontDict = pdfDoc.context.lookup(fontDictRef);
-      const barcodeFontRef = fontDict.get(PDFLib.PDFName.of('3of9Barcode'));
-      const barcodeFont = PDFLib.PDFFont.load(pdfDoc.context, barcodeFontRef, '3of9Barcode');
+      const dr = pdfDoc.context.lookup(acroFormDict.get(PDFLib.PDFName.of('DR')));
+      const fontDict = pdfDoc.context.lookup(dr.get(PDFLib.PDFName.of('Font')));
+      const barcodeFontDictRef = fontDict.get(PDFLib.PDFName.of('3of9Barcode'));
+      const barcodeFontDict = pdfDoc.context.lookup(barcodeFontDictRef);
+      const descriptor = pdfDoc.context.lookup(barcodeFontDict.get(PDFLib.PDFName.of('FontDescriptor')));
+      const fontFile2Ref = descriptor.get(PDFLib.PDFName.of('FontFile2'));
+      const fontFile2Stream = pdfDoc.context.lookup(fontFile2Ref);
+      const fontBytes = PDFLib.decodePDFRawStream(fontFile2Stream).decode();
+
+      const embeddedBarcodeFont = await pdfDoc.embedFont(fontBytes);
       const field9of3 = form.getTextField('LBV_Barcode_9of3');
-      field9of3.updateAppearances(barcodeFont);
-      console.log('✅ Barcode-Feld mit eingebetteter Schrift "3of9Barcode" neu gezeichnet');
+      field9of3.updateAppearances(embeddedBarcodeFont);
+      console.log('✅ Barcode-Schrift "3of9Barcode" aus dem PDF extrahiert, neu eingebettet und angewendet');
     } catch (fontErr) {
-      console.warn('⚠️ Eingebettete Barcode-Schrift konnte nicht explizit gesetzt werden (Wert bleibt trotzdem korrekt):', fontErr);
+      console.warn('⚠️ Eingebettete Barcode-Schrift konnte nicht neu eingebettet werden (Wert bleibt trotzdem korrekt):', fontErr);
     }
 
     // Schuldaten
